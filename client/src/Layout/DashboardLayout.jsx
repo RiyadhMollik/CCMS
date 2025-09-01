@@ -34,7 +34,7 @@ const DashboardLayout = () => {
           <div className="text-lg md:text-2xl font-medium flex-1">
             <div className="hidden md:block">
               <h1 className="font-bold bg-gradient-to-r from-[#084420] to-[#82cd20] bg-clip-text text-transparent text-xl md:text-2xl">
-                Call Center Management System
+                Welcome to Call Center Management System Dashboard
               </h1>
             </div>
             <div className="md:hidden">
