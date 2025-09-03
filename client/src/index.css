@@ -8,5 +8,5 @@ body {
 }
 
 a.active {
-  @apply bg-[#58910e] rounded-xl py-3;
+  @apply bg-emerald-600 text-white rounded-xl py-3;
 }

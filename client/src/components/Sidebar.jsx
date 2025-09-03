@@ -17,7 +17,7 @@ import {
   ChevronDoubleLeftIcon,
   ChevronDoubleRightIcon,
 } from "@heroicons/react/24/outline"; // Outline icons
-import logo from "../assets/logo2.png";
+import logo from "/logo.png";
 import useLogout from "./Hook/useLogout";
 import { AuthContext } from "./context/AuthProvider";
 
@@ -51,10 +51,10 @@ const Sidebar = () => {
     }
   };
   return (
-    <ul className={`menu bg-[#084420] text-white rounded-r-2xl min-h-full ${isCollapsed ? 'w-18' : 'w-64'} space-y-3 overflow-y-auto scrollbar-hide transition-all duration-300`}>
+    <ul className={`menu bg-emerald-900 text-white rounded-r-2xl min-h-full ${isCollapsed ? 'w-18' : 'w-64'} space-y-3 overflow-y-auto scrollbar-hide transition-all duration-300`}>
       
       {/* Header Section - Logo and Collapse Button */}
-      <div className={`sticky top-0 bg-[#084420] z-10 pb-2 ${isCollapsed ? 'flex justify-center' : 'flex flex-col'}`}>
+      <div className={`sticky top-0 bg-emerald-900 z-10 pb-2 ${isCollapsed ? 'flex justify-center' : 'flex flex-col'}`}>
         {/* Full mode: Logo and collapse button in row */}
         {!isCollapsed && (
           <div className="flex items-center justify-between px-2 py-2">
@@ -64,7 +64,7 @@ const Sidebar = () => {
             </div>
             <button
               onClick={toggleCollapse}
-              className="p-1 hover:bg-[#062e18] rounded-lg transition-colors duration-200 ml-2"
+              className="p-1 hover:bg-emerald-800 rounded-lg transition-colors duration-200 ml-2"
               title="Collapse sidebar"
             >
               <ChevronDoubleLeftIcon className="w-5 h-5" />
@@ -76,7 +76,7 @@ const Sidebar = () => {
         {isCollapsed && (
           <button
             onClick={toggleCollapse}
-            className="p-2 hover:bg-[#062e18] rounded-lg transition-colors duration-200"
+            className="p-2 hover:bg-emerald-800 rounded-lg transition-colors duration-200"
             title="Expand sidebar"
           >
             <ChevronDoubleRightIcon className="w-5 h-5" />
@@ -110,7 +110,7 @@ const Sidebar = () => {
         <li className="text-base font-medium">
           <button
             onClick={isCollapsed ? undefined : toggleRegistration}
-            className={`flex items-center w-full px-4 py-2 text-left hover:bg-[#062e18] rounded-lg transition-colors duration-200 ${isCollapsed ? 'justify-center' : ''}`}
+            className={`flex items-center w-full px-4 py-2 text-left hover:bg-emerald-800 rounded-lg transition-colors duration-200 ${isCollapsed ? 'justify-center' : ''}`}
             title={isCollapsed ? "Registration" : ""}
           >
             <ClipboardDocumentListIcon className={`w-5 h-5 ${!isCollapsed ? 'mr-2' : ''}`} />
@@ -134,7 +134,7 @@ const Sidebar = () => {
             <li className="text-sm font-medium pl-4">
               <NavLink
                 to="/ad-registration"
-                className="flex items-center px-4 py-2 bg-[#063015] hover:bg-[#062e18] rounded-lg transition-colors duration-200 border-l-2 border-[#82cd20] ml-2"
+                className="flex items-center px-4 py-2 bg-emerald-800 hover:bg-emerald-700 rounded-lg transition-colors duration-200 border-l-2 border-emerald-400 ml-2"
               >
                 AD Registration
               </NavLink>
@@ -144,7 +144,7 @@ const Sidebar = () => {
             <li className="text-sm font-medium pl-4">
               <NavLink
                 to="/admin-registration"
-                className="flex items-center px-4 py-2 bg-[#063015] hover:bg-[#062e18] rounded-lg transition-colors duration-200 border-l-2 border-[#82cd20] ml-2"
+                className="flex items-center px-4 py-2 bg-emerald-800 hover:bg-emerald-700 rounded-lg transition-colors duration-200 border-l-2 border-emerald-400 ml-2"
               >
                 Admin Registration
               </NavLink>
@@ -154,7 +154,7 @@ const Sidebar = () => {
             <li className="text-sm font-medium pl-4">
               <NavLink
                 to="/uao-registration"
-                className="flex items-center px-4 py-2 bg-[#063015] hover:bg-[#062e18] rounded-lg transition-colors duration-200 border-l-2 border-[#82cd20] ml-2"
+                className="flex items-center px-4 py-2 bg-emerald-800 hover:bg-emerald-700 rounded-lg transition-colors duration-200 border-l-2 border-emerald-400 ml-2"
               >
                 UAO Registration
               </NavLink>
@@ -164,7 +164,7 @@ const Sidebar = () => {
             <li className="text-sm font-medium pl-4">
               <NavLink
                 to="/saao-registration"
-                className="flex items-center px-4 py-2 bg-[#063015] hover:bg-[#062e18] rounded-lg transition-colors duration-200 border-l-2 border-[#82cd20] ml-2"
+                className="flex items-center px-4 py-2 bg-emerald-800 hover:bg-emerald-700 rounded-lg transition-colors duration-200 border-l-2 border-emerald-400 ml-2"
               >
                 SAAO Registration
               </NavLink>
@@ -174,7 +174,7 @@ const Sidebar = () => {
             <li className="text-sm font-medium pl-4">
               <NavLink
                 to="/farmer-registration"
-                className="flex items-center px-4 py-2 bg-[#063015] hover:bg-[#062e18] rounded-lg transition-colors duration-200 border-l-2 border-[#82cd20] ml-2"
+                className="flex items-center px-4 py-2 bg-emerald-800 hover:bg-emerald-700 rounded-lg transition-colors duration-200 border-l-2 border-emerald-400 ml-2"
               >
                 Farmer Registration
               </NavLink>
@@ -184,7 +184,7 @@ const Sidebar = () => {
             <li className="text-sm font-medium pl-4">
               <NavLink
                 to="/scientist-registration"
-                className="flex items-center px-4 py-2 bg-[#063015] hover:bg-[#062e18] rounded-lg transition-colors duration-200 border-l-2 border-[#82cd20] ml-2"
+                className="flex items-center px-4 py-2 bg-emerald-800 hover:bg-emerald-700 rounded-lg transition-colors duration-200 border-l-2 border-emerald-400 ml-2"
               >
                 Scientist Registration
               </NavLink>
@@ -194,7 +194,7 @@ const Sidebar = () => {
             <li className="text-sm font-medium pl-4">
               <NavLink
                 to="/journalists-registration"
-                className="flex items-center px-4 py-2 bg-[#063015] hover:bg-[#062e18] rounded-lg transition-colors duration-200 border-l-2 border-[#82cd20] ml-2"
+                className="flex items-center px-4 py-2 bg-emerald-800 hover:bg-emerald-700 rounded-lg transition-colors duration-200 border-l-2 border-emerald-400 ml-2"
               >
                 Journalists Registration
               </NavLink>
@@ -209,7 +209,7 @@ const Sidebar = () => {
         <li className="text-base font-medium">
           <button
             onClick={isCollapsed ? undefined : toggleFeedback}
-            className={`flex items-center w-full px-4 py-2 text-left hover:bg-[#062e18] rounded-lg transition-colors duration-200 ${isCollapsed ? 'justify-center' : ''}`}
+            className={`flex items-center w-full px-4 py-2 text-left hover:bg-emerald-800 rounded-lg transition-colors duration-200 ${isCollapsed ? 'justify-center' : ''}`}
             title={isCollapsed ? "Feedback" : ""}
           >
             <ChatBubbleLeftRightIcon className={`w-5 h-5 ${!isCollapsed ? 'mr-2' : ''}`} />
@@ -233,7 +233,7 @@ const Sidebar = () => {
             <li className="text-sm font-medium pl-4">
               <NavLink
                 to="/send-feedback"
-                className="flex items-center px-4 py-2 bg-[#063015] hover:bg-[#062e18] rounded-lg transition-colors duration-200 border-l-2 border-[#82cd20] ml-2"
+                className="flex items-center px-4 py-2 bg-emerald-800 hover:bg-emerald-700 rounded-lg transition-colors duration-200 border-l-2 border-emerald-400 ml-2"
               >
                 Send
               </NavLink>
@@ -243,7 +243,7 @@ const Sidebar = () => {
             <li className="text-sm font-medium pl-4">
               <NavLink
                 to="/feedback"
-                className="flex items-center px-4 py-2 bg-[#063015] hover:bg-[#062e18] rounded-lg transition-colors duration-200 border-l-2 border-[#82cd20] ml-2"
+                className="flex items-center px-4 py-2 bg-emerald-800 hover:bg-emerald-700 rounded-lg transition-colors duration-200 border-l-2 border-emerald-400 ml-2"
               >
                 User Feedbacks
               </NavLink>
@@ -290,7 +290,7 @@ const Sidebar = () => {
           <li className="text-base font-medium">
             <button
               onClick={isCollapsed ? undefined : toggleSettings}
-              className={`flex items-center w-full px-4 py-2 text-left hover:bg-[#062e18] rounded-lg transition-colors duration-200 ${isCollapsed ? 'justify-center' : ''}`}
+              className={`flex items-center w-full px-4 py-2 text-left hover:bg-emerald-800 rounded-lg transition-colors duration-200 ${isCollapsed ? 'justify-center' : ''}`}
               title={isCollapsed ? "Settings" : ""}
             >
               <Cog6ToothIcon className={`w-5 h-5 ${!isCollapsed ? 'mr-2' : ''}`} />
@@ -315,7 +315,7 @@ const Sidebar = () => {
             <li className="text-sm font-medium pl-4">
               <NavLink
                 to="/region"
-                className="flex items-center px-4 py-2 bg-[#063015] hover:bg-[#062e18] rounded-lg transition-colors duration-200 border-l-2 border-[#82cd20] ml-2"
+                className="flex items-center px-4 py-2 bg-emerald-800 hover:bg-emerald-700 rounded-lg transition-colors duration-200 border-l-2 border-emerald-400 ml-2"
               >
                 Add Region
               </NavLink>
@@ -325,7 +325,7 @@ const Sidebar = () => {
             <li className="text-sm font-medium pl-4">
               <NavLink
                 to="/hotspot"
-                className="flex items-center px-4 py-2 bg-[#063015] hover:bg-[#062e18] rounded-lg transition-colors duration-200 border-l-2 border-[#82cd20] ml-2"
+                className="flex items-center px-4 py-2 bg-emerald-800 hover:bg-emerald-700 rounded-lg transition-colors duration-200 border-l-2 border-emerald-400 ml-2"
               >
                 Add Hotspot
               </NavLink>
@@ -335,7 +335,7 @@ const Sidebar = () => {
             <li className="text-sm font-medium pl-4">
               <NavLink
                 to="/division"
-                className="flex items-center px-4 py-2 bg-[#063015] hover:bg-[#062e18] rounded-lg transition-colors duration-200 border-l-2 border-[#82cd20] ml-2"
+                className="flex items-center px-4 py-2 bg-emerald-800 hover:bg-emerald-700 rounded-lg transition-colors duration-200 border-l-2 border-emerald-400 ml-2"
               >
                 Add Division
               </NavLink>
@@ -345,7 +345,7 @@ const Sidebar = () => {
             <li className="text-sm font-medium pl-4">
               <NavLink
                 to="/district"
-                className="flex items-center px-4 py-2 bg-[#063015] hover:bg-[#062e18] rounded-lg transition-colors duration-200 border-l-2 border-[#82cd20] ml-2"
+                className="flex items-center px-4 py-2 bg-emerald-800 hover:bg-emerald-700 rounded-lg transition-colors duration-200 border-l-2 border-emerald-400 ml-2"
               >
                 Add District
               </NavLink>
@@ -355,7 +355,7 @@ const Sidebar = () => {
             <li className="text-sm font-medium pl-4">
               <NavLink
                 to="/upazila"
-                className="flex items-center px-4 py-2 bg-[#063015] hover:bg-[#062e18] rounded-lg transition-colors duration-200 border-l-2 border-[#82cd20] ml-2"
+                className="flex items-center px-4 py-2 bg-emerald-800 hover:bg-emerald-700 rounded-lg transition-colors duration-200 border-l-2 border-emerald-400 ml-2"
               >
                 Add Upazila
               </NavLink>
@@ -365,7 +365,7 @@ const Sidebar = () => {
             <li className="text-sm font-medium pl-4">
               <NavLink
                 to="/union"
-                className="flex items-center px-4 py-2 bg-[#063015] hover:bg-[#062e18] rounded-lg transition-colors duration-200 border-l-2 border-[#82cd20] ml-2"
+                className="flex items-center px-4 py-2 bg-emerald-800 hover:bg-emerald-700 rounded-lg transition-colors duration-200 border-l-2 border-emerald-400 ml-2"
               >
                 Add Union
               </NavLink>
@@ -375,7 +375,7 @@ const Sidebar = () => {
             <li className="text-sm font-medium pl-4">
               <NavLink
                 to="/block"
-                className="flex items-center px-4 py-2 bg-[#063015] hover:bg-[#062e18] rounded-lg transition-colors duration-200 border-l-2 border-[#82cd20] ml-2"
+                className="flex items-center px-4 py-2 bg-emerald-800 hover:bg-emerald-700 rounded-lg transition-colors duration-200 border-l-2 border-emerald-400 ml-2"
               >
                 Add Block
               </NavLink>
@@ -385,7 +385,7 @@ const Sidebar = () => {
             <li className="text-sm font-medium pl-4">
               <NavLink
                 to="/user"
-                className="flex items-center px-4 py-2 bg-[#063015] hover:bg-[#062e18] rounded-lg transition-colors duration-200 border-l-2 border-[#82cd20] ml-2"
+                className="flex items-center px-4 py-2 bg-emerald-800 hover:bg-emerald-700 rounded-lg transition-colors duration-200 border-l-2 border-emerald-400 ml-2"
               >
                 Add User
               </NavLink>
@@ -395,7 +395,7 @@ const Sidebar = () => {
             <li className="text-sm font-medium pl-4">
               <NavLink
                 to="/update-password"
-                className="flex items-center px-4 py-2 bg-[#063015] hover:bg-[#062e18] rounded-lg transition-colors duration-200 border-l-2 border-[#82cd20] ml-2"
+                className="flex items-center px-4 py-2 bg-emerald-800 hover:bg-emerald-700 rounded-lg transition-colors duration-200 border-l-2 border-emerald-400 ml-2"
               >
                 Change Password
               </NavLink>
@@ -405,7 +405,7 @@ const Sidebar = () => {
             <li className="text-sm font-medium pl-4">
               <NavLink
                 to="/roles"
-                className="flex items-center px-4 py-2 bg-[#063015] hover:bg-[#062e18] rounded-lg transition-colors duration-200 border-l-2 border-[#82cd20] ml-2"
+                className="flex items-center px-4 py-2 bg-emerald-800 hover:bg-emerald-700 rounded-lg transition-colors duration-200 border-l-2 border-emerald-400 ml-2"
               >
                 Role
               </NavLink>
@@ -415,7 +415,7 @@ const Sidebar = () => {
             <li className="text-sm font-medium pl-4">
               <NavLink
                 to="/role-permission"
-                className="flex items-center px-4 py-2 bg-[#063015] hover:bg-[#062e18] rounded-lg transition-colors duration-200 border-l-2 border-[#82cd20] ml-2"
+                className="flex items-center px-4 py-2 bg-emerald-800 hover:bg-emerald-700 rounded-lg transition-colors duration-200 border-l-2 border-emerald-400 ml-2"
               >
                 Role Permission
               </NavLink>
