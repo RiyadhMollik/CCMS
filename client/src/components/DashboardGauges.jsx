@@ -1,9 +1,46 @@
 import React, { useEffect, useState } from "react";
+import axios from "axios";
 import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
 
 const DashboardGauges = () => {
   const [modulesLoaded, setModulesLoaded] = useState(false);
+  const [destinationData, setDestinationData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [totalCalls, setTotalCalls] = useState(0);
+
+  // Fetch data from API
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const response = await axios.get(
+          "https://iinms.brri.gov.bd/api/cdr/report/all"
+        );
+
+        if (response.data.destinationStats) {
+          const destinations = response.data.destinationStats.filter(
+            (dest) => dest.destination !== "104"
+          );
+          setDestinationData(destinations);
+
+          // Calculate total calls (excluding destination 104)
+          const total = destinations.reduce(
+            (sum, item) => sum + item.totalCalls,
+            0
+          );
+          setTotalCalls(total);
+        }
+      } catch (error) {
+        console.error("Error fetching destination data:", error);
+        // Keep default empty data on error
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   // Initialize Highcharts modules
   useEffect(() => {
@@ -40,18 +77,49 @@ const DashboardGauges = () => {
   }, []);
 
   // Don't render charts until modules are loaded
-  if (!modulesLoaded) {
+  if (!modulesLoaded || loading) {
     return (
-      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-6">
+      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-6 lg:h-[776px] h-auto">
         <div className="flex justify-center items-center h-64">
           <div className="text-gray-500 flex items-center space-x-2">
             <div className="animate-spin w-5 h-5 border-2 border-emerald-500 border-t-transparent rounded-full"></div>
-            <span>Loading charts...</span>
+            <span>{loading ? "Loading data..." : "Loading charts..."}</span>
           </div>
         </div>
       </div>
     );
   }
+
+  // Define colors that match website theme
+  const colors = [
+    "#10b981", // emerald-500
+    "#3b82f6", // blue-500
+    "#f59e0b", // amber-500
+    "#ef4444", // red-500
+    "#8b5cf6", // violet-500
+    "#ec4899", // pink-500
+  ];
+
+  // Calculate percentages and prepare gauge data
+  const maxCalls = Math.max(...destinationData.map((d) => d.totalCalls));
+
+  const gaugeData = destinationData
+    .slice(0, 6)
+    .map((dest, index) => ({
+      name: dest.destinationState,
+      destination: dest.destination,
+      totalCalls: dest.totalCalls,
+      percentage:
+        totalCalls > 0 ? Math.round((dest.totalCalls / totalCalls) * 100) : 0,
+      color: colors[index % colors.length],
+    }))
+    .sort((a, b) => b.percentage - a.percentage) // Sort by percentage (highest first)
+    .map((dest, index) => ({
+      ...dest,
+      color: colors[index % colors.length], // Reassign colors after sorting
+      radius: `${99 - index * 13}%`,
+      innerRadius: `${87 - index * 13}%`,
+    }));
 
   // Function to render icons on gauges
   const renderIcons = function () {
@@ -105,13 +173,12 @@ const DashboardGauges = () => {
     });
   };
 
-  // Multi-KPI Gauge Configuration (like the demo)
+  // Multi-KPI Gauge Configuration (Dynamic)
   const multiKPIGaugeConfig = {
     chart: {
       type: "solidgauge",
       height: 480,
       backgroundColor: "transparent",
-      // Removed the render icons event for now
     },
     title: {
       text: "",
@@ -130,8 +197,8 @@ const DashboardGauges = () => {
       fixed: true,
       pointFormat:
         '<div style="text-align: center; padding: 8px;">' +
-        '<div style="font-size: 14px; color: #6b7280; margin-bottom: 4px;">{series.name}</div>' +
-        '<div style="font-size: 24px; color: {point.color}; font-weight: bold;">{point.y}%</div>' +
+        '<div style="font-size: 16px; color: #374151; font-weight: bold; margin-bottom: 6px;">{series.name}</div> <br />' +
+        '<div style="font-size: 20px; color: {point.color}; font-weight: bold;">{point.totalCalls} calls</div>' +
         "</div>",
       position: {
         align: "center",
@@ -144,50 +211,12 @@ const DashboardGauges = () => {
     pane: {
       startAngle: 0,
       endAngle: 320,
-      background: [
-        {
-          // Track for Total Calls
-          outerRadius: "60%",
-          innerRadius: "48%",
-          backgroundColor: "rgba(16, 185, 129, 0.2)", // emerald with transparency
-          borderWidth: 0,
-        },
-        {
-          // Track for Received Calls
-          outerRadius: "47%",
-          innerRadius: "35%",
-          backgroundColor: "rgba(59, 130, 246, 0.2)", // blue with transparency
-          borderWidth: 0,
-        },
-        {
-          // Track for Success Rate
-          outerRadius: "34%",
-          innerRadius: "22%",
-          backgroundColor: "rgba(5, 150, 105, 0.2)", // green with transparency
-          borderWidth: 0,
-        },
-        {
-          // Track for Success Rate
-          outerRadius: "73%",
-          innerRadius: "61%",
-          backgroundColor: "rgba(5, 150, 105, 0.2)", // green with transparency
-          borderWidth: 0,
-        },
-        {
-          // Track for Success Rate
-          outerRadius: "86%",
-          innerRadius: "74%",
-          backgroundColor: "rgba(5, 150, 105, 0.2)", // green with transparency
-          borderWidth: 0,
-        },
-        {
-          // Track for Success Rate
-          outerRadius: "99%",
-          innerRadius: "87%",
-          backgroundColor: "rgba(5, 150, 105, 0.2)", // green with transparency
-          borderWidth: 0,
-        },
-      ],
+      background: gaugeData.map((item, index) => ({
+        outerRadius: item.radius,
+        innerRadius: item.innerRadius,
+        backgroundColor: `${item.color}20`, // Add transparency
+        borderWidth: 0,
+      })),
     },
     yAxis: {
       min: 0,
@@ -211,74 +240,19 @@ const DashboardGauges = () => {
     exporting: {
       enabled: false,
     },
-    series: [
-      {
-        name: "Total Calls Progress",
-        data: [
-          {
-            color: "#10b981", // emerald-500
-            radius: "34%",
-            innerRadius: "22%",
-            y: 85, // 8500/10000 * 100
-          },
-        ],
-      },
-      {
-        name: "Answer Rate",
-        data: [
-          {
-            color: "#3b82f6", // blue-500
-            radius: "47%",
-            innerRadius: "35%",
-            y: 72, // 7800/8500 * 100
-          },
-        ],
-      },
-      {
-        name: "Success Rate",
-        data: [
-          {
-            color: "#059669", // emerald-600
-            radius: "60%",
-            innerRadius: "48%",
-            y: 92,
-          },
-        ],
-      },
-      {
-        name: "Success Rate",
-        data: [
-          {
-            color: "#055969", // emerald-600
-            radius: "73%",
-            innerRadius: "61%",
-            y: 92,
-          },
-        ],
-      },
-      {
-        name: "Success Rate",
-        data: [
-          {
-            color: "#059038", // emerald-600
-            radius: "86%",
-            innerRadius: "74%",
-            y: 92,
-          },
-        ],
-      },
-      {
-        name: "Success Rate",
-        data: [
-          {
-            color: "#063038", // emerald-600
-            radius: "99%",
-            innerRadius: "87%",
-            y: 92,
-          },
-        ],
-      },
-    ],
+    series: gaugeData.map((item) => ({
+      name: item.name,
+      data: [
+        {
+          color: item.color,
+          radius: item.radius,
+          innerRadius: item.innerRadius,
+          y: item.percentage,
+          totalCalls: item.totalCalls,
+          percentage: item.percentage,
+        },
+      ],
+    })),
   };
 
   // Individual gauge configuration (simplified)
@@ -414,17 +388,26 @@ const DashboardGauges = () => {
       trendUp: true,
     },
   ];
-
   return (
     <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-6 lg:h-[776px] h-auto flex flex-col">
       {/* Header */}
       <div className="mb-4 flex-shrink-0">
-        <h3 className="text-lg font-semibold text-gray-900 mb-1">
-          Performance Overview
-        </h3>
-        <p className="text-gray-500 text-sm">
-          Real-time call center metrics and KPIs
-        </p>
+        <div className="flex justify-between items-center">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-1">
+              Call Distribution by Division
+            </h3>
+            <p className="text-gray-500 text-sm">
+              Real-time call volume distribution across divisions
+            </p>
+          </div>
+          <div className="text-right">
+            <div className="text-xl font-bold text-gray-700">
+              {totalCalls.toLocaleString()}
+            </div>
+            <div className="text-xs text-gray-500">Total calls</div>
+          </div>
+        </div>
       </div>
 
       {/* Multi-KPI Gauge (Main Feature) */}
@@ -441,48 +424,32 @@ const DashboardGauges = () => {
 
           {/* Legend for Multi-KPI Gauge */}
           <div className="grid grid-cols-3 gap-3 mt-4">
-            <div className="text-center p-3 bg-emerald-50 rounded-lg border border-emerald-100">
-              <span className="text-sm font-medium text-emerald-700">
-                Total Calls
-              </span>
-              <div className="text-xs text-emerald-600 mt-1">
-                8,500 / 10,000
+            {gaugeData.map((item, index) => (
+              <div
+                key={index}
+                className="text-center p-3 rounded-lg border"
+                style={{
+                  backgroundColor: `${item.color}10`,
+                  borderColor: `${item.color}30`,
+                }}
+              >
+                <div className="flex items-center justify-center space-x-2">
+                  <div
+                    className="w-3 h-3 rounded-full"
+                    style={{ backgroundColor: item.color }}
+                  ></div>
+                  <span
+                    className="text-sm font-medium"
+                    style={{ color: item.color }}
+                  >
+                    {item.name.split(" ")[0]}
+                  </span>
+                </div>
+                <div className="text-xs text-gray-600 mt-1">
+                  {item.totalCalls} calls ({item.percentage}%)
+                </div>
               </div>
-            </div>
-            <div className="text-center p-3 bg-blue-50 rounded-lg border border-blue-100">
-              <span className="text-sm font-medium text-blue-700">
-                Answer Rate
-              </span>
-              <div className="text-xs text-blue-600 mt-1">7,800 answered</div>
-            </div>
-            <div className="text-center p-3 bg-green-50 rounded-lg border border-green-100">
-              <span className="text-sm font-medium text-green-700">
-                Success Rate
-              </span>
-              <div className="text-xs text-green-600 mt-1">Completion rate</div>
-            </div>
-            <div className="text-center p-3 bg-blue-50 rounded-lg border border-blue-100">
-              <span className="text-sm font-medium text-blue-700">
-                Answer Rate
-              </span>
-              <div className="text-xs text-blue-600 mt-1">Response rate</div>
-            </div>
-            <div className="text-center p-3 bg-green-50 rounded-lg border border-green-100">
-              <span className="text-sm font-medium text-green-700">
-                Success Rate
-              </span>
-              <div className="text-xs text-green-600 mt-1">
-                Customer satisfaction
-              </div>
-            </div>
-            <div className="text-center p-3 bg-green-50 rounded-lg border border-green-100">
-              <span className="text-sm font-medium text-green-700">
-                Success Rate
-              </span>
-              <div className="text-xs text-green-600 mt-1">
-                Customer satisfaction
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       </div>

@@ -4,6 +4,8 @@ import DashboardAreaChart from "../../components/DashboardAreaChart";
 import DashboardComposedChart from "../../components/DashboardComposedChart";
 import DashboardGauges from "../../components/DashboardGauges";
 import CustomShapeBarChart from "../../components/CustomShapeBarChart";
+import CallStatus from "../../components/CallStatus";
+import CallDuration from "../../components/CallDuration";
 
 const DashboardHome = () => {
   return (
@@ -26,6 +28,15 @@ const DashboardHome = () => {
           <div>
             <CustomShapeBarChart />
           </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-4">
+        <div>
+          <CallStatus />
+        </div>
+        <div>
+          <CallDuration />
         </div>
       </div>
     </div>

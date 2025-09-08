@@ -1,16 +1,16 @@
 import React from "react";
 import { BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid } from "recharts";
 
-const colors = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "red", "pink"];
+const colors = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8B5CF6", "#EC4899", "#F59E0B"];
 
 const data = [
-  { name: "Page A", uv: 4000, pv: 2400, amt: 2400 },
-  { name: "Page B", uv: 3000, pv: 1398, amt: 2210 },
-  { name: "Page C", uv: 2000, pv: 9800, amt: 2290 },
-  { name: "Page D", uv: 2780, pv: 3908, amt: 2000 },
-  { name: "Page E", uv: 1890, pv: 4800, amt: 2181 },
-  { name: "Page F", uv: 2390, pv: 3800, amt: 2500 },
-  { name: "Page G", uv: 3490, pv: 4300, amt: 2100 },
+  { name: "Barisal", calls: 2680, population: 1200000 },
+  { name: "Dhaka", calls: 4200, population: 9000000 },
+  { name: "Rajshahi", calls: 3400, population: 2700000 },
+  { name: "Rangpur", calls: 2420, population: 1500000 },
+  { name: "Sylhet", calls: 2800, population: 3500000 },
+  { name: "Chittagong", calls: 3100, population: 5200000 },
+  { name: "Khulna", calls: 4950, population: 1600000 },
 ];
 
 const getPath = (x, y, width, height) => {
@@ -37,12 +37,17 @@ const CustomShapeBarChart = () => {
       {/* Chart Header */}
       <div className="mb-4 flex-shrink-0">
         <div className="flex justify-between items-center mb-2">
-          <h3 className="text-lg font-semibold text-gray-900">
-            Custom Shape Analytics
-          </h3>
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900">
+              Top Locations by Call Volume
+            </h3>
+            <p className="text-gray-500 text-sm">
+              Distribution of incoming calls by location
+            </p>
+          </div>
           <div className="text-right">
-            <div className="text-xl font-bold text-emerald-600">27.8K</div>
-            <div className="text-xs text-gray-500">Total processed</div>
+            <div className="text-xl font-bold text-emerald-600">17.6K</div>
+            <div className="text-xs text-gray-500">Total calls</div>
           </div>
         </div>
       </div>
@@ -58,7 +63,7 @@ const CustomShapeBarChart = () => {
             <XAxis dataKey="name" />
             <YAxis />
             <Bar
-              dataKey="uv"
+              dataKey="calls"
               fill="#8884d8"
               shape={<TriangleBar />}
               label={{ position: "top" }}
