@@ -22,16 +22,11 @@ import useLogout from "./Hook/useLogout";
 import { AuthContext } from "./context/AuthProvider";
 
 const Sidebar = () => {
-  const [isRegistrationOpen, setIsRegistrationOpen] = useState(false);
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const { logout, loading } = useLogout();
   const { authUser, rolePermission } = useContext(AuthContext);
-
-  const toggleRegistration = () => {
-    setIsRegistrationOpen(!isRegistrationOpen);
-  };
 
   const toggleFeedback = () => {
     setIsFeedbackOpen(!isFeedbackOpen);
@@ -43,9 +38,7 @@ const Sidebar = () => {
 
   const toggleCollapse = () => {
     setIsCollapsed(!isCollapsed);
-    // Close all sub-menus when collapsing
     if (!isCollapsed) {
-      setIsRegistrationOpen(false);
       setIsFeedbackOpen(false);
       setIsSettingsOpen(false);
     }
@@ -98,110 +91,6 @@ const Sidebar = () => {
           {!isCollapsed && "Dashboard"}
         </NavLink>
       </li>
-
-      {/* Registration Menu - Show only if user has any registration permissions */}
-      {(rolePermission?.["AD List"] ||
-        rolePermission?.["DD List"] ||
-        rolePermission?.["UAO List"] ||
-        rolePermission?.["SAAO List"] ||
-        rolePermission?.["Farmer List"] ||
-        rolePermission?.["Scientist List"] ||
-        rolePermission?.["Journalist List"]) && (
-        <li className="text-base font-medium">
-          <button
-            onClick={isCollapsed ? undefined : toggleRegistration}
-            className={`flex items-center w-full px-4 py-2 text-left hover:bg-emerald-800 rounded-lg transition-colors duration-200 ${isCollapsed ? 'justify-center' : ''}`}
-            title={isCollapsed ? "Registration" : ""}
-          >
-            <ClipboardDocumentListIcon className={`w-5 h-5 ${!isCollapsed ? 'mr-2' : ''}`} />
-            {!isCollapsed && (
-              <>
-                Registration
-                {isRegistrationOpen ? (
-                  <ChevronDownIcon className="w-4 h-4 ml-auto" />
-                ) : (
-                  <ChevronRightIcon className="w-4 h-4 ml-auto" />
-                )}
-              </>
-            )}
-          </button>
-        </li>
-      )}
-
-      {isRegistrationOpen && !isCollapsed && (
-        <>
-          {rolePermission?.["AD List"] && (
-            <li className="text-sm font-medium pl-4">
-              <NavLink
-                to="/ad-registration"
-                className="flex items-center px-4 py-2 bg-emerald-800 hover:bg-emerald-700 rounded-lg transition-colors duration-200 border-l-2 border-emerald-400 ml-2"
-              >
-                AD Registration
-              </NavLink>
-            </li>
-          )}
-          {rolePermission?.["DD List"] && (
-            <li className="text-sm font-medium pl-4">
-              <NavLink
-                to="/admin-registration"
-                className="flex items-center px-4 py-2 bg-emerald-800 hover:bg-emerald-700 rounded-lg transition-colors duration-200 border-l-2 border-emerald-400 ml-2"
-              >
-                Admin Registration
-              </NavLink>
-            </li>
-          )}
-          {rolePermission?.["UAO List"] && (
-            <li className="text-sm font-medium pl-4">
-              <NavLink
-                to="/uao-registration"
-                className="flex items-center px-4 py-2 bg-emerald-800 hover:bg-emerald-700 rounded-lg transition-colors duration-200 border-l-2 border-emerald-400 ml-2"
-              >
-                UAO Registration
-              </NavLink>
-            </li>
-          )}
-          {rolePermission?.["SAAO List"] && (
-            <li className="text-sm font-medium pl-4">
-              <NavLink
-                to="/saao-registration"
-                className="flex items-center px-4 py-2 bg-emerald-800 hover:bg-emerald-700 rounded-lg transition-colors duration-200 border-l-2 border-emerald-400 ml-2"
-              >
-                SAAO Registration
-              </NavLink>
-            </li>
-          )}
-          {rolePermission?.["Farmer List"] && (
-            <li className="text-sm font-medium pl-4">
-              <NavLink
-                to="/farmer-registration"
-                className="flex items-center px-4 py-2 bg-emerald-800 hover:bg-emerald-700 rounded-lg transition-colors duration-200 border-l-2 border-emerald-400 ml-2"
-              >
-                Farmer Registration
-              </NavLink>
-            </li>
-          )}
-          {rolePermission?.["Scientist List"] && (
-            <li className="text-sm font-medium pl-4">
-              <NavLink
-                to="/scientist-registration"
-                className="flex items-center px-4 py-2 bg-emerald-800 hover:bg-emerald-700 rounded-lg transition-colors duration-200 border-l-2 border-emerald-400 ml-2"
-              >
-                Scientist Registration
-              </NavLink>
-            </li>
-          )}
-          {rolePermission?.["Journalist List"] && (
-            <li className="text-sm font-medium pl-4">
-              <NavLink
-                to="/journalists-registration"
-                className="flex items-center px-4 py-2 bg-emerald-800 hover:bg-emerald-700 rounded-lg transition-colors duration-200 border-l-2 border-emerald-400 ml-2"
-              >
-                Journalists Registration
-              </NavLink>
-            </li>
-          )}
-        </>
-      )}
 
       {/* Feedback Menu - Show only if user has feedback permissions */}
       {(rolePermission?.["Send Feedback"] ||

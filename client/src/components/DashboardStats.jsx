@@ -48,6 +48,28 @@ const DashboardStats = () => {
       bgColor: 'bg-red-50',
       progressColor: 'bg-red-500',
       textColor: 'text-red-600'
+    },
+    {
+      id: 5,
+      title: 'Hold Time',
+      value: '2164H',
+      change: '+ 80%',
+      changeType: 'increase',
+      color: 'red',
+      bgColor: 'bg-red-50',
+      progressColor: 'bg-red-500',
+      textColor: 'text-red-600'
+    },
+    {
+      id: 6,
+      title: 'Hold Time',
+      value: '2164H',
+      change: '+ 80%',
+      changeType: 'increase',
+      color: 'red',
+      bgColor: 'bg-red-50',
+      progressColor: 'bg-red-500',
+      textColor: 'text-red-600'
     }
   ];
 
@@ -66,7 +88,7 @@ const DashboardStats = () => {
   };
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
       {statsData.map((stat, index) => (
         <div
           key={stat.id}
@@ -98,9 +120,6 @@ const DashboardStats = () => {
               <h2 className="text-2xl font-bold text-gray-900 group-hover:scale-110 transition-transform duration-200">
                 {stat.value}
               </h2>
-              <span className={`text-xs font-medium ${stat.textColor} animate-bounce group-hover:animate-none transition-all duration-200`}>
-                {stat.change}
-              </span>
             </div>
           </div>
 

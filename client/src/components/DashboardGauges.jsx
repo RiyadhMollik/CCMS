@@ -58,8 +58,11 @@ const DashboardGauges = () => {
     // Define icon mapping based on series name (more reliable)
     const iconMap = {
       "Total Calls Progress": "📞",
-      "Answer Rate": "✅", 
-      "Success Rate": "📊"
+      "Answer Rate": "✅",
+      Answer: "✅",
+      "Success Rate": "📊",
+      Success: "📊",
+      Rate: "📊",
     };
 
     this.series.forEach((series) => {
@@ -106,12 +109,12 @@ const DashboardGauges = () => {
   const multiKPIGaugeConfig = {
     chart: {
       type: "solidgauge",
-      height: 400,
+      height: 480,
       backgroundColor: "transparent",
       // Removed the render icons event for now
     },
     title: {
-      text: "Call Center Performance",
+      text: "",
       style: {
         fontSize: "18px",
         fontWeight: "600",
@@ -140,26 +143,47 @@ const DashboardGauges = () => {
     },
     pane: {
       startAngle: 0,
-      endAngle: 360,
+      endAngle: 320,
       background: [
         {
           // Track for Total Calls
-          outerRadius: "112%",
-          innerRadius: "88%",
+          outerRadius: "60%",
+          innerRadius: "48%",
           backgroundColor: "rgba(16, 185, 129, 0.2)", // emerald with transparency
           borderWidth: 0,
         },
         {
           // Track for Received Calls
-          outerRadius: "87%",
-          innerRadius: "63%",
+          outerRadius: "47%",
+          innerRadius: "35%",
           backgroundColor: "rgba(59, 130, 246, 0.2)", // blue with transparency
           borderWidth: 0,
         },
         {
           // Track for Success Rate
-          outerRadius: "62%",
-          innerRadius: "38%",
+          outerRadius: "34%",
+          innerRadius: "22%",
+          backgroundColor: "rgba(5, 150, 105, 0.2)", // green with transparency
+          borderWidth: 0,
+        },
+        {
+          // Track for Success Rate
+          outerRadius: "73%",
+          innerRadius: "61%",
+          backgroundColor: "rgba(5, 150, 105, 0.2)", // green with transparency
+          borderWidth: 0,
+        },
+        {
+          // Track for Success Rate
+          outerRadius: "86%",
+          innerRadius: "74%",
+          backgroundColor: "rgba(5, 150, 105, 0.2)", // green with transparency
+          borderWidth: 0,
+        },
+        {
+          // Track for Success Rate
+          outerRadius: "99%",
+          innerRadius: "87%",
           backgroundColor: "rgba(5, 150, 105, 0.2)", // green with transparency
           borderWidth: 0,
         },
@@ -193,20 +217,20 @@ const DashboardGauges = () => {
         data: [
           {
             color: "#10b981", // emerald-500
-            radius: "112%",
-            innerRadius: "88%",
+            radius: "34%",
+            innerRadius: "22%",
             y: 85, // 8500/10000 * 100
           },
         ],
       },
       {
-        name: "Answer Rate", 
+        name: "Answer Rate",
         data: [
           {
             color: "#3b82f6", // blue-500
-            radius: "87%",
-            innerRadius: "63%",
-            y: 92, // 7800/8500 * 100
+            radius: "47%",
+            innerRadius: "35%",
+            y: 72, // 7800/8500 * 100
           },
         ],
       },
@@ -215,8 +239,41 @@ const DashboardGauges = () => {
         data: [
           {
             color: "#059669", // emerald-600
-            radius: "62%",
-            innerRadius: "38%",
+            radius: "60%",
+            innerRadius: "48%",
+            y: 92,
+          },
+        ],
+      },
+      {
+        name: "Success Rate",
+        data: [
+          {
+            color: "#055969", // emerald-600
+            radius: "73%",
+            innerRadius: "61%",
+            y: 92,
+          },
+        ],
+      },
+      {
+        name: "Success Rate",
+        data: [
+          {
+            color: "#059038", // emerald-600
+            radius: "86%",
+            innerRadius: "74%",
+            y: 92,
+          },
+        ],
+      },
+      {
+        name: "Success Rate",
+        data: [
+          {
+            color: "#063038", // emerald-600
+            radius: "99%",
+            innerRadius: "87%",
             y: 92,
           },
         ],
@@ -359,10 +416,10 @@ const DashboardGauges = () => {
   ];
 
   return (
-    <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-6">
+    <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-6 lg:h-[776px] h-auto flex flex-col">
       {/* Header */}
-      <div className="mb-6">
-        <h3 className="text-xl font-semibold text-gray-900 mb-1">
+      <div className="mb-4 flex-shrink-0">
+        <h3 className="text-lg font-semibold text-gray-900 mb-1">
           Performance Overview
         </h3>
         <p className="text-gray-500 text-sm">
@@ -371,10 +428,10 @@ const DashboardGauges = () => {
       </div>
 
       {/* Multi-KPI Gauge (Main Feature) */}
-      <div className="mb-8">
-        <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-6">
+      <div className="flex-grow flex flex-col justify-center overflow-hidden">
+        <div className="rounded-xl p-4">
           <div className="flex justify-center">
-            <div style={{ width: "400px", height: "400px" }}>
+            <div style={{ width: "100%", height: "480px", maxWidth: "500px" }}>
               <HighchartsReact
                 highcharts={Highcharts}
                 options={multiKPIGaugeConfig}
@@ -383,36 +440,48 @@ const DashboardGauges = () => {
           </div>
 
           {/* Legend for Multi-KPI Gauge */}
-          <div className="grid grid-cols-3 gap-4 mt-6">
-            <div className="text-center p-3 bg-white rounded-lg border">
-              <div className="flex items-center justify-center mb-2">
-                <div className="w-4 h-4 bg-emerald-500 rounded-full mr-2"></div>
-                <span className="text-sm font-medium text-gray-700">
-                  Total Calls
-                </span>
+          <div className="grid grid-cols-3 gap-3 mt-4">
+            <div className="text-center p-3 bg-emerald-50 rounded-lg border border-emerald-100">
+              <span className="text-sm font-medium text-emerald-700">
+                Total Calls
+              </span>
+              <div className="text-xs text-emerald-600 mt-1">
+                8,500 / 10,000
               </div>
-              <div className="text-lg font-bold text-emerald-600">85%</div>
-              <div className="text-xs text-gray-500">8,500 / 10,000</div>
             </div>
-            <div className="text-center p-3 bg-white rounded-lg border">
-              <div className="flex items-center justify-center mb-2">
-                <div className="w-4 h-4 bg-blue-500 rounded-full mr-2"></div>
-                <span className="text-sm font-medium text-gray-700">
-                  Answer Rate
-                </span>
-              </div>
-              <div className="text-lg font-bold text-blue-600">92%</div>
-              <div className="text-xs text-gray-500">7,800 answered</div>
+            <div className="text-center p-3 bg-blue-50 rounded-lg border border-blue-100">
+              <span className="text-sm font-medium text-blue-700">
+                Answer Rate
+              </span>
+              <div className="text-xs text-blue-600 mt-1">7,800 answered</div>
             </div>
-            <div className="text-center p-3 bg-white rounded-lg border">
-              <div className="flex items-center justify-center mb-2">
-                <div className="w-4 h-4 bg-green-600 rounded-full mr-2"></div>
-                <span className="text-sm font-medium text-gray-700">
-                  Success Rate
-                </span>
+            <div className="text-center p-3 bg-green-50 rounded-lg border border-green-100">
+              <span className="text-sm font-medium text-green-700">
+                Success Rate
+              </span>
+              <div className="text-xs text-green-600 mt-1">Completion rate</div>
+            </div>
+            <div className="text-center p-3 bg-blue-50 rounded-lg border border-blue-100">
+              <span className="text-sm font-medium text-blue-700">
+                Answer Rate
+              </span>
+              <div className="text-xs text-blue-600 mt-1">Response rate</div>
+            </div>
+            <div className="text-center p-3 bg-green-50 rounded-lg border border-green-100">
+              <span className="text-sm font-medium text-green-700">
+                Success Rate
+              </span>
+              <div className="text-xs text-green-600 mt-1">
+                Customer satisfaction
               </div>
-              <div className="text-lg font-bold text-green-600">92%</div>
-              <div className="text-xs text-gray-500">Customer satisfaction</div>
+            </div>
+            <div className="text-center p-3 bg-green-50 rounded-lg border border-green-100">
+              <span className="text-sm font-medium text-green-700">
+                Success Rate
+              </span>
+              <div className="text-xs text-green-600 mt-1">
+                Customer satisfaction
+              </div>
             </div>
           </div>
         </div>

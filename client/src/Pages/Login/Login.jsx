@@ -127,16 +127,16 @@ function Login() {
   return (
     <div className="min-h-screen w-screen flex items-center justify-center relative overflow-hidden">
       {/* Rice field background image from public folder */}
-      <div 
+      <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{
-          backgroundImage: "url('/rice3.avif')"
+          backgroundImage: "url('/rice3.avif')",
         }}
       ></div>
-      
+
       {/* Dark overlay for better readability */}
       <div className="absolute inset-0 bg-black/60"></div>
-      
+
       {/* Subtle teal overlay to match theme */}
       <div className="absolute inset-0 bg-gradient-to-br from-[#026666]/15 via-transparent to-[#024444]/15"></div>
 
@@ -152,8 +152,11 @@ function Login() {
       <div className="bg-white/98 backdrop-blur-sm p-10 rounded-2xl shadow-2xl w-full max-w-md z-10 relative border border-[#04cccc]/20">
         {/* Logo/Icon */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-[#026666] mb-2">BRRI DCRS</h1>
-          <p className="text-[#338485]">Data Collection & Resource System</p>
+          <div className="flex justify-center mb-4">
+            <img src="/logo.png" alt="BRRI CCMS Logo" className="w-20" />
+          </div>
+          <h1 className="text-3xl font-bold text-[#026666] mb-2">BRRI CCMS</h1>
+          <p className="text-[#338485]">Call Center Management System</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -292,11 +295,9 @@ function Login() {
 
         {/* Footer */}
         <div className="mt-8 text-center">
-          <p className="text-sm text-[#338485] font-medium">
+          <p className="text-sm text-[#338485]">Agromet Lab</p>
+          <p className="text-base text-[#026666]/70 font-medium mt-1">
             Bangladesh Rice Research Institute
-          </p>
-          <p className="text-xs text-[#026666]/70 mt-1">
-            Data Collection & Resource System
           </p>
         </div>
       </div>
