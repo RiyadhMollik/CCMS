@@ -7,28 +7,53 @@ const CallStatus = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [totalCalls, setTotalCalls] = useState(0);
+  const [windowWidth, setWindowWidth] = useState(
+    typeof window !== "undefined" ? window.innerWidth : 1024
+  );
+
+  // Track window resize for responsive charts
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
+
+    if (typeof window !== "undefined") {
+      window.addEventListener("resize", handleResize);
+      return () => window.removeEventListener("resize", handleResize);
+    }
+  }, []);
 
   // Fetch data from API
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const response = await axios.get('https://iinms.brri.gov.bd/api/cdr/report/all');
-        
+        const response = await axios.get(
+          "https://iinms.brri.gov.bd/api/cdr/report/all"
+        );
+
         if (response.data) {
           const { totalAnswer, totalBusy, totalNoAnswer } = response.data;
-          
+
           const chartData = [
-            { name: "Calls Received", value: totalAnswer || 0, color: "#10b981" },
-            { name: "Not Received", value: totalNoAnswer || 0, color: "#f59e0b" },
+            {
+              name: "Calls Received",
+              value: totalAnswer || 0,
+              color: "#10b981",
+            },
+            {
+              name: "Not Received",
+              value: totalNoAnswer || 0,
+              color: "#f59e0b",
+            },
             { name: "Busy/Failed", value: totalBusy || 0, color: "#ef4444" },
           ];
-          
+
           setData(chartData);
           setTotalCalls(totalAnswer + totalBusy + totalNoAnswer);
         }
       } catch (error) {
-        console.error('Error fetching call status data:', error);
+        console.error("Error fetching call status data:", error);
         // Keep default empty data on error
         setData([
           { name: "Calls Received", value: 0, color: "#10b981" },
@@ -51,6 +76,30 @@ const CallStatus = () => {
     return num.toString();
   };
 
+  // Get responsive values based on current window width
+  const isMobile = windowWidth < 640;
+  const isTablet = windowWidth >= 640 && windowWidth < 1024;
+
+  const getChartDimensions = () => {
+    if (isMobile) {
+      return { innerRadius: 50, outerRadius: 90 };
+    }
+    if (isTablet) {
+      return { innerRadius: 70, outerRadius: 120 };
+    }
+    return { innerRadius: 100, outerRadius: 180 };
+  };
+
+  const getTextSizes = () => {
+    if (isMobile) {
+      return { titleSize: 14, valueSize: 12, percentSize: 11 };
+    }
+    if (isTablet) {
+      return { titleSize: 16, valueSize: 14, percentSize: 13 };
+    }
+    return { titleSize: 18, valueSize: 15, percentSize: 15 };
+  };
+
   const renderActiveShape = ({
     cx,
     cy,
@@ -64,36 +113,39 @@ const CallStatus = () => {
     percent,
     value,
   }) => {
+    const textSizes = getTextSizes();
+    const yOffset = isMobile ? 3 : 5;
+
     return (
       <g>
         <text
           x={cx}
           y={cy}
-          dy={-5}
+          dy={-yOffset}
           textAnchor="middle"
           fill={fill}
-          fontSize="18"
+          fontSize={textSizes.titleSize}
           fontWeight="600"
         >
-          {payload.name}
+          {isMobile ? payload.name.split(" ")[0] : payload.name}
         </text>
         <text
           x={cx}
           y={cy}
-          dy={15}
+          dy={yOffset + 10}
           textAnchor="middle"
           fill="#666"
-          fontSize="15"
+          fontSize={textSizes.valueSize}
         >
-          {`${value} calls`}
+          {isMobile ? formatNumber(value) : `${value} calls`}
         </text>
         <text
           x={cx}
           y={cy}
-          dy={35}
+          dy={yOffset + 25}
           textAnchor="middle"
           fill="#999"
-          fontSize="15"
+          fontSize={textSizes.percentSize}
         >
           {`${(percent * 100).toFixed(1)}%`}
         </text>
@@ -105,7 +157,7 @@ const CallStatus = () => {
           startAngle={startAngle}
           endAngle={endAngle}
           fill={fill}
-          cornerRadius={10}
+          cornerRadius={isMobile ? 6 : 10}
         />
       </g>
     );
@@ -120,27 +172,31 @@ const CallStatus = () => {
   };
 
   return (
-    <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 lg:h-[550px] h-auto flex flex-col">
+    <div className="bg-white rounded-xl p-2 sm:p-4 md:p-6 shadow-sm border border-gray-100 lg:h-[550px] h-auto flex flex-col">
       {/* Header */}
-      <div className="mb-4 flex-shrink-0">
-        <div className="flex justify-between items-center">
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-1">
+      <div className="mb-2 sm:mb-3 md:mb-4 flex-shrink-0">
+        <div className="flex justify-between items-start space-x-3">
+          <div className="flex-1 min-w-0">
+            <h3 className="text-sm sm:text-base md:text-lg font-semibold text-gray-900 mb-1 leading-tight">
               Call Status Overview
             </h3>
-            <p className="text-gray-500 text-sm">
+            <p className="text-gray-500 text-xs md:text-sm">
               Distribution of call statuses today
             </p>
           </div>
-          <div className="text-right">
-            <div className="text-xl font-bold text-gray-700">{formatNumber(totalCalls)}</div>
-            <div className="text-xs text-gray-500">Total calls</div>
+          <div className="text-right flex-shrink-0">
+            <div className="text-base sm:text-lg md:text-xl font-bold text-gray-700 whitespace-nowrap">
+              {formatNumber(totalCalls)}
+            </div>
+            <div className="text-xs text-gray-500 whitespace-nowrap">
+              Total calls
+            </div>
           </div>
         </div>
       </div>
 
       {/* Chart Container */}
-      <div className="flex-grow" style={{ minHeight: "350px" }}>
+      <div className="flex-grow h-48 sm:h-64 md:h-80 lg:h-96">
         {loading ? (
           <div className="flex justify-center items-center h-full">
             <div className="text-gray-500 flex items-center space-x-2">
@@ -157,10 +213,10 @@ const CallStatus = () => {
                 data={data}
                 cx="50%"
                 cy="50%"
-                innerRadius={100}
-                outerRadius={180}
-                paddingAngle={5}
-                cornerRadius={12}
+                innerRadius={getChartDimensions().innerRadius}
+                outerRadius={getChartDimensions().outerRadius}
+                paddingAngle={isMobile ? 3 : 5}
+                cornerRadius={isMobile ? 6 : 12}
                 dataKey="value"
                 onMouseEnter={onPieEnter}
                 onMouseLeave={onPieLeave}
@@ -175,18 +231,20 @@ const CallStatus = () => {
       </div>
 
       {/* Legend */}
-      <div className="flex justify-center gap-6 mt-4 flex-shrink-0">
-        <div className="flex items-center">
-          <div className="w-3 h-3 bg-emerald-500 rounded-full mr-2"></div>
-          <span className="text-sm text-gray-600">Received</span>
+      <div
+        className={`flex justify-center gap-6 mt-2 sm:mt-3 md:mt-4 flex-shrink-0`}
+      >
+        <div className="flex items-center justify-center">
+          <div className="w-3 h-3 bg-emerald-500 rounded-full mr-2 flex-shrink-0"></div>
+          <span className="text-xs sm:text-sm text-gray-600">Received</span>
         </div>
-        <div className="flex items-center">
-          <div className="w-3 h-3 bg-amber-500 rounded-full mr-2"></div>
-          <span className="text-sm text-gray-600">Not Received</span>
+        <div className="flex items-center justify-center">
+          <div className="w-3 h-3 bg-amber-500 rounded-full mr-2 flex-shrink-0"></div>
+          <span className="text-xs sm:text-sm text-gray-600">Not Received</span>
         </div>
-        <div className="flex items-center">
-          <div className="w-3 h-3 bg-red-500 rounded-full mr-2"></div>
-          <span className="text-sm text-gray-600">Busy/Failed</span>
+        <div className="flex items-center justify-center">
+          <div className="w-3 h-3 bg-red-500 rounded-full mr-2 flex-shrink-0"></div>
+          <span className="text-xs sm:text-sm text-gray-600">Busy/Failed</span>
         </div>
       </div>
     </div>

@@ -8,6 +8,19 @@ const DashboardGauges = () => {
   const [destinationData, setDestinationData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [totalCalls, setTotalCalls] = useState(0);
+  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1024);
+
+  // Track window resize for responsive charts
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('resize', handleResize);
+      return () => window.removeEventListener('resize', handleResize);
+    }
+  }, []);
 
   // Fetch data from API
   useEffect(() => {
@@ -79,8 +92,8 @@ const DashboardGauges = () => {
   // Don't render charts until modules are loaded
   if (!modulesLoaded || loading) {
     return (
-      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-6 lg:h-[776px] h-auto">
-        <div className="flex justify-center items-center h-64">
+      <div className="bg-white rounded-xl p-4 md:p-6 shadow-sm border border-gray-100 mb-6 lg:h-[776px] h-auto">
+        <div className="flex justify-center items-center h-48 md:h-64">
           <div className="text-gray-500 flex items-center space-x-2">
             <div className="animate-spin w-5 h-5 border-2 border-emerald-500 border-t-transparent rounded-full"></div>
             <span>{loading ? "Loading data..." : "Loading charts..."}</span>
@@ -173,12 +186,38 @@ const DashboardGauges = () => {
     });
   };
 
+  // Get responsive values based on current window width
+  const getChartHeight = () => {
+    if (windowWidth >= 1024) return 450;
+    if (windowWidth >= 768) return 400;
+    if (windowWidth >= 640) return 256;
+    return 192;
+  };
+
+  const getChartMargins = () => {
+    return windowWidth < 640 ? [10, 10, 10, 10] : [20, 20, 20, 20];
+  };
+
+  const getChartSpacing = () => {
+    return windowWidth < 640 ? [5, 5, 5, 5] : [10, 10, 10, 10];
+  };
+
+  const getPaneCenter = () => {
+    return windowWidth < 640 ? ['50%', '55%'] : ['50%', '50%'];
+  };
+
+  const getPaneSize = () => {
+    return windowWidth < 640 ? '85%' : '90%';
+  };
+
   // Multi-KPI Gauge Configuration (Dynamic)
   const multiKPIGaugeConfig = {
     chart: {
       type: "solidgauge",
-      height: 480,
+      height: getChartHeight(),
       backgroundColor: "transparent",
+      margin: getChartMargins(),
+      spacing: getChartSpacing(),
     },
     title: {
       text: "",
@@ -211,6 +250,8 @@ const DashboardGauges = () => {
     pane: {
       startAngle: 0,
       endAngle: 320,
+      center: getPaneCenter(),
+      size: getPaneSize(),
       background: gaugeData.map((item, index) => ({
         outerRadius: item.radius,
         innerRadius: item.innerRadius,
@@ -389,32 +430,32 @@ const DashboardGauges = () => {
     },
   ];
   return (
-    <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-6 lg:h-[776px] h-auto flex flex-col">
+    <div className="bg-white rounded-xl p-4 md:p-6 shadow-sm border border-gray-100 mb-6 lg:h-[776px] h-auto flex flex-col">
       {/* Header */}
-      <div className="mb-4 flex-shrink-0">
-        <div className="flex justify-between items-center">
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-1">
+      <div className="mb-3 md:mb-4 flex-shrink-0">
+        <div className="flex justify-between items-start space-x-3">
+          <div className="flex-1 min-w-0">
+            <h3 className="text-sm sm:text-base md:text-lg font-semibold text-gray-900 mb-1 leading-tight">
               Call Distribution by Division
             </h3>
-            <p className="text-gray-500 text-sm">
+            <p className="text-gray-500 text-xs md:text-sm">
               Real-time call volume distribution across divisions
             </p>
           </div>
-          <div className="text-right">
-            <div className="text-xl font-bold text-gray-700">
+          <div className="text-right flex-shrink-0">
+            <div className="text-base sm:text-lg md:text-xl font-bold text-gray-700 whitespace-nowrap">
               {totalCalls.toLocaleString()}
             </div>
-            <div className="text-xs text-gray-500">Total calls</div>
+            <div className="text-xs text-gray-500 whitespace-nowrap">Total calls</div>
           </div>
         </div>
       </div>
 
       {/* Multi-KPI Gauge (Main Feature) */}
       <div className="flex-grow flex flex-col justify-center overflow-hidden">
-        <div className="rounded-xl p-4">
-          <div className="flex justify-center">
-            <div style={{ width: "100%", height: "480px", maxWidth: "500px" }}>
+        <div className="rounded-xl p-2 md:p-4 flex flex-col h-full">
+          <div className="flex justify-center flex-shrink-0">
+            <div className="w-full h-48 sm:h-64 md:h-[400px] lg:h-[450px] max-w-[600px]">
               <HighchartsReact
                 highcharts={Highcharts}
                 options={multiKPIGaugeConfig}
@@ -423,30 +464,46 @@ const DashboardGauges = () => {
           </div>
 
           {/* Legend for Multi-KPI Gauge */}
-          <div className="grid grid-cols-3 gap-3 mt-4">
+          <div className="grid grid-cols-3 sm:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-3 mt-3 md:mt-4 flex-shrink-0">
             {gaugeData.map((item, index) => (
-              <div
-                key={index}
-                className="text-center p-3 rounded-lg border"
-                style={{
-                  backgroundColor: `${item.color}10`,
-                  borderColor: `${item.color}30`,
-                }}
-              >
-                <div className="flex items-center justify-center space-x-2">
+              <div key={index}>
+                {/* Mobile/Small screens: Simple dot + name */}
+                <div className="flex items-center justify-center space-x-2 md:hidden">
                   <div
-                    className="w-3 h-3 rounded-full"
+                    className="w-3 h-3 rounded-full flex-shrink-0"
                     style={{ backgroundColor: item.color }}
                   ></div>
                   <span
-                    className="text-sm font-medium"
+                    className="text-xs font-medium truncate"
                     style={{ color: item.color }}
                   >
                     {item.name.split(" ")[0]}
                   </span>
                 </div>
-                <div className="text-xs text-gray-600 mt-1">
-                  {item.totalCalls} calls ({item.percentage}%)
+
+                {/* Medium and Large screens: Full legend with background */}
+                <div
+                  className="hidden md:block text-center p-3 rounded-lg border"
+                  style={{
+                    backgroundColor: `${item.color}10`,
+                    borderColor: `${item.color}30`,
+                  }}
+                >
+                  <div className="flex items-center justify-center space-x-2">
+                    <div
+                      className="w-3 h-3 rounded-full flex-shrink-0"
+                      style={{ backgroundColor: item.color }}
+                    ></div>
+                    <span
+                      className="text-sm font-medium truncate"
+                      style={{ color: item.color }}
+                    >
+                      {item.name.split(" ")[0]}
+                    </span>
+                  </div>
+                  <div className="text-xs text-gray-600 mt-1">
+                    {item.totalCalls} calls ({item.percentage}%)
+                  </div>
                 </div>
               </div>
             ))}

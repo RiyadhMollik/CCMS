@@ -1,5 +1,5 @@
-import React from "react";
-import { BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid } from "recharts";
+import React, { useState, useEffect } from "react";
+import { BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from "recharts";
 
 const colors = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8B5CF6", "#EC4899", "#F59E0B"];
 
@@ -29,44 +29,72 @@ const TriangleBar = (props) => {
   return <path d={getPath(x, y, width, height)} stroke="none" fill={fill} />;
 };
 
-import { ResponsiveContainer } from "recharts";
-
 const CustomShapeBarChart = () => {
+  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1024);
+
+  // Track window resize for responsive charts
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('resize', handleResize);
+      return () => window.removeEventListener('resize', handleResize);
+    }
+  }, []);
+
+  const isMobile = windowWidth < 640;
   return (
-    <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 lg:h-[380px] h-auto flex flex-col">
+    <div className="bg-white rounded-xl p-2 sm:p-4 md:p-6 shadow-sm border border-gray-100 lg:h-[380px] h-auto flex flex-col">
       {/* Chart Header */}
-      <div className="mb-4 flex-shrink-0">
-        <div className="flex justify-between items-center mb-2">
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900">
+      <div className="mb-2 sm:mb-3 md:mb-4 flex-shrink-0">
+        <div className="flex justify-between items-start space-x-3 mb-2">
+          <div className="flex-1 min-w-0">
+            <h3 className="text-sm sm:text-base md:text-lg font-semibold text-gray-900 leading-tight">
               Top Locations by Call Volume
             </h3>
-            <p className="text-gray-500 text-sm">
+            <p className="text-gray-500 text-xs md:text-sm mt-1">
               Distribution of incoming calls by location
             </p>
           </div>
-          <div className="text-right">
-            <div className="text-xl font-bold text-emerald-600">17.6K</div>
-            <div className="text-xs text-gray-500">Total calls</div>
+          <div className="text-right flex-shrink-0">
+            <div className="text-base sm:text-lg md:text-xl font-bold text-emerald-600 whitespace-nowrap">17.6K</div>
+            <div className="text-xs text-gray-500 whitespace-nowrap">Total calls</div>
           </div>
         </div>
       </div>
       
       {/* Chart Container */}
-      <div className="w-full flex-grow flex items-center justify-center" style={{ minHeight: "280px" }}>
+      <div className="w-full flex-grow flex items-center justify-center h-56 sm:h-64 md:h-80">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
             data={data}
-            margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+            margin={{ 
+              top: isMobile ? 10 : 20, 
+              right: isMobile ? 5 : 30, 
+              left: isMobile ? 5 : 20, 
+              bottom: 5 
+            }}
           >
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" />
-            <YAxis />
+            <XAxis 
+              dataKey="name" 
+              fontSize={isMobile ? 9 : 12}
+              angle={isMobile ? -45 : 0}
+              textAnchor={isMobile ? "end" : "middle"}
+              height={isMobile ? 50 : 30}
+              interval={0}
+            />
+            <YAxis 
+              fontSize={isMobile ? 9 : 12}
+              width={isMobile ? 30 : 40}
+            />
             <Bar
               dataKey="calls"
               fill="#8884d8"
               shape={<TriangleBar />}
-              label={{ position: "top" }}
+              label={{ position: "top", fontSize: isMobile ? 9 : 12 }}
             >
               {data.map((entry, index) => (
                 <Cell

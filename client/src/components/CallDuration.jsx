@@ -6,6 +6,19 @@ const CallDuration = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [totalCalls, setTotalCalls] = useState(0);
+  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1024);
+
+  // Track window resize for responsive charts
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('resize', handleResize);
+      return () => window.removeEventListener('resize', handleResize);
+    }
+  }, []);
 
   // Define colors for each duration range
   const colors = [
@@ -70,28 +83,54 @@ const CallDuration = () => {
     return num.toString();
   };
 
+  // Get responsive values based on current window width
+  const isMobile = windowWidth < 640;
+  const isTablet = windowWidth >= 640 && windowWidth < 1024;
+  
+  const getChartMargins = () => {
+    if (isMobile) {
+      return { bottom: 15, top: 10, right: 20, left: 5 };
+    }
+    if (isTablet) {
+      return { bottom: 18, top: 15, right: 30, left: 10 };
+    }
+    return { bottom: 20, top: 20, right: 40, left: 15 };
+  };
+
+  const getFontSizes = () => {
+    if (isMobile) {
+      return { axis: 10, label: 10 };
+    }
+    if (isTablet) {
+      return { axis: 11, label: 11 };
+    }
+    return { axis: 12, label: 12 };
+  };
+
   return (
-    <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 lg:h-[550px] h-auto flex flex-col">
+    <div className="bg-white rounded-xl p-2 sm:p-4 md:p-6 shadow-sm border border-gray-100 lg:h-[550px] h-auto flex flex-col">
       {/* Header */}
-      <div className="mb-4 flex-shrink-0">
-        <div className="flex justify-between items-center">
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-1">
+      <div className="mb-2 sm:mb-3 md:mb-4 flex-shrink-0">
+        <div className="flex justify-between items-start space-x-3">
+          <div className="flex-1 min-w-0">
+            <h3 className="text-sm sm:text-base md:text-lg font-semibold text-gray-900 mb-1 leading-tight">
               Call Duration Analysis
             </h3>
-            <p className="text-gray-500 text-sm">
+            <p className="text-gray-500 text-xs md:text-sm">
               Distribution by call duration ranges
             </p>
           </div>
-          <div className="text-right">
-            <div className="text-xl font-bold text-gray-700">{formatNumber(totalCalls)}</div>
-            <div className="text-xs text-gray-500">Total calls</div>
+          <div className="text-right flex-shrink-0">
+            <div className="text-base sm:text-lg md:text-xl font-bold text-gray-700 whitespace-nowrap">
+              {formatNumber(totalCalls)}
+            </div>
+            <div className="text-xs text-gray-500 whitespace-nowrap">Total calls</div>
           </div>
         </div>
       </div>
 
       {/* Chart Container */}
-      <div className="flex-grow" style={{ minHeight: "280px" }}>
+      <div className="flex-grow h-56 md:h-72 lg:h-80">
         {loading ? (
           <div className="flex justify-center items-center h-full">
             <div className="text-gray-500 flex items-center space-x-2">
@@ -103,28 +142,29 @@ const CallDuration = () => {
           <ResponsiveContainer width="100%" height="100%">
             <BarChart 
               data={data} 
-              margin={{ bottom: 20, top: 20, right: 40 }}
+              margin={getChartMargins()}
               layout="vertical"
             >
               <XAxis 
                 type="number"
                 axisLine={false}
                 tickLine={false}
-                tick={{ fill: "#6b7280", fontSize: 12 }}
+                tick={{ fill: "#6b7280", fontSize: getFontSizes().axis }}
               />
               <YAxis 
                 type="category"
                 dataKey="name"
                 axisLine={false}
                 tickLine={false}
-                tick={{ fill: "#6b7280", fontSize: 12 }}
+                tick={{ fill: "#6b7280", fontSize: getFontSizes().axis }}
+                width={isMobile ? 50 : isTablet ? 60 : 70}
               />
-              <Bar dataKey="calls" radius={[0, 4, 4, 0]}>
+              <Bar dataKey="calls" radius={[0, isMobile ? 2 : 4, isMobile ? 2 : 4, 0]}>
                 <LabelList 
                   dataKey="calls" 
                   position="right" 
                   style={{ 
-                    fontSize: '12px', 
+                    fontSize: `${getFontSizes().label}px`, 
                     fill: '#374151', 
                     fontWeight: 'bold' 
                   }}

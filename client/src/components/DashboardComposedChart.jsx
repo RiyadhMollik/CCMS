@@ -102,51 +102,55 @@ const DashboardComposedChart = () => {
 
   if (loading) {
     return (
-      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-6">
+      <div className="bg-white rounded-xl p-4 md:p-6 shadow-sm border border-gray-100 mb-6">
         <div className="animate-pulse">
-          <div className="flex justify-between items-center mb-6">
-            <div>
-              <div className="h-6 bg-gray-200 rounded w-48 mb-2"></div>
-              <div className="h-4 bg-gray-200 rounded w-64"></div>
+          <div className="flex justify-between items-start space-x-3 mb-4 md:mb-6">
+            <div className="flex-1 min-w-0">
+              <div className="h-5 md:h-6 bg-gray-200 rounded w-40 md:w-48 mb-2"></div>
+              <div className="h-3 md:h-4 bg-gray-200 rounded w-48 md:w-64"></div>
             </div>
-            <div className="text-right">
-              <div className="h-8 bg-gray-200 rounded w-16 mb-1"></div>
-              <div className="h-3 bg-gray-200 rounded w-20"></div>
+            <div className="text-right flex-shrink-0">
+              <div className="h-6 md:h-8 bg-gray-200 rounded w-12 md:w-16 mb-1"></div>
+              <div className="h-3 bg-gray-200 rounded w-16 md:w-20"></div>
             </div>
           </div>
-          <div className="w-full h-80 bg-gray-200 rounded"></div>
+          <div className="w-full h-60 md:h-80 bg-gray-200 rounded"></div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-6">
+    <div className="bg-white rounded-xl p-4 md:p-6 shadow-sm border border-gray-100 mb-6">
       {/* Chart Header */}
-      <div className="mb-6">
-        <div className="flex justify-between items-center mb-2">
-          <h3 className="text-xl font-semibold text-gray-900">
-            Monthly Call Volume
-          </h3>
-          <div className="text-right">
-            <div className="text-2xl font-bold text-emerald-600">{formatNumber(totalCalls)}</div>
-            <div className="text-xs text-gray-500">Total Calls</div>
+      <div className="mb-4 md:mb-6">
+        <div className="flex justify-between items-start space-x-3 mb-2">
+          <div className="flex-1 min-w-0">
+            <h3 className="text-base sm:text-lg md:text-xl font-semibold text-gray-900 leading-tight">
+              Monthly Call Volume
+            </h3>
+            <p className="text-gray-600 text-xs md:text-sm mt-1">
+              Last 12 months call volume trends with bar and line visualization
+            </p>
+          </div>
+          <div className="text-right flex-shrink-0">
+            <div className="text-lg sm:text-xl md:text-2xl font-bold text-emerald-600 whitespace-nowrap">
+              {formatNumber(totalCalls)}
+            </div>
+            <div className="text-xs text-gray-500 whitespace-nowrap">Total Calls</div>
           </div>
         </div>
-        <p className="text-gray-600 text-sm">
-          Last 12 months call volume trends with bar and line visualization
-        </p>
       </div>
 
       {/* Chart Container */}
-      <div className="w-full" style={{ height: "350px" }}>
+      <div className="w-full" style={{ height: "280px" }}>
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart
             data={data}
             margin={{
-              top: 20,
-              right: 30,
-              left: 20,
+              top: 10,
+              right: 15,
+              left: 10,
               bottom: 20,
             }}
           >
@@ -155,15 +159,20 @@ const DashboardComposedChart = () => {
               dataKey="name"
               axisLine={false}
               tickLine={false}
-              tick={{ fill: "#6b7280", fontSize: 12 }}
+              tick={{ fill: "#6b7280", fontSize: 10 }}
+              interval="preserveStartEnd"
             />
             <YAxis
               axisLine={false}
               tickLine={false}
-              tick={{ fill: "#6b7280", fontSize: 12 }}
+              tick={{ fill: "#6b7280", fontSize: 10 }}
+              width={40}
             />
             <Tooltip content={<CustomTooltip />} />
-            <Legend />
+            <Legend 
+              wrapperStyle={{ fontSize: '12px' }}
+              iconSize={12}
+            />
 
             {/* Gradient definitions */}
             <defs>
@@ -185,8 +194,8 @@ const DashboardComposedChart = () => {
               fill="#a7f3d0"
               name="Call Volume"
               opacity={0.9}
-              radius={[25, 25, 25, 25]}
-              maxBarSize={80}
+              radius={[15, 15, 15, 15]}
+              maxBarSize={60}
             />
 
             {/* Line chart for satisfaction */}
@@ -194,9 +203,9 @@ const DashboardComposedChart = () => {
               type="monotone"
               dataKey="satisfaction"
               stroke="#059669"
-              strokeWidth={3}
-              dot={{ fill: "#059669", strokeWidth: 2, r: 6 }}
-              activeDot={{ r: 8, stroke: "#059669", strokeWidth: 2 }}
+              strokeWidth={2}
+              dot={{ fill: "#059669", strokeWidth: 2, r: 4 }}
+              activeDot={{ r: 6, stroke: "#059669", strokeWidth: 2 }}
               name="Call Trend"
             />
           </ComposedChart>
