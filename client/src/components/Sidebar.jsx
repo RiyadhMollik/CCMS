@@ -2,21 +2,12 @@ import React, { useState, useContext } from "react";
 import { NavLink } from "react-router";
 import {
   HomeIcon,
-  ClipboardDocumentListIcon,
-  PaperAirplaneIcon,
-  BanknotesIcon,
-  BeakerIcon,
-  ChatBubbleLeftRightIcon,
   InformationCircleIcon,
-  Cog6ToothIcon,
-  UserCircleIcon,
   ArrowRightOnRectangleIcon,
-  ChevronDownIcon,
-  ChevronRightIcon,
-  ChevronLeftIcon,
   ChevronDoubleLeftIcon,
   ChevronDoubleRightIcon,
-} from "@heroicons/react/24/outline"; // Outline icons
+} from "@heroicons/react/24/outline";
+import { IoAnalyticsSharp } from "react-icons/io5";
 import logo from "/logo.png";
 import useLogout from "./Hook/useLogout";
 import { AuthContext } from "./context/AuthProvider";
@@ -108,7 +99,7 @@ const Sidebar = () => {
           className={`flex items-center ${isCollapsed ? "justify-center" : ""}`}
           title={isCollapsed ? "Data Analytics" : ""}
         >
-          <InformationCircleIcon
+          <IoAnalyticsSharp
             className={`w-5 h-5 ${!isCollapsed ? "mr-2" : ""}`}
           />
           {!isCollapsed && "Data Analytics"}

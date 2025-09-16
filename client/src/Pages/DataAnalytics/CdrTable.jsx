@@ -288,36 +288,36 @@ const CdrTable = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="w-full mx-auto bg-white rounded-2xl shadow-lg p-6 md:p-8">
+    <div className="min-h-screen bg-gray-50 p-2 sm:p-4 lg:p-6">
+      <div className="w-full bg-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 md:p-8">
         {/* Header Section with Better Visual Hierarchy */}
-        <div className="border-b border-gray-100 pb-6 mb-8">
-          <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+        <div className="border-b border-gray-100 pb-4 sm:pb-6 mb-6 sm:mb-8">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-6">
             <div className="flex-1">
-              <div className="flex items-center gap-3">
-                <div className="w-1 h-8 bg-green-600 rounded-full"></div>
-                <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="w-1 h-6 sm:h-8 bg-green-600 rounded-full"></div>
+                <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">
                   Call Data Records
                 </h1>
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-3">
+            <div className="flex flex-row gap-2 sm:gap-3 w-full sm:w-auto">
               <button
                 onClick={handleExportCSV}
-                className="flex items-center gap-2 px-4 py-3 bg-green-600 text-white rounded-xl font-medium shadow-md hover:bg-green-700 hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200"
+                className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-3 bg-green-600 text-white rounded-lg sm:rounded-xl font-medium shadow-md hover:bg-green-700 hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 text-sm sm:text-base"
                 title="Export to CSV"
               >
-                <FaFileCsv size={18} />
-                <span>Export CSV</span>
+                <FaFileCsv size={16} className="sm:w-[18px] sm:h-[18px]" />
+                Export CSV
               </button>
               <button
                 onClick={handleExportPDF}
-                className="flex items-center gap-2 px-4 py-3 bg-red-600 text-white rounded-xl font-medium shadow-md hover:bg-red-700 hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200"
+                className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-3 bg-red-600 text-white rounded-lg sm:rounded-xl font-medium shadow-md hover:bg-red-700 hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 text-sm sm:text-base"
                 title="Export to PDF"
               >
-                <FaFilePdf size={18} />
-                <span>Export PDF</span>
+                <FaFilePdf size={16} className="sm:w-[18px] sm:h-[18px]" />
+                Export PDF
               </button>
             </div>
           </div>
@@ -336,7 +336,7 @@ const CdrTable = () => {
           <div className="bg-gray-50 rounded-xl p-4">
             <form onSubmit={handleFilterSubmit} className="space-y-3">
               {/* First Row - Date Range and Primary Filters */}
-              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-2 sm:gap-3">
                 <div className="relative">
                   <input
                     type="date"
@@ -462,34 +462,50 @@ const CdrTable = () => {
 
         {/* Table */}
         {loading ? (
-          <div className="flex justify-center items-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
-            <span className="ml-3 text-gray-600">Loading call data...</span>
+          <div className="flex justify-center items-center py-8 sm:py-12">
+            <div className="animate-spin rounded-full h-8 w-8 sm:h-12 sm:w-12 border-b-2 border-green-600"></div>
+            <span className="ml-3 text-gray-600 text-sm sm:text-base">
+              Loading call data...
+            </span>
           </div>
         ) : cdrData.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="text-gray-500 text-lg mb-2">No call data found</div>
+          <div className="text-center py-8 sm:py-12">
+            <div className="text-gray-500 text-base sm:text-lg mb-2">
+              No call data found
+            </div>
             <div className="text-gray-400 text-sm">
               Try adjusting your filters or check back later
             </div>
           </div>
         ) : (
           <div
-            className="overflow-x-auto rounded-lg border border-gray-200"
+            className="overflow-x-auto rounded-lg border border-gray-200 -mx-1 sm:mx-0"
             ref={tableRef}
           >
-            <table className="table table-zebra w-full">
+            <table className="table table-zebra w-full min-w-[800px]">
               <thead className="bg-green-50 border-b border-gray-200">
-                <tr className="text-sm md:text-base font-semibold text-gray-700">
-                  <th className="py-4 px-6">Date</th>
-                  <th className="py-4 px-4">Source</th>
-                  <th className="py-4 px-4">Destination</th>
-                  <th className="py-4 px-4">Src. Channel</th>
-                  <th className="py-4 px-4">Dst. Channel</th>
-                  <th className="py-4 px-4 text-center">Status</th>
-                  <th className="py-4 px-4 text-center">Duration</th>
-                  <th className="py-4 px-4 text-center">Location</th>
-                  <th className="py-4 px-4 text-center">Problem</th>
+                <tr className="text-xs sm:text-sm md:text-base font-semibold text-gray-700">
+                  <th className="py-3 sm:py-4 px-3 sm:px-6">Date</th>
+                  <th className="py-3 sm:py-4 px-2 sm:px-4">Source</th>
+                  <th className="py-3 sm:py-4 px-2 sm:px-4">Destination</th>
+                  <th className="py-3 sm:py-4 px-2 sm:px-4 hidden sm:table-cell">
+                    Src. Channel
+                  </th>
+                  <th className="py-3 sm:py-4 px-2 sm:px-4 hidden sm:table-cell">
+                    Dst. Channel
+                  </th>
+                  <th className="py-3 sm:py-4 px-2 sm:px-4 text-center">
+                    Status
+                  </th>
+                  <th className="py-3 sm:py-4 px-2 sm:px-4 text-center">
+                    Duration
+                  </th>
+                  <th className="py-3 sm:py-4 px-2 sm:px-4 text-center hidden md:table-cell">
+                    Location
+                  </th>
+                  <th className="py-3 sm:py-4 px-2 sm:px-4 text-center hidden md:table-cell">
+                    Problem
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -498,9 +514,9 @@ const CdrTable = () => {
                     key={row.id}
                     className="bg-white hover:bg-green-50 transition-colors duration-200 ease-in-out"
                   >
-                    <td className="py-4 px-6 text-gray-800 font-medium">
+                    <td className="py-3 sm:py-4 px-3 sm:px-6 text-gray-800 font-medium">
                       <div className="flex flex-col">
-                        <span className="text-sm font-semibold text-gray-900">
+                        <span className="text-xs sm:text-sm font-semibold text-gray-900">
                           {new Date(row.date).toLocaleDateString("en-GB", {
                             year: "numeric",
                             month: "2-digit",
@@ -516,19 +532,19 @@ const CdrTable = () => {
                         </span>
                       </div>
                     </td>
-                    <td className="py-4 px-4 text-gray-700">
+                    <td className="py-3 sm:py-4 px-2 sm:px-4 text-gray-700 text-xs sm:text-sm">
                       {cleanSource(row.source)}
                     </td>
-                    <td className="py-4 px-4 text-gray-700">
+                    <td className="py-3 sm:py-4 px-2 sm:px-4 text-gray-700 text-xs sm:text-sm">
                       {row.destination}
                     </td>
-                    <td className="py-4 px-4 text-gray-700">
+                    <td className="py-3 sm:py-4 px-2 sm:px-4 text-gray-700 text-xs sm:text-sm hidden sm:table-cell">
                       {row.src_channel}
                     </td>
-                    <td className="py-4 px-4 text-gray-700">
+                    <td className="py-3 sm:py-4 px-2 sm:px-4 text-gray-700 text-xs sm:text-sm hidden sm:table-cell">
                       {row.dst_channel}
                     </td>
-                    <td className="py-4 px-4 text-gray-700 text-center">
+                    <td className="py-3 sm:py-4 px-2 sm:px-4 text-gray-700 text-center">
                       <span
                         className={`inline-flex items-center rounded-full text-xs px-2 py-1 font-medium ${
                           (row.status || "").toLowerCase() === "answered"
@@ -543,16 +559,20 @@ const CdrTable = () => {
                         {formatStatus(row.status)}
                       </span>
                     </td>
-                    <td className="py-4 px-4 text-gray-700 text-center">
-                      <span className="inline-flex items-center text-sm font-medium px-2 py-1 rounded-full">
+                    <td className="py-3 sm:py-4 px-2 sm:px-4 text-gray-700 text-center">
+                      <span className="inline-flex items-center text-xs sm:text-sm font-medium px-2 py-1 rounded-full">
                         {row.duration}
                       </span>
                     </td>
-                    <td className="py-4 px-4 text-center">
-                      <span className="text-gray-500 text-sm">N/A</span>
+                    <td className="py-3 sm:py-4 px-2 sm:px-4 text-center hidden md:table-cell">
+                      <span className="text-gray-500 text-xs sm:text-sm">
+                        N/A
+                      </span>
                     </td>
-                    <td className="py-4 px-4 text-center">
-                      <span className="text-gray-500 text-sm">N/A</span>
+                    <td className="py-3 sm:py-4 px-2 sm:px-4 text-center hidden md:table-cell">
+                      <span className="text-gray-500 text-xs sm:text-sm">
+                        N/A
+                      </span>
                     </td>
                   </tr>
                 ))}
@@ -562,57 +582,65 @@ const CdrTable = () => {
         )}
 
         {/* Pagination */}
-        <div className="flex flex-col sm:flex-row justify-center items-center mt-8 gap-4">
-          <div className="flex items-center space-x-2">
+        <div className="flex flex-col sm:flex-row justify-center items-center mt-6 sm:mt-8 gap-3 sm:gap-4">
+          <div className="flex items-center space-x-1 sm:space-x-2">
             <button
               aria-label="First Page"
-              className="p-3 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 shadow-sm"
+              className="p-2 sm:p-3 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 shadow-sm"
               onClick={() => handlePageChange(1)}
               disabled={pagination.page <= 1}
             >
-              <FaAngleDoubleLeft size={16} className="text-gray-600" />
+              <FaAngleDoubleLeft
+                size={14}
+                className="sm:w-4 sm:h-4 text-gray-600"
+              />
             </button>
             <button
               aria-label="Previous Page"
-              className="p-3 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 shadow-sm"
+              className="p-2 sm:p-3 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 shadow-sm"
               onClick={() => handlePageChange(pagination.page - 1)}
               disabled={pagination.page <= 1}
             >
-              <FaAngleLeft size={16} className="text-gray-600" />
+              <FaAngleLeft size={14} className="sm:w-4 sm:h-4 text-gray-600" />
             </button>
           </div>
 
-          <div className="flex items-center space-x-3 bg-white border border-gray-200 rounded-lg px-4 py-2 shadow-sm">
-            <span className="text-gray-600 font-medium">Page</span>
+          <div className="flex items-center space-x-2 sm:space-x-3 bg-white border border-gray-200 rounded-lg px-3 sm:px-4 py-2 shadow-sm">
+            <span className="text-gray-600 font-medium text-xs sm:text-sm">
+              Page
+            </span>
             <input
               type="number"
-              className="w-16 text-center p-2 border border-gray-200 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none text-gray-700 font-medium"
+              className="w-12 sm:w-16 text-center p-1 sm:p-2 border border-gray-200 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none text-gray-700 font-medium text-xs sm:text-sm"
               value={pagination.page}
               min={1}
               max={pagination.totalPages}
               onChange={(e) => handlePageChange(Number(e.target.value))}
             />
-            <span className="text-gray-600 font-medium">
+            <span className="text-gray-600 font-medium text-xs sm:text-sm">
               of {pagination.totalPages}
             </span>
           </div>
 
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-1 sm:space-x-2">
             <button
               aria-label="Next Page"
-              className="p-3 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 shadow-sm"
+              className="p-2 sm:p-3 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 shadow-sm"
               onClick={() => handlePageChange(pagination.page + 1)}
               disabled={pagination.page >= pagination.totalPages}
             >
-              <FaAngleRight size={16} className="text-gray-600" />
+              <FaAngleRight size={14} className="sm:w-4 sm:h-4 text-gray-600" />
             </button>
             <button
               aria-label="Last Page"
-              className="p-3 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 shadow-sm"
+              className="p-2 sm:p-3 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 shadow-sm"
               onClick={() => handlePageChange(pagination.totalPages)}
               disabled={pagination.page >= pagination.totalPages}
             >
-              <FaAngleDoubleRight size={16} className="text-gray-600" />
+              <FaAngleDoubleRight
+                size={14}
+                className="sm:w-4 sm:h-4 text-gray-600"
+              />
             </button>
           </div>
         </div>
