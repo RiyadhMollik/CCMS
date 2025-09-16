@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router";
 
 const DashboardStats = () => {
+  const navigate = useNavigate();
   const [isVisible, setIsVisible] = useState(false);
   const [loading, setLoading] = useState(true);
   const [apiData, setApiData] = useState({
@@ -12,6 +14,12 @@ const DashboardStats = () => {
     successRate: "0%",
     totalDuration: 0,
   });
+
+  // Handle card click to navigate to data analytics page
+  const handleCardClick = (cardType) => {
+    // Navigate to data analytics page
+    navigate('/data-analytics');
+  };
 
   // Fetch data from API
   useEffect(() => {
@@ -188,6 +196,7 @@ const DashboardStats = () => {
       {statsData.map((stat, index) => (
         <div
           key={stat.id}
+          onClick={() => handleCardClick(stat.title)}
           className={`${
             stat.bgColor
           } rounded-xl p-4 shadow-sm hover:shadow-xl hover:scale-105 transition-all duration-300 border border-gray-100 cursor-pointer group transform relative overflow-hidden ${
