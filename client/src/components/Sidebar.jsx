@@ -61,7 +61,9 @@ const Sidebar = () => {
             <div className="flex flex-col items-center flex-1">
               <img src={logo} className="w-16" alt="Logo" />
               <h1 className="font-bold text-sm mt-4">CCMS</h1>
-              <p className="text-xs text-center my-2">Call Center Management System</p>
+              <p className="text-xs text-center my-2">
+                Call Center Management System
+              </p>
             </div>
             <button
               onClick={toggleCollapse}
@@ -100,11 +102,11 @@ const Sidebar = () => {
         </NavLink>
       </li>
 
-       <li className="text-base font-medium">
+      <li className="text-base font-medium">
         <NavLink
-          to="/about"
+          to="/data-analytics"
           className={`flex items-center ${isCollapsed ? "justify-center" : ""}`}
-          title={isCollapsed ? "About" : ""}
+          title={isCollapsed ? "Data Analytics" : ""}
         >
           <InformationCircleIcon
             className={`w-5 h-5 ${!isCollapsed ? "mr-2" : ""}`}

@@ -5,6 +5,7 @@ import Login from "../Pages/Login/Login";
 // import DashboardHome from "../Pages/DashboardHome/DashboardHome";
 // import AWS from "../Pages/AWS/AWS";
 import VcSms from "../Pages/VcSms/VcSms";
+import CdrTable from "../Pages/DataAnalytics/CdrTable";
 
 const router = createBrowserRouter([
   {
@@ -18,6 +19,10 @@ const router = createBrowserRouter([
       {
         index: true,
         Component: VcSms,
+      },
+      {
+        path: "/data-analytics",
+        Component: CdrTable,
       },
     ],
   },
