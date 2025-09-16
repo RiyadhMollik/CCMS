@@ -44,14 +44,13 @@ const DashboardLayout = () => {
             </div>
           </div>
           <div className="flex items-center gap-4 relative">
-            {/* <p className="font-medium">data 1</p> */}
-            <div>
-              <img
-                src={logo}
-                alt="Profile"
-                className="w-12 h-12 rounded-full border"
-              />
-            </div>
+            <a
+              href="tel:09644300300"
+              className="font-semibold text-green-800 bg-white border border-green-400 px-3 py-1.5 rounded-md shadow-sm hover:bg-green-50 hover:border-green-600 focus:ring-2 focus:ring-green-300 transition-all duration-150 outline-none cursor-pointer flex items-center gap-2"
+              title="Call Helpline"
+            >
+              Helpline: 09644300300
+            </a>
           </div>
         </div>
         {/* Main Content */}
