@@ -38,7 +38,7 @@ const Sidebar = () => {
     <ul
       className={`menu bg-emerald-900 text-white rounded-r-2xl min-h-full ${
         isCollapsed ? "w-18" : "w-64"
-      } space-y-3 overflow-y-auto scrollbar-hide transition-all duration-300`}
+      } space-y-3 overflow-y-auto scrollbar-hide transition-all duration-300 flex flex-col`}
     >
       {/* Header Section - Logo and Collapse Button */}
       <div
@@ -134,6 +134,23 @@ const Sidebar = () => {
           {!isCollapsed && "Log out"}
         </button>
       </li>
+
+      {/* Farmer Image Section */}
+      {!isCollapsed && (
+        <li className="mt-6 mb-6">
+          <div className="relative">
+            <div className="absolute inset-0 bg-gradient-to-t from-emerald-700/50 to-transparent rounded-2xl"></div>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent rounded-2xl"></div>
+            <div className="relative overflow-hidden rounded-2xl">
+              <img
+                src="/farmer.png"
+                alt="Farmer"
+                className="w-full h-72 object-cover"
+              />
+            </div>
+          </div>
+        </li>
+      )}
     </ul>
   );
 };
