@@ -6,6 +6,7 @@ import DashboardGauges from "../../components/DashboardGauges";
 import CustomShapeBarChart from "../../components/CustomShapeBarChart";
 import CallStatus from "../../components/CallStatus";
 import CallDuration from "../../components/CallDuration";
+import CallHistoryTable from "../../components/CallHistoryTable";
 
 const DashboardHome = () => {
   return (
@@ -38,6 +39,9 @@ const DashboardHome = () => {
         <div>
           <CallDuration />
         </div>
+      </div>
+      <div>
+        <CallHistoryTable />
       </div>
     </div>
   );
