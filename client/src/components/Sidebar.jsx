@@ -151,6 +151,20 @@ const Sidebar = () => {
           </div>
         </li>
       )}
+      
+      {/* Copyright Notice */}
+      {!isCollapsed && (
+        <li className="mt-auto mb-4">
+          <div className="flex flex-col items-center px-4">
+            <p className="text-xs text-emerald-100 opacity-75">
+              © 2025 Agromet Lab
+            </p>
+            <p className="text-xs text-emerald-200 opacity-60 mt-1">
+              All rights reserved
+            </p>
+          </div>
+        </li>
+      )}
     </ul>
   );
 };
