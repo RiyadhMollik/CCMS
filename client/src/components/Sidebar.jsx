@@ -152,7 +152,6 @@ const Sidebar = () => {
         </li>
       )}
       
-      {/* Copyright Notice */}
       {!isCollapsed && (
         <li className="mt-auto mb-4">
           <div className="flex flex-col items-center px-4">

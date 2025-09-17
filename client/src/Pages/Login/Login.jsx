@@ -8,7 +8,7 @@ function Login() {
   const [userLocation, setUserLocation] = useState(null);
   const [locationPermission, setLocationPermission] = useState(false);
 
-  const API_URL = "https://iinms.brri.gov.bd/api/users/login";
+  const API_URL = "https://iinms.brri.gov.bd/api/users/ccms-login";
 
   // Get user location
   const getCurrentLocation = () => {
