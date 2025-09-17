@@ -31,8 +31,8 @@ const CdrTable = () => {
     { name: "Date", visible: true },
     { name: "Source", visible: true },
     { name: "Destination", visible: true },
-    { name: "Src. Channel", visible: true },
-    { name: "Dst. Channel", visible: true },
+    // { name: "Src. Channel", visible: true },
+    // { name: "Dst. Channel", visible: true },
     { name: "Status", visible: true },
     { name: "Duration", visible: true },
     { name: "Location", visible: true },
@@ -43,8 +43,8 @@ const CdrTable = () => {
     Date: "date",
     Source: "source",
     Destination: "destination",
-    "Src. Channel": "src_channel",
-    "Dst. Channel": "dst_channel",
+    // "Src. Channel": "src_channel",
+    // "Dst. Channel": "dst_channel",
     Status: "status",
     Duration: "duration",
     Location: "name",
@@ -67,6 +67,21 @@ const CdrTable = () => {
       console.error("Failed to fetch CDR data:", err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleInputChange = async (id, field, value) => {
+    setCdrData((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, [field]: value } : item))
+    );
+    try {
+      await fetch(`https://iinms.brri.gov.bd/api/cdr/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ [field]: value }),
+      });
+    } catch (err) {
+      console.error('Update failed:', err);
     }
   };
 
@@ -127,8 +142,10 @@ const CdrTable = () => {
             });
           } else if (col.name === "Source") {
             rowData[keyAlias] = cleanSource(row[actualKey]);
-          } else if (col.name === "Location" || col.name === "Problem") {
-            rowData[keyAlias] = "N/A";
+          } else if (col.name === "Location") {
+            rowData[keyAlias] = row.name || "";
+          } else if (col.name === "Problem") {
+            rowData[keyAlias] = row.address || "";
           } else {
             rowData[keyAlias] = actualKey ? row[actualKey] || "" : "";
           }
@@ -193,8 +210,10 @@ const CdrTable = () => {
             });
           } else if (col.name === "Source") {
             return cleanSource(row[key]);
-          } else if (col.name === "Location" || col.name === "Problem") {
-            return "N/A";
+          } else if (col.name === "Location") {
+            return row.name || "";
+          } else if (col.name === "Problem") {
+            return row.address || "";
           }
           return key ? row[key] || "" : "";
         })
@@ -488,12 +507,12 @@ const CdrTable = () => {
                   <th className="py-3 sm:py-4 px-3 sm:px-6">Date</th>
                   <th className="py-3 sm:py-4 px-2 sm:px-4">Source</th>
                   <th className="py-3 sm:py-4 px-2 sm:px-4">Destination</th>
-                  <th className="py-3 sm:py-4 px-2 sm:px-4 hidden sm:table-cell">
+                  {/* <th className="py-3 sm:py-4 px-2 sm:px-4 hidden sm:table-cell">
                     Src. Channel
-                  </th>
-                  <th className="py-3 sm:py-4 px-2 sm:px-4 hidden sm:table-cell">
+                  </th> */}
+                  {/* <th className="py-3 sm:py-4 px-2 sm:px-4 hidden sm:table-cell">
                     Dst. Channel
-                  </th>
+                  </th> */}
                   <th className="py-3 sm:py-4 px-2 sm:px-4 text-center">
                     Status
                   </th>
@@ -535,18 +554,18 @@ const CdrTable = () => {
                     <td className="py-3 sm:py-4 px-2 sm:px-4 text-gray-700 text-xs sm:text-sm">
                       {cleanSource(row.source)}
                     </td>
-                    <td className="py-3 sm:py-4 px-2 sm:px-4 text-gray-700 text-xs sm:text-sm">
+                    <td className="py-3 sm:py-4 px-2 sm:px-4 text-gray-700 text-xs sm:text-sm text-center">
                       {row.destination}
                     </td>
-                    <td className="py-3 sm:py-4 px-2 sm:px-4 text-gray-700 text-xs sm:text-sm hidden sm:table-cell">
+                    {/* <td className="py-3 sm:py-4 px-2 sm:px-4 text-gray-700 text-xs sm:text-sm hidden sm:table-cell">
                       {row.src_channel}
-                    </td>
-                    <td className="py-3 sm:py-4 px-2 sm:px-4 text-gray-700 text-xs sm:text-sm hidden sm:table-cell">
+                    </td> */}
+                    {/* <td className="py-3 sm:py-4 px-2 sm:px-4 text-gray-700 text-xs sm:text-sm hidden sm:table-cell">
                       {row.dst_channel}
-                    </td>
+                    </td> */}
                     <td className="py-3 sm:py-4 px-2 sm:px-4 text-gray-700 text-center">
                       <span
-                        className={`inline-flex items-center rounded-full text-xs px-2 py-1 font-medium ${
+                        className={`inline-flex items-center rounded-full text-xs px-2 py-1 font-medium whitespace-nowrap ${
                           (row.status || "").toLowerCase() === "answered"
                             ? "bg-green-800 text-white"
                             : (row.status || "").toLowerCase() === "no answer"
@@ -565,14 +584,22 @@ const CdrTable = () => {
                       </span>
                     </td>
                     <td className="py-3 sm:py-4 px-2 sm:px-4 text-center hidden md:table-cell">
-                      <span className="text-gray-500 text-xs sm:text-sm">
-                        N/A
-                      </span>
+                      <input
+                        type="text"
+                        className="w-full p-1.5 sm:p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition text-xs sm:text-sm"
+                        value={row.name || ""}
+                        onChange={(e) => handleInputChange(row.id, "name", e.target.value)}
+                        placeholder="Location"
+                      />
                     </td>
                     <td className="py-3 sm:py-4 px-2 sm:px-4 text-center hidden md:table-cell">
-                      <span className="text-gray-500 text-xs sm:text-sm">
-                        N/A
-                      </span>
+                      <input
+                        type="text"
+                        className="w-full p-1.5 sm:p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition text-xs sm:text-sm"
+                        value={row.address || ""}
+                        onChange={(e) => handleInputChange(row.id, "address", e.target.value)}
+                        placeholder="Problem"
+                      />
                     </td>
                   </tr>
                 ))}

@@ -77,10 +77,47 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
     return fullData.filter((point) => point[0] >= startDate.getTime());
   };
 
+  // Filter data to show every 8 hours (skip 7 hours each time)
+  const filterBy8Hours = (data) => {
+    if (data.length === 0) return data;
+    
+    // Sort data by timestamp to ensure chronological order
+    const sortedData = [...data].sort((a, b) => a[0] - b[0]);
+    
+    // Filter to show data at 8-hour intervals: 00:00, 08:00, 16:00
+    const filtered = [];
+    const seenIntervals = new Set();
+    
+    sortedData.forEach(([timestamp, value]) => {
+      const date = new Date(timestamp);
+      const hour = date.getHours();
+      
+      // Create a unique key for each 8-hour interval
+      // This ensures we only take one reading per 8-hour slot per day
+      const dayStart = new Date(date);
+      dayStart.setHours(0, 0, 0, 0);
+      
+      // Determine which 8-hour slot this falls into (0-7 = slot 0, 8-15 = slot 1, 16-23 = slot 2)
+      const slot = Math.floor(hour / 8);
+      const intervalKey = `${dayStart.getTime()}_${slot}`;
+      
+      // Only include if we haven't seen this interval yet
+      if (!seenIntervals.has(intervalKey)) {
+        filtered.push([timestamp, value]);
+        seenIntervals.add(intervalKey);
+      }
+    });
+    
+    console.log(`8-hour filtering: ${data.length} points -> ${filtered.length} points`);
+    return filtered;
+  };
+
   // Handle time range change
   const handleTimeRangeChange = (range) => {
     setTimeRange(range);
-    setFilteredData(filterDataByTimeRange(data, range));
+    const timeRangeFiltered = filterDataByTimeRange(data, range);
+    const hourlyFiltered = filterBy8Hours(timeRangeFiltered);
+    setFilteredData(hourlyFiltered);
   };
 
   // Fetch data for specific station and parameter
@@ -116,7 +153,9 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
 
       console.log(`Processed chart data for ${measure}:`, chartData);
       setData(chartData);
-      setFilteredData(filterDataByTimeRange(chartData, timeRange));
+      const timeRangeFiltered = filterDataByTimeRange(chartData, timeRange);
+      const hourlyFiltered = filterBy8Hours(timeRangeFiltered);
+      setFilteredData(hourlyFiltered);
 
       if (chartData.length === 0) {
         setError("No valid data available for this parameter");
@@ -139,7 +178,9 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
   // Update filtered data when time range changes
   useEffect(() => {
     if (data.length > 0) {
-      setFilteredData(filterDataByTimeRange(data, timeRange));
+      const timeRangeFiltered = filterDataByTimeRange(data, timeRange);
+      const hourlyFiltered = filterBy8Hours(timeRangeFiltered);
+      setFilteredData(hourlyFiltered);
     }
   }, [data, timeRange]);
 
@@ -160,14 +201,14 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
       dailyGroups[dateKey].push(value);
     });
 
-    // Calculate daily statistics (average, min, max for temperature)
+    // Calculate daily statistics (average, min, max for temperature; total for rain)
     const isTemperature = parameter === 'Air Temperature';
+    const isRainfall = parameter === 'Rain Gauge';
     
     const dailyAverages = Object.entries(dailyGroups)
       .map(([date, values]) => {
-        const average = values.reduce((sum, val) => sum + val, 0) / values.length;
-        
         if (isTemperature) {
+          const average = values.reduce((sum, val) => sum + val, 0) / values.length;
           const min = Math.min(...values);
           const max = Math.max(...values);
           return {
@@ -177,7 +218,17 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
             max: parseFloat(max.toFixed(2)),
             count: values.length
           };
+        } else if (isRainfall) {
+          // For rainfall, sum all values to get total daily rainfall
+          const total = values.reduce((sum, val) => sum + val, 0);
+          return {
+            date,
+            total: parseFloat(total.toFixed(2)),
+            count: values.length
+          };
         } else {
+          // For other parameters, calculate average
+          const average = values.reduce((sum, val) => sum + val, 0) / values.length;
           return {
             date,
             average: parseFloat(average.toFixed(2)),
@@ -296,7 +347,7 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
         style: { fontSize: "16px", fontWeight: "bold", color: "#374151" },
       },
       subtitle: {
-        text: unit ? `Unit: ${unit}` : "",
+        text: unit ? `Unit: ${unit} • 8-hour intervals` : "8-hour intervals",
         align: "left",
         style: { color: "#6B7280", fontSize: "12px" },
       },
@@ -357,7 +408,7 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
             <span className="text-xl sm:text-2xl flex-shrink-0">{icon}</span>
             <div className="min-w-0 flex-1">
               <h3 className="font-bold text-gray-800 text-sm sm:text-base truncate">{title}</h3>
-              <p className="text-xs sm:text-sm text-gray-500">{unit}</p>
+              <p className="text-xs sm:text-sm text-gray-500">{unit} • 8-hour intervals</p>
             </div>
           </div>
           {data.length > 0 && (
@@ -409,7 +460,7 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
             {/* Chart Section - Full width on mobile, 60% on desktop */}
             <div className="lg:col-span-7">
               <div className="w-full bg-white rounded-lg border border-gray-100 overflow-hidden">
-                <div className="h-64 h-96 w-full">
+                <div className="h-96 w-full">
                   <HighchartsReact
                     highcharts={Highcharts}
                     options={getHighchartsOptions()}
@@ -423,7 +474,9 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
               <div className="bg-white rounded-lg border border-gray-100 p-3 sm:p-4 min-h-[16rem] sm:min-h-[20rem] lg:h-96 flex flex-col">
                 <h4 className="text-sm sm:text-base font-semibold text-gray-700 mb-3 sm:mb-4 flex items-center gap-2 flex-shrink-0">
                   📊 <span className="hidden sm:inline">Recent 7 Days</span>
-                  <span className="sm:hidden">7 Days</span> {parameter === 'Air Temperature' ? 'Temperature Range' : 'Average'}
+                  <span className="sm:hidden">7 Days</span> 
+                  {parameter === 'Air Temperature' ? 'Temperature Range' : 
+                   parameter === 'Rain Gauge' ? 'Total Rainfall' : 'Average'}
                 </h4>
                 <div className="overflow-x-auto flex-1">
                   <table className="table table-zebra w-full">
@@ -437,7 +490,9 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
                             <th className="text-xs sm:text-sm font-semibold text-gray-600 px-1 sm:px-2">Avg {unit}</th>
                           </>
                         ) : (
-                          <th className="text-xs sm:text-sm font-semibold text-gray-600 px-2 sm:px-3">Avg {unit}</th>
+                          <th className="text-xs sm:text-sm font-semibold text-gray-600 px-2 sm:px-3">
+                            {parameter === 'Rain Gauge' ? 'Total' : 'Avg'} {unit}
+                          </th>
                         )}
                       </tr>
                     </thead>
@@ -469,17 +524,15 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
                               </td>
                               <td className="text-xs sm:text-sm font-medium text-gray-800 px-1 sm:px-2">
                                 {item.average}
-                                <span className="hidden sm:inline text-gray-500 ml-1 text-xs">
-                                  ({item.count})
-                                </span>
                               </td>
                             </>
+                          ) : parameter === 'Rain Gauge' ? (
+                            <td className="text-xs sm:text-sm font-medium text-gray-800 px-2 sm:px-3">
+                              {item.total}
+                            </td>
                           ) : (
                             <td className="text-xs sm:text-sm font-medium text-gray-800 px-2 sm:px-3">
                               {item.average}
-                              <span className="hidden sm:inline text-gray-500 ml-1 text-xs">
-                                ({item.count})
-                              </span>
                             </td>
                           )}
                         </tr>
@@ -508,7 +561,7 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
         {filteredData.length > 0 && (
           <div className="mt-3 text-center">
             <p className="text-xs text-gray-500">
-              Showing {filteredData.length} of {data.length} data points
+              Showing {filteredData.length} of {data.length} data points (8-hour intervals)
             </p>
           </div>
         )}
