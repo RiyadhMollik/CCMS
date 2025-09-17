@@ -88,7 +88,7 @@ const AWS = () => {
 
   return (
     <div className="min-h-screen bg-base-200 p-2 sm:p-4 lg:p-6">
-      <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         {/* Header Section */}
         <div className="text-center mb-4 sm:mb-8 px-2">
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-base-content mb-2 leading-tight">

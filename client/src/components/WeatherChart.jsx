@@ -23,6 +23,12 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
   const [data, setData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [timeRange, setTimeRange] = useState("month");
+  const [showDownloadModal, setShowDownloadModal] = useState(false);
+  const [customDateRange, setCustomDateRange] = useState({
+    startDate: "",
+    endDate: "",
+    enabled: false,
+  });
   const chartRef = useRef(null);
 
   // Create unique ID for this chart instance
@@ -64,8 +70,27 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
   };
 
   // Filter data based on selected time range
-  const filterDataByTimeRange = (fullData, range) => {
-    if (range === "all" || fullData.length === 0) {
+  const filterDataByTimeRange = (fullData, range, customRange = null) => {
+    if (fullData.length === 0) {
+      return fullData;
+    }
+
+    // Handle custom date range
+    if (
+      range === "custom" &&
+      customRange &&
+      customRange.startDate &&
+      customRange.endDate
+    ) {
+      const startTime = new Date(customRange.startDate).getTime();
+      const endTime = new Date(customRange.endDate).setHours(23, 59, 59, 999); // End of selected day
+
+      return fullData.filter(
+        (point) => point[0] >= startTime && point[0] <= endTime
+      );
+    }
+
+    if (range === "all") {
       return fullData;
     }
 
@@ -135,13 +160,40 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
   // Handle time range change
   const handleTimeRangeChange = (range) => {
     setTimeRange(range);
+    setCustomDateRange({ ...customDateRange, enabled: false });
+
     const timeRangeFiltered = filterDataByTimeRange(data, range);
     const hourlyFiltered = filterBy8Hours(timeRangeFiltered);
     setFilteredData(hourlyFiltered);
   };
 
+  // Handle custom date range change
+  const handleCustomDateRangeChange = (field, value) => {
+    const newRange = { ...customDateRange, [field]: value };
+    setCustomDateRange(newRange);
+
+    // If both dates are set, apply the filter
+    if (newRange.startDate && newRange.endDate) {
+      setTimeRange("custom");
+      newRange.enabled = true;
+
+      const timeRangeFiltered = filterDataByTimeRange(data, "custom", newRange);
+      const hourlyFiltered = filterBy8Hours(timeRangeFiltered);
+      setFilteredData(hourlyFiltered);
+    }
+  };
+
+  // Clear custom date range
+  const clearCustomDateRange = () => {
+    setCustomDateRange({ startDate: "", endDate: "", enabled: false });
+    setTimeRange("month");
+    const timeRangeFiltered = filterDataByTimeRange(data, "month");
+    const hourlyFiltered = filterBy8Hours(timeRangeFiltered);
+    setFilteredData(hourlyFiltered);
+  };
+
   // Handle chart download using Highcharts native export or fallback methods
-  const handleDownload = async () => {
+  const handleImageDownload = async () => {
     try {
       // Get time range label for filename
       const timeLabels = {
@@ -149,7 +201,12 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
         week: "1Week",
         month: "1Month",
         "3month": "3Months",
+        "6month": "6Months",
+        "1year": "1Year",
         all: "AllData",
+        custom: customDateRange.enabled
+          ? `${customDateRange.startDate}_to_${customDateRange.endDate}`
+          : "Custom",
       };
 
       const timeLabel = timeLabels[timeRange] || timeRange;
@@ -265,6 +322,101 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
       console.error("Download failed:", error);
       alert("Download failed. Please try again or refresh the page.");
     }
+    setShowDownloadModal(false);
+  };
+
+  // Handle CSV download
+  const handleCSVDownload = () => {
+    try {
+      const timeLabels = {
+        day: "1Day",
+        week: "1Week",
+        month: "1Month",
+        "3month": "3Months",
+        "6month": "6Months",
+        "1year": "1Year",
+        all: "AllData",
+        custom: customDateRange.enabled
+          ? `${customDateRange.startDate}_to_${customDateRange.endDate}`
+          : "Custom",
+      };
+
+      const timeLabel = timeLabels[timeRange] || timeRange;
+      const filename = `${title.replace(/\s+/g, "_")}_${timeLabel}_${
+        new Date().toISOString().split("T")[0]
+      }.csv`;
+
+      // Create CSV content
+      let csvContent = `Date,Time,${title} (${unit || ""})\n`;
+
+      filteredData.forEach(([timestamp, value]) => {
+        const date = new Date(timestamp);
+        const dateStr = date.toLocaleDateString("en-US");
+        const timeStr = date.toLocaleTimeString("en-US");
+        csvContent += `${dateStr},${timeStr},${value}\n`;
+      });
+
+      // Create and download CSV file
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const link = document.createElement("a");
+      link.download = filename;
+      link.href = URL.createObjectURL(blob);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(link.href);
+
+      console.log("CSV download completed");
+    } catch (error) {
+      console.error("CSV download failed:", error);
+      alert("CSV download failed. Please try again.");
+    }
+    setShowDownloadModal(false);
+  };
+
+  // Handle table download (daily averages)
+  const handleTableDownload = () => {
+    try {
+      const filename = `${title.replace(/\s+/g, "_")}_DailyAverages_${
+        new Date().toISOString().split("T")[0]
+      }.csv`;
+
+      const dailyData = getDailyAverages();
+
+      let csvContent;
+      if (parameter === "Air Temperature") {
+        csvContent = `Date,Min ${unit},Max ${unit},Avg ${unit}\n`;
+        dailyData.forEach((item) => {
+          csvContent += `${item.date},${item.min},${item.max},${item.average}\n`;
+        });
+      } else if (parameter === "Rain Gauge") {
+        csvContent = `Date,Total ${unit}\n`;
+        dailyData.forEach((item) => {
+          csvContent += `${item.date},${item.total}\n`;
+        });
+      } else {
+        csvContent = `Date,Average ${unit}\n`;
+        dailyData.forEach((item) => {
+          csvContent += `${item.date},${item.average}\n`;
+        });
+      }
+
+      // Create and download CSV file
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const link = document.createElement("a");
+      link.download = filename;
+      link.href = URL.createObjectURL(blob);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(link.href);
+
+      console.log("Table download completed");
+    } catch (error) {
+      console.error("Table download failed:", error);
+      alert("Table download failed. Please try again.");
+    }
+    setShowDownloadModal(false);
   };
 
   // Fetch data for specific station and parameter
@@ -324,11 +476,15 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
   // Update filtered data when time range changes
   useEffect(() => {
     if (data.length > 0) {
-      const timeRangeFiltered = filterDataByTimeRange(data, timeRange);
+      const timeRangeFiltered = filterDataByTimeRange(
+        data,
+        timeRange,
+        customDateRange.enabled ? customDateRange : null
+      );
       const hourlyFiltered = filterBy8Hours(timeRangeFiltered);
       setFilteredData(hourlyFiltered);
     }
-  }, [data, timeRange]);
+  }, [data, timeRange, customDateRange]);
 
   // Calculate daily averages for recent 5 days
   const getDailyAverages = () => {
@@ -395,17 +551,17 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
     const paramLower = parameter?.toLowerCase() || "";
 
     if (paramLower.includes("temperature") || paramLower.includes("temp")) {
-      // Temperature: Yellow to Red gradient
+      // Temperature: Light red to bold red gradient
       return {
-        lineColor: "#DC2626",
+        lineColor: "#B91C1C",
         gradientStops: [
-          [0, "#FEF3C7"],
-          [0.3, "#FCD34D"],
-          [0.6, "#F59E0B"],
-          [0.8, "#EA580C"],
-          [1, "#DC2626"],
+          [0, "#FEE2E2"],
+          [0.3, "#FECACA"],
+          [0.6, "#F87171"],
+          [0.8, "#EF4444"],
+          [1, "#B91C1C"],
         ],
-        hoverLineColor: "#DC2626",
+        hoverLineColor: "#B91C1C",
       };
     } else if (paramLower.includes("humidity")) {
       // Humidity: Light blue to teal
@@ -627,9 +783,9 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
           </div>
           {data.length > 0 && (
             <button
-              onClick={handleDownload}
+              onClick={() => setShowDownloadModal(true)}
               className="btn btn-sm bg-green-600 hover:bg-green-700 text-white border-none shadow-md hover:shadow-lg transition-all duration-300 flex items-center gap-2 px-4 py-2 rounded-lg font-medium"
-              title="Download chart as image"
+              title="Download options"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -652,28 +808,82 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
 
         {/* Time Range Selection */}
         {data.length > 0 && (
-          <div className="mb-2 sm:mb-3">
-            <div className="flex flex-wrap gap-1 sm:gap-2 justify-center sm:justify-start">
-              {[
-                { key: "day", label: "1D" },
-                { key: "week", label: "1W" },
-                { key: "month", label: "1M" },
-                { key: "3month", label: "3M" },
-                { key: "all", label: "All" },
-              ].map((range) => (
-                <button
-                  key={range.key}
-                  onClick={() => handleTimeRangeChange(range.key)}
-                  className={`btn btn-xs sm:btn-sm transition-all duration-200 text-xs sm:text-sm ${
-                    timeRange === range.key
-                      ? "btn-primary"
-                      : "btn-outline btn-primary"
-                  }`}
-                >
-                  {range.label}
-                </button>
-              ))}
+          <div className="mb-2 sm:mb-3 space-y-3">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+              {/* Preset Time Range Buttons */}
+              <div className="flex flex-wrap gap-1 sm:gap-2 justify-center sm:justify-start">
+                {[
+                  { key: "day", label: "1D" },
+                  { key: "week", label: "1W" },
+                  { key: "month", label: "1M" },
+                  { key: "3month", label: "3M" },
+                  { key: "6month", label: "6M" },
+                  { key: "1year", label: "1Y" },
+                  { key: "all", label: "All" },
+                ].map((range) => (
+                  <button
+                    key={range.key}
+                    onClick={() => handleTimeRangeChange(range.key)}
+                    className={`btn btn-xs sm:btn-sm transition-all duration-200 text-xs sm:text-sm ${
+                      timeRange === range.key && !customDateRange.enabled
+                        ? "btn-primary"
+                        : "btn-outline btn-primary"
+                    }`}
+                  >
+                    {range.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Custom Date Range Picker */}
+              <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-end">
+                <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
+                  <label className="text-xs sm:text-sm font-medium text-gray-600">
+                    Custom Range:
+                  </label>
+                  <div className="flex gap-2 items-center">
+                    <input
+                      type="date"
+                      value={customDateRange.startDate}
+                      onChange={(e) =>
+                        handleCustomDateRangeChange("startDate", e.target.value)
+                      }
+                      className="input input-sm sm:input-md input-bordered text-sm sm:text-base w-44 sm:w-48"
+                      max={new Date().toISOString().split("T")[0]}
+                    />
+                    <span className="text-gray-400 text-sm">to</span>
+                    <input
+                      type="date"
+                      value={customDateRange.endDate}
+                      onChange={(e) =>
+                        handleCustomDateRangeChange("endDate", e.target.value)
+                      }
+                      className="input input-sm sm:input-md input-bordered text-sm sm:text-base w-44 sm:w-48"
+                      min={customDateRange.startDate}
+                      max={new Date().toISOString().split("T")[0]}
+                    />
+                  </div>
+                </div>
+
+                {customDateRange.enabled && (
+                  <button
+                    onClick={clearCustomDateRange}
+                    className="btn btn-xs sm:btn-sm btn-ghost text-xs sm:text-sm text-gray-500 hover:text-gray-700"
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
             </div>
+
+            {/* Active Range Display */}
+            {customDateRange.enabled && (
+              <div className="text-xs text-gray-600 bg-blue-50 px-2 py-1 rounded-md inline-block">
+                📅 Custom:{" "}
+                {new Date(customDateRange.startDate).toLocaleDateString()} -{" "}
+                {new Date(customDateRange.endDate).toLocaleDateString()}
+              </div>
+            )}
           </div>
         )}
 
@@ -812,17 +1022,141 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
             </p>
           </div>
         )}
-
-        {/* Data Stats */}
-        {filteredData.length > 0 && (
-          <div className="mt-3 text-center">
-            <p className="text-xs text-gray-500">
-              Showing {filteredData.length} of {data.length} data points (8-hour
-              intervals)
-            </p>
-          </div>
-        )}
       </div>
+
+      {/* Download Modal */}
+      {showDownloadModal && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-2xl border border-gray-200 pointer-events-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold text-gray-800">
+                Download Options
+              </h3>
+              <button
+                onClick={() => setShowDownloadModal(false)}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-6 w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            <p className="text-gray-600 mb-6 text-sm">
+              Choose what you'd like to download for "{title}":
+            </p>
+
+            <div className="space-y-3">
+              {/* CSV Button */}
+              <button
+                onClick={handleCSVDownload}
+                className="w-full flex items-center gap-3 p-4 bg-blue-50 hover:bg-blue-100 rounded-lg border border-blue-200 transition-colors group"
+              >
+                <div className="bg-blue-600 p-2 rounded-lg group-hover:bg-blue-700 transition-colors">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 text-white"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    />
+                  </svg>
+                </div>
+                <div className="text-left">
+                  <div className="font-medium text-gray-800">CSV Data</div>
+                  <div className="text-sm text-gray-500">
+                    Raw chart data with timestamps
+                  </div>
+                </div>
+              </button>
+
+              {/* Image Button */}
+              <button
+                onClick={handleImageDownload}
+                className="w-full flex items-center gap-3 p-4 bg-green-50 hover:bg-green-100 rounded-lg border border-green-200 transition-colors group"
+              >
+                <div className="bg-green-600 p-2 rounded-lg group-hover:bg-green-700 transition-colors">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 text-white"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                    />
+                  </svg>
+                </div>
+                <div className="text-left">
+                  <div className="font-medium text-gray-800">Chart Image</div>
+                  <div className="text-sm text-gray-500">
+                    High-quality PNG of the chart
+                  </div>
+                </div>
+              </button>
+
+              {/* Table Button */}
+              <button
+                onClick={handleTableDownload}
+                className="w-full flex items-center gap-3 p-4 bg-purple-50 hover:bg-purple-100 rounded-lg border border-purple-200 transition-colors group"
+              >
+                <div className="bg-purple-600 p-2 rounded-lg group-hover:bg-purple-700 transition-colors">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 text-white"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
+                    />
+                  </svg>
+                </div>
+                <div className="text-left">
+                  <div className="font-medium text-gray-800">Daily Table</div>
+                  <div className="text-sm text-gray-500">
+                    Daily averages summary
+                  </div>
+                </div>
+              </button>
+            </div>
+
+            <div className="mt-6 flex justify-end">
+              <button
+                onClick={() => setShowDownloadModal(false)}
+                className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
