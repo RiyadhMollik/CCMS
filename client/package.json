@@ -18,6 +18,7 @@
     "chartjs-adapter-date-fns": "^3.0.0",
     "highcharts": "^12.4.0",
     "highcharts-react-official": "^3.2.2",
+    "html2canvas": "^1.4.1",
     "jspdf": "^3.0.2",
     "jspdf-autotable": "^5.0.2",
     "lucide-react": "^0.542.0",

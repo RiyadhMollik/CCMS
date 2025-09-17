@@ -1,6 +1,21 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
+
+// Try to load Highcharts export modules
+if (typeof window !== "undefined") {
+  try {
+    const exporting = require("highcharts/modules/exporting");
+    const exportData = require("highcharts/modules/export-data");
+    const offlineExporting = require("highcharts/modules/offline-exporting");
+
+    exporting(Highcharts);
+    exportData(Highcharts);
+    offlineExporting(Highcharts);
+  } catch (error) {
+    console.warn("Some Highcharts export modules could not be loaded:", error);
+  }
+}
 
 const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
   const [loading, setLoading] = useState(false);
@@ -8,6 +23,12 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
   const [data, setData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [timeRange, setTimeRange] = useState("month");
+  const chartRef = useRef(null);
+
+  // Create unique ID for this chart instance
+  const chartId = `chart-wrapper-${parameter
+    ?.replace(/\s+/g, "-")
+    .toLowerCase()}-${stationId || "default"}`;
 
   const parseDate = (dateString) => {
     if (!dateString) return null;
@@ -80,35 +101,34 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
   // Filter data to show every 8 hours (skip 7 hours each time)
   const filterBy8Hours = (data) => {
     if (data.length === 0) return data;
-    
+
     // Sort data by timestamp to ensure chronological order
     const sortedData = [...data].sort((a, b) => a[0] - b[0]);
-    
+
     // Filter to show data at 8-hour intervals: 00:00, 08:00, 16:00
     const filtered = [];
     const seenIntervals = new Set();
-    
+
     sortedData.forEach(([timestamp, value]) => {
       const date = new Date(timestamp);
       const hour = date.getHours();
-      
+
       // Create a unique key for each 8-hour interval
       // This ensures we only take one reading per 8-hour slot per day
       const dayStart = new Date(date);
       dayStart.setHours(0, 0, 0, 0);
-      
+
       // Determine which 8-hour slot this falls into (0-7 = slot 0, 8-15 = slot 1, 16-23 = slot 2)
       const slot = Math.floor(hour / 8);
       const intervalKey = `${dayStart.getTime()}_${slot}`;
-      
+
       // Only include if we haven't seen this interval yet
       if (!seenIntervals.has(intervalKey)) {
         filtered.push([timestamp, value]);
         seenIntervals.add(intervalKey);
       }
     });
-    
-    console.log(`8-hour filtering: ${data.length} points -> ${filtered.length} points`);
+
     return filtered;
   };
 
@@ -118,6 +138,133 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
     const timeRangeFiltered = filterDataByTimeRange(data, range);
     const hourlyFiltered = filterBy8Hours(timeRangeFiltered);
     setFilteredData(hourlyFiltered);
+  };
+
+  // Handle chart download using Highcharts native export or fallback methods
+  const handleDownload = async () => {
+    try {
+      // Get time range label for filename
+      const timeLabels = {
+        day: "1Day",
+        week: "1Week",
+        month: "1Month",
+        "3month": "3Months",
+        all: "AllData",
+      };
+
+      const timeLabel = timeLabels[timeRange] || timeRange;
+      const filename = `${title.replace(/\s+/g, "_")}_${timeLabel}_${
+        new Date().toISOString().split("T")[0]
+      }`;
+
+      // Method 1: Try Highcharts built-in export
+      if (chartRef.current?.chart) {
+        const chart = chartRef.current.chart;
+
+        try {
+          chart.exportChart({
+            type: "image/png",
+            filename: filename,
+            width: 1000,
+            height: 500,
+            scale: 2,
+          });
+          console.log("Download completed using Highcharts export");
+          return;
+        } catch (exportError) {
+          console.warn(
+            "Highcharts export failed, trying alternative method:",
+            exportError
+          );
+        }
+      }
+
+      // Method 2: SVG conversion fallback
+      if (chartRef.current?.chart) {
+        const chart = chartRef.current.chart;
+
+        try {
+          // Get SVG string from Highcharts
+          const svg = chart.getSVG({
+            width: 1000,
+            height: 500,
+          });
+
+          // Create a blob and download
+          const blob = new Blob([svg], { type: "image/svg+xml;charset=utf-8" });
+          const link = document.createElement("a");
+          link.download = filename + ".svg";
+          link.href = URL.createObjectURL(blob);
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          URL.revokeObjectURL(link.href);
+
+          console.log("Download completed as SVG");
+          return;
+        } catch (svgError) {
+          console.warn("SVG export failed:", svgError);
+        }
+      }
+
+      // Method 3: Simple canvas conversion (without html2canvas)
+      const chartContainer = document.getElementById(chartId);
+      if (chartContainer) {
+        const svg = chartContainer.querySelector("svg");
+        if (svg) {
+          // Create a canvas and draw the SVG
+          const canvas = document.createElement("canvas");
+          const ctx = canvas.getContext("2d");
+
+          // Set canvas size
+          canvas.width = 1000;
+          canvas.height = 500;
+
+          // Create image from SVG
+          const svgData = new XMLSerializer().serializeToString(svg);
+          const img = new Image();
+
+          img.onload = function () {
+            // Fill white background
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw the SVG
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+            // Download the image
+            canvas.toBlob(function (blob) {
+              const link = document.createElement("a");
+              link.download = filename + ".png";
+              link.href = URL.createObjectURL(blob);
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+              URL.revokeObjectURL(link.href);
+            });
+          };
+
+          img.onerror = function () {
+            alert("Failed to convert chart to image. Please try again.");
+          };
+
+          // Convert SVG to data URL
+          const svgBlob = new Blob([svgData], {
+            type: "image/svg+xml;charset=utf-8",
+          });
+          const url = URL.createObjectURL(svgBlob);
+          img.src = url;
+
+          return;
+        }
+      }
+
+      // If all methods fail
+      alert("Unable to download chart. Please try refreshing the page.");
+    } catch (error) {
+      console.error("Download failed:", error);
+      alert("Download failed. Please try again or refresh the page.");
+    }
   };
 
   // Fetch data for specific station and parameter
@@ -151,7 +298,6 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
         .filter((item) => item !== null)
         .sort((a, b) => a[0] - b[0]);
 
-      console.log(`Processed chart data for ${measure}:`, chartData);
       setData(chartData);
       const timeRangeFiltered = filterDataByTimeRange(chartData, timeRange);
       const hourlyFiltered = filterBy8Hours(timeRangeFiltered);
@@ -190,11 +336,11 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
 
     // Group data by date
     const dailyGroups = {};
-    
+
     data.forEach(([timestamp, value]) => {
       const date = new Date(timestamp);
-      const dateKey = date.toISOString().split('T')[0]; // YYYY-MM-DD format
-      
+      const dateKey = date.toISOString().split("T")[0]; // YYYY-MM-DD format
+
       if (!dailyGroups[dateKey]) {
         dailyGroups[dateKey] = [];
       }
@@ -202,37 +348,39 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
     });
 
     // Calculate daily statistics (average, min, max for temperature; total for rain)
-    const isTemperature = parameter === 'Air Temperature';
-    const isRainfall = parameter === 'Rain Gauge';
-    
+    const isTemperature = parameter === "Air Temperature";
+    const isRainfall = parameter === "Rain Gauge";
+
     const dailyAverages = Object.entries(dailyGroups)
       .map(([date, values]) => {
         if (isTemperature) {
-          const average = values.reduce((sum, val) => sum + val, 0) / values.length;
+          const average =
+            values.reduce((sum, val) => sum + val, 0) / values.length;
           const min = Math.min(...values);
           const max = Math.max(...values);
           return {
             date,
-            average: parseFloat(average.toFixed(2)),
-            min: parseFloat(min.toFixed(2)),
-            max: parseFloat(max.toFixed(2)),
-            count: values.length
+            average: average.toFixed(1),
+            min: min.toFixed(1),
+            max: max.toFixed(1),
+            count: values.length,
           };
         } else if (isRainfall) {
           // For rainfall, sum all values to get total daily rainfall
           const total = values.reduce((sum, val) => sum + val, 0);
           return {
             date,
-            total: parseFloat(total.toFixed(2)),
-            count: values.length
+            total: total.toFixed(1),
+            count: values.length,
           };
         } else {
           // For other parameters, calculate average
-          const average = values.reduce((sum, val) => sum + val, 0) / values.length;
+          const average =
+            values.reduce((sum, val) => sum + val, 0) / values.length;
           return {
             date,
-            average: parseFloat(average.toFixed(2)),
-            count: values.length
+            average: average.toFixed(1),
+            count: values.length,
           };
         }
       })
@@ -245,75 +393,101 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
   // Get color configuration based on parameter type
   const getColorConfig = () => {
     const paramLower = parameter?.toLowerCase() || "";
-    
-    if (paramLower.includes('temperature') || paramLower.includes('temp')) {
+
+    if (paramLower.includes("temperature") || paramLower.includes("temp")) {
       // Temperature: Yellow to Red gradient
       return {
-        lineColor: '#DC2626',
+        lineColor: "#DC2626",
         gradientStops: [
-          [0, '#FEF3C7'], [0.3, '#FCD34D'], [0.6, '#F59E0B'], 
-          [0.8, '#EA580C'], [1, '#DC2626']
+          [0, "#FEF3C7"],
+          [0.3, "#FCD34D"],
+          [0.6, "#F59E0B"],
+          [0.8, "#EA580C"],
+          [1, "#DC2626"],
         ],
-        hoverLineColor: '#DC2626',
+        hoverLineColor: "#DC2626",
       };
-    } else if (paramLower.includes('humidity')) {
+    } else if (paramLower.includes("humidity")) {
       // Humidity: Light blue to teal
       return {
-        lineColor: '#0891B2',
+        lineColor: "#0891B2",
         gradientStops: [
-          [0, '#E0F7FA'], [0.3, '#80DEEA'], [0.6, '#26C6DA'], 
-          [0.8, '#00ACC1'], [1, '#0891B2']
+          [0, "#E0F7FA"],
+          [0.3, "#80DEEA"],
+          [0.6, "#26C6DA"],
+          [0.8, "#00ACC1"],
+          [1, "#0891B2"],
         ],
-        hoverLineColor: '#0891B2',
+        hoverLineColor: "#0891B2",
       };
-    } else if (paramLower.includes('rain') || paramLower.includes('precipitation')) {
+    } else if (
+      paramLower.includes("rain") ||
+      paramLower.includes("precipitation")
+    ) {
       // Rain: Light gray to dark blue
       return {
-        lineColor: '#1E3A8A',
+        lineColor: "#1E3A8A",
         gradientStops: [
-          [0, '#F1F5F9'], [0.3, '#CBD5E1'], [0.6, '#64748B'], 
-          [0.8, '#334155'], [1, '#1E3A8A']
+          [0, "#F1F5F9"],
+          [0.3, "#CBD5E1"],
+          [0.6, "#64748B"],
+          [0.8, "#334155"],
+          [1, "#1E3A8A"],
         ],
-        hoverLineColor: '#1E3A8A',
+        hoverLineColor: "#1E3A8A",
       };
-    } else if (paramLower.includes('wind')) {
+    } else if (paramLower.includes("wind")) {
       // Wind: Light green to dark green
       return {
-        lineColor: '#166534',
+        lineColor: "#166534",
         gradientStops: [
-          [0, '#F0FDF4'], [0.3, '#BBF7D0'], [0.6, '#4ADE80'], 
-          [0.8, '#16A34A'], [1, '#166534']
+          [0, "#F0FDF4"],
+          [0.3, "#BBF7D0"],
+          [0.6, "#4ADE80"],
+          [0.8, "#16A34A"],
+          [1, "#166534"],
         ],
-        hoverLineColor: '#166534',
+        hoverLineColor: "#166534",
       };
-    } else if (paramLower.includes('solar') || paramLower.includes('radiation')) {
+    } else if (
+      paramLower.includes("solar") ||
+      paramLower.includes("radiation")
+    ) {
       // Solar: Light yellow to orange
       return {
-        lineColor: '#EA580C',
+        lineColor: "#EA580C",
         gradientStops: [
-          [0, '#FFFBEB'], [0.3, '#FED7AA'], [0.6, '#FB923C'], 
-          [0.8, '#F97316'], [1, '#EA580C']
+          [0, "#FFFBEB"],
+          [0.3, "#FED7AA"],
+          [0.6, "#FB923C"],
+          [0.8, "#F97316"],
+          [1, "#EA580C"],
         ],
-        hoverLineColor: '#EA580C',
+        hoverLineColor: "#EA580C",
       };
-    } else if (paramLower.includes('pressure')) {
+    } else if (paramLower.includes("pressure")) {
       // Pressure: Light purple to dark purple
       return {
-        lineColor: '#7C3AED',
+        lineColor: "#7C3AED",
         gradientStops: [
-          [0, '#F5F3FF'], [0.3, '#DDD6FE'], [0.6, '#A78BFA'], 
-          [0.8, '#8B5CF6'], [1, '#7C3AED']
+          [0, "#F5F3FF"],
+          [0.3, "#DDD6FE"],
+          [0.6, "#A78BFA"],
+          [0.8, "#8B5CF6"],
+          [1, "#7C3AED"],
         ],
-        hoverLineColor: '#7C3AED',
+        hoverLineColor: "#7C3AED",
       };
     } else {
       // Default: Blue gradient
       return {
-        lineColor: '#1E40AF',
+        lineColor: "#1E40AF",
         gradientStops: [
-          [0, '#93C5FD'], [0.5, '#3B82F6'], [1, '#1E40AF']
+          [0, "#93C5FD"],
+          [0.5, "#3B82F6"],
+          [1, "#1E40AF"],
         ],
-        hoverLineColor: '#1E40AF',
+        hoverLineColor: "#1E40AF",
       };
     }
   };
@@ -326,7 +500,7 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
     const colorConfig = getColorConfig();
 
     // Calculate dynamic Y-axis range
-    const values = chartData.map(point => point[1]);
+    const values = chartData.map((point) => point[1]);
     const minValue = Math.min(...values);
     const maxValue = Math.max(...values);
     const range = maxValue - minValue;
@@ -338,7 +512,7 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
         zooming: { type: "x" },
         backgroundColor: "transparent",
         height: 380,
-        animation: { duration: 1000, easing: 'easeOutQuart' },
+        animation: { duration: 1000, easing: "easeOutQuart" },
         style: { fontFamily: '"Inter", "Segoe UI", Roboto, sans-serif' },
       },
       title: {
@@ -358,7 +532,10 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
         labels: { style: { fontSize: "10px" } },
       },
       yAxis: {
-        title: { text: unit || "", style: { fontSize: "12px", fontWeight: "bold" } },
+        title: {
+          text: unit || "",
+          style: { fontSize: "12px", fontWeight: "bold" },
+        },
         gridLineColor: "rgba(0, 0, 0, 0.1)",
         gridLineDashStyle: "Dash",
         min: Math.max(0, minValue - padding),
@@ -370,32 +547,65 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
         shared: true,
         xDateFormat: "%A, %b %e, %Y %H:%M",
         headerFormat: "<b>{point.key}</b><br/>",
-        pointFormat: `<span style="color:{series.color}">${title}</span>: <b>{point.y:.2f}</b> ${unit || ""}<br/>`,
+        pointFormat: `<span style="color:{series.color}">${title}</span>: <b>{point.y:.2f}</b> ${
+          unit || ""
+        }<br/>`,
         style: { fontSize: "11px" },
       },
       legend: { enabled: false },
       plotOptions: {
         areaspline: {
-          lineWidth: 2,
+          lineWidth: 1,
           fillOpacity: 0.3,
-          marker: { enabled: false, states: { hover: { enabled: true, radius: 4 } } },
+          marker: {
+            enabled: true,
+            radius: 4,
+            fillColor: colorConfig.lineColor,
+            lineColor: "#ffffff",
+            lineWidth: 1,
+            states: {
+              hover: {
+                enabled: true,
+                radius: 6,
+                fillColor: colorConfig.lineColor,
+                lineColor: "#ffffff",
+                lineWidth: 1,
+              },
+            },
+          },
           connectNulls: true,
-          states: { hover: { lineWidth: 3 } }
+          states: { hover: { lineWidth: 3 } },
         },
       },
-      series: [{
-        name: title,
-        data: chartData,
-        color: {
-          linearGradient: { x1: 0, x2: 0, y1: 1, y2: 0 },
-          stops: colorConfig.gradientStops,
+      series: [
+        {
+          name: title,
+          data: chartData,
+          color: {
+            linearGradient: { x1: 0, x2: 0, y1: 1, y2: 0 },
+            stops: colorConfig.gradientStops,
+          },
+          fillColor: "transparent",
+          lineWidth: 1,
+          marker: {
+            enabled: true,
+            radius: 4,
+            fillColor: colorConfig.lineColor,
+            lineColor: "#ffffff",
+            lineWidth: 2,
+          },
+          connectNulls: true,
         },
-        fillColor: 'transparent',
-        lineWidth: 2,
-        marker: { enabled: false },
-        connectNulls: true,
-      }],
+      ],
       credits: { enabled: false },
+      exporting: {
+        enabled: true,
+        buttons: {
+          contextButton: {
+            enabled: false, // Hide default export button
+          },
+        },
+      },
     };
   };
 
@@ -407,15 +617,36 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
           <div className="flex items-center gap-2 flex-1 min-w-0">
             <span className="text-xl sm:text-2xl flex-shrink-0">{icon}</span>
             <div className="min-w-0 flex-1">
-              <h3 className="font-bold text-gray-800 text-sm sm:text-base truncate">{title}</h3>
-              <p className="text-xs sm:text-sm text-gray-500">{unit} • 8-hour intervals</p>
+              <h3 className="font-bold text-gray-800 text-sm sm:text-base truncate">
+                {title}
+              </h3>
+              <p className="text-xs sm:text-sm text-gray-500">
+                {unit} • 8-hour intervals
+              </p>
             </div>
           </div>
           {data.length > 0 && (
-            <div className="badge badge-primary badge-xs sm:badge-sm flex-shrink-0 ml-2">
-              <span className="hidden sm:inline">{data.length} points</span>
-              <span className="sm:hidden">{data.length}</span>
-            </div>
+            <button
+              onClick={handleDownload}
+              className="btn btn-sm bg-green-600 hover:bg-green-700 text-white border-none shadow-md hover:shadow-lg transition-all duration-300 flex items-center gap-2 px-4 py-2 rounded-lg font-medium"
+              title="Download chart as image"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-4 w-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"
+                />
+              </svg>
+              <span className="text-sm font-semibold">Download</span>
+            </button>
           )}
         </div>
 
@@ -434,7 +665,9 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
                   key={range.key}
                   onClick={() => handleTimeRangeChange(range.key)}
                   className={`btn btn-xs sm:btn-sm transition-all duration-200 text-xs sm:text-sm ${
-                    timeRange === range.key ? "btn-primary" : "btn-outline btn-primary"
+                    timeRange === range.key
+                      ? "btn-primary"
+                      : "btn-outline btn-primary"
                   }`}
                 >
                   {range.label}
@@ -460,61 +693,77 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
             {/* Chart Section - Full width on mobile, 60% on desktop */}
             <div className="lg:col-span-7">
               <div className="w-full bg-white rounded-lg border border-gray-100 overflow-hidden">
-                <div className="h-96 w-full">
+                <div id={chartId} className="h-96 w-full">
                   <HighchartsReact
                     highcharts={Highcharts}
                     options={getHighchartsOptions()}
+                    ref={chartRef}
                   />
                 </div>
               </div>
             </div>
-            
+
             {/* Table Section - Full width on mobile, 40% on desktop */}
             <div className="lg:col-span-5">
               <div className="bg-white rounded-lg border border-gray-100 p-3 sm:p-4 min-h-[16rem] sm:min-h-[20rem] lg:h-96 flex flex-col">
                 <h4 className="text-sm sm:text-base font-semibold text-gray-700 mb-3 sm:mb-4 flex items-center gap-2 flex-shrink-0">
                   📊 <span className="hidden sm:inline">Recent 7 Days</span>
-                  <span className="sm:hidden">7 Days</span> 
-                  {parameter === 'Air Temperature' ? 'Temperature Range' : 
-                   parameter === 'Rain Gauge' ? 'Total Rainfall' : 'Average'}
+                  <span className="sm:hidden">7 Days</span>
+                  {parameter === "Air Temperature"
+                    ? "Temperature Range"
+                    : parameter === "Rain Gauge"
+                    ? "Total Rainfall"
+                    : "Average"}
                 </h4>
                 <div className="overflow-x-auto flex-1">
                   <table className="table table-zebra w-full">
                     <thead>
                       <tr className="bg-gray-50">
-                        <th className="text-xs sm:text-sm font-semibold text-gray-600 px-2 sm:px-3">Date</th>
-                        {parameter === 'Air Temperature' ? (
+                        <th className="text-xs sm:text-sm font-semibold text-gray-600 px-2 sm:px-3">
+                          Date
+                        </th>
+                        {parameter === "Air Temperature" ? (
                           <>
-                            <th className="text-xs sm:text-sm font-semibold text-gray-600 px-1 sm:px-2">Min {unit}</th>
-                            <th className="text-xs sm:text-sm font-semibold text-gray-600 px-1 sm:px-2">Max {unit}</th>
-                            <th className="text-xs sm:text-sm font-semibold text-gray-600 px-1 sm:px-2">Avg {unit}</th>
+                            <th className="text-xs sm:text-sm font-semibold text-gray-600 px-1 sm:px-2">
+                              Min {unit}
+                            </th>
+                            <th className="text-xs sm:text-sm font-semibold text-gray-600 px-1 sm:px-2">
+                              Max {unit}
+                            </th>
+                            <th className="text-xs sm:text-sm font-semibold text-gray-600 px-1 sm:px-2">
+                              Avg {unit}
+                            </th>
                           </>
                         ) : (
                           <th className="text-xs sm:text-sm font-semibold text-gray-600 px-2 sm:px-3">
-                            {parameter === 'Rain Gauge' ? 'Total' : 'Avg'} {unit}
+                            {parameter === "Rain Gauge" ? "Total" : "Avg"}{" "}
+                            {unit}
                           </th>
                         )}
                       </tr>
                     </thead>
                     <tbody>
                       {getDailyAverages().map((item, index) => (
-                        <tr key={item.date} className={index === 0 ? "bg-blue-100" : ""}>
+                        <tr
+                          key={item.date}
+                          className={index === 0 ? "bg-blue-100" : ""}
+                        >
                           <td className="text-xs sm:text-sm text-gray-700 px-2 sm:px-3">
                             <span className="hidden sm:inline">
-                              {new Date(item.date).toLocaleDateString('en-US', {
-                                month: 'short',
-                                day: 'numeric',
-                                year: '2-digit'
+                              {new Date(item.date).toLocaleDateString("en-US", {
+                                month: "short",
+                                day: "numeric",
+                                year: "2-digit",
                               })}
                             </span>
                             <span className="sm:hidden">
-                              {new Date(item.date).toLocaleDateString('en-US', {
-                                month: 'numeric',
-                                day: 'numeric'
+                              {new Date(item.date).toLocaleDateString("en-US", {
+                                month: "numeric",
+                                day: "numeric",
                               })}
                             </span>
                           </td>
-                          {parameter === 'Air Temperature' ? (
+                          {parameter === "Air Temperature" ? (
                             <>
                               <td className="text-xs sm:text-sm font-medium text-blue-600 px-1 sm:px-2">
                                 {item.min}
@@ -526,7 +775,7 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
                                 {item.average}
                               </td>
                             </>
-                          ) : parameter === 'Rain Gauge' ? (
+                          ) : parameter === "Rain Gauge" ? (
                             <td className="text-xs sm:text-sm font-medium text-gray-800 px-2 sm:px-3">
                               {item.total}
                             </td>
@@ -539,7 +788,12 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
                       ))}
                       {getDailyAverages().length === 0 && (
                         <tr>
-                          <td colSpan={parameter === 'Air Temperature' ? "4" : "2"} className="text-center text-xs sm:text-sm text-gray-500 py-4 sm:py-6">
+                          <td
+                            colSpan={
+                              parameter === "Air Temperature" ? "4" : "2"
+                            }
+                            className="text-center text-xs sm:text-sm text-gray-500 py-4 sm:py-6"
+                          >
                             No daily data available
                           </td>
                         </tr>
@@ -553,7 +807,9 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
         ) : (
           <div className="flex flex-col items-center justify-center h-48 space-y-3 bg-gray-50 rounded-lg border-2 border-dashed border-gray-200">
             <div className="text-4xl opacity-30">{icon}</div>
-            <p className="text-sm text-gray-500 text-center">No data available</p>
+            <p className="text-sm text-gray-500 text-center">
+              No data available
+            </p>
           </div>
         )}
 
@@ -561,7 +817,8 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
         {filteredData.length > 0 && (
           <div className="mt-3 text-center">
             <p className="text-xs text-gray-500">
-              Showing {filteredData.length} of {data.length} data points (8-hour intervals)
+              Showing {filteredData.length} of {data.length} data points (8-hour
+              intervals)
             </p>
           </div>
         )}

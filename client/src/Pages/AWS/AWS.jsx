@@ -95,7 +95,7 @@ const AWS = () => {
             🌤️ Agromet Weather Station (AgWS)
           </h1>
           <p className="text-base-content/70 text-sm sm:text-base lg:text-lg px-2 sm:px-0">
-            Climate Monitoring by{" "}
+            Acknowledged by{" "}
             <span className="font-semibold text-primary">
               Bangladesh Meteorological Department
             </span>{" "}

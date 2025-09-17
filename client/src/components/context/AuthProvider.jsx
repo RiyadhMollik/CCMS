@@ -18,7 +18,7 @@ export const AuthContextProvider = ({ children }) => {
                 const response = await fetch(`https://iinms.brri.gov.bd/api/users/${userId}`);
                 if (response.ok) {
                     const userData = await response.json();
-                    console.log(userData);
+                    // console.log(userData);
                     const res = await fetch(
                         `https://iinms.brri.gov.bd/api/roles/roles/${userData.roleId}/permissions`
                     );
@@ -34,7 +34,7 @@ export const AuthContextProvider = ({ children }) => {
                             return { permissions };
                         };
                         const result = convertPermissions(data);
-                        console.log(result.permissions);
+                        // console.log(result.permissions);
                         setRolePermission(result.permissions);
                     }
                     setAuthUser(userData);

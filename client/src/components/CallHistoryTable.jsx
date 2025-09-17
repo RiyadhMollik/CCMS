@@ -19,7 +19,7 @@ const CallHistoryTable = () => {
         }
 
         const data = await response.json();
-        console.log("Call History API Response:", data);
+        // console.log("Call History API Response:", data);
 
         // Get the last10History array from the API response
         const callsData = data.last10History || [];
