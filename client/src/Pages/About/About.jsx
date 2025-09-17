@@ -1,13 +1,13 @@
 const About = () => {
   const patrons = [
     {
-      title: "Chief Parton",
+      title: "Chief Patron",
       name: "Dr. Mohammad Khalequzzaman",
-      designation: "Director General",
+      designation: "Director General, BRRI",
       image: "/brri-dg-2.jpeg", // Replace with actual path
     },
     {
-      title: "Parton",
+      title: "Patron",
       name: "Dr. Md Rafiqul Islam",
       designation: "Director (Research), BRRI",
       image: "/brri-da.jpg", // Replace with actual path
@@ -22,23 +22,23 @@ const About = () => {
     },
   ];
   return (
-    <div className="min-h-screen max-w-full font-book-antiqua  bg-green-50 flex flex-col items-center justify-center p-6">
+    <div className="min-h-screen max-w-full font-book-antiqua  bg-green-50 flex flex-col items-center justify-center md:p-6">
       <div className=" bg-white shadow-lg rounded-lg p-8">
-        <h1 className="text-3xl font-bold text-green-700 text-center mb-6">
+        <h1 className="text-xl md:text-3xl font-bold text-green-700 text-center mb-6">
           Development of a Call Centre for Strengthening Climate Risk Management
           in Rice-Based Farming Systems
         </h1>
 
-        <p className="text-gray-700 text-lg leading-relaxed mb-6 text-justify">
+        <p className="text-gray-700 md:text-lg leading-relaxed mb-6 text-justify">
           <em>
-            The BRRI Call Center transforms agricultural advisory into a fast,
+            "The BRRI Call Center transforms agricultural advisory into a fast,
             farmer-driven service, delivering expert guidance exactly when and
             where it’s needed. By connecting farmers directly with scientists,
             it empowers informed decisions, boosts rice yields, and builds
-            resilience against climate challenges.
+            resilience against climate challenges."
           </em>
         </p>
-        <p className="text-gray-700 text-lg leading-relaxed mb-6 text-justify">
+        <p className="text-gray-700 md:text-lg leading-relaxed mb-6 text-justify">
           In today’s fast-evolving digital era, technology is reshaping
           agriculture through precision farming, satellite-based forecasts,
           AI-driven pest diagnostics, and mobile advisory platforms. For
@@ -50,7 +50,7 @@ const About = () => {
           public extension services, informal networks, and local input dealers,
           often suffer from delays, inefficiencies, and inconsistent quality.
         </p>
-        <p className="text-gray-700 text-lg leading-relaxed mb-6 text-justify">
+        <p className="text-gray-700 md:text-lg leading-relaxed mb-6 text-justify">
           Recently, digital engagement in rural Bangladesh has grown
           significantly. More than 60% of households now own mobile phones, and
           young farmers increasingly use apps, social media, and agricultural
@@ -62,7 +62,7 @@ const About = () => {
           simplicity with depth, offering real-time, personalized, and locally
           relevant guidance.
         </p>
-        <p className="text-gray-700 text-lg leading-relaxed mb-6 text-justify">
+        <p className="text-gray-700 md:text-lg leading-relaxed mb-6 text-justify">
           Despite major advances in rice research by the Bangladesh Rice
           Research Institute (BRRI)—including stress-tolerant varieties, modern
           agronomic practices, and integrated pest management—knowledge
@@ -74,7 +74,7 @@ const About = () => {
           pest outbreaks or erratic weather can devastate crops within days,
           such delays are critical.
         </p>
-        <p className="text-gray-700 text-lg leading-relaxed mb-6 text-justify">
+        <p className="text-gray-700 md:text-lg leading-relaxed mb-6 text-justify">
           To address these gaps, the BRRI Agromet Lab launched the BRRI Call
           Center, a dedicated agricultural helpline. Farmers can dial a
           designated number and speak directly with BRRI scientists and rice
@@ -88,7 +88,7 @@ const About = () => {
           describe problems verbally and can share photos via messaging apps for
           more accurate diagnosis.
         </p>
-        <p className="text-gray-700 text-lg leading-relaxed mb-6 text-justify">
+        <p className="text-gray-700 md:text-lg leading-relaxed mb-6 text-justify">
           The initiative reflects the e-agriculture model promoted by the World
           Summit on the Information Society (WSIS, 2003), emphasizing ICT use
           for integrated agricultural services. Beyond advice, the call center
@@ -99,7 +99,7 @@ const About = () => {
           weather and climate data into farmer-friendly advisories adds
           particular value.
         </p>
-        <p className="text-gray-700 text-lg leading-relaxed mb-6 text-justify">
+        <p className="text-gray-700 md:text-lg leading-relaxed mb-6 text-justify">
           Crucially, the call center transforms extension from one-way knowledge
           transfer to multi-way, farmer-driven communication. Farmers are active
           contributors, sharing field observations and indigenous knowledge,
@@ -111,10 +111,10 @@ const About = () => {
           and rural prosperity.
         </p>
 
-        <h2 className="text-2xl font-bold text-green-700">
+        <h2 className="text-xl md:text-2xl font-bold text-green-700 mb-2">
           Objective of the Call Center
         </h2>
-        <p className="text-gray-700 text-lg leading-relaxed mb-2 text-justify">
+        <p className="text-gray-700 md:text-lg leading-relaxed mb-2 text-justify">
           The primary goal of this call center is to deliver real-time, expert
           advice to rice farmers on various aspects of rice cultivation. This
           includes support on:
@@ -130,14 +130,14 @@ const About = () => {
           <li>Any other field-specific query raised by the farmers.</li>
         </ul>
 
-        <h2 className="text-2xl font-bold text-green-700 mt-8 mb-2">
+        <h2 className="text-xl md:text-2xl font-bold text-green-700 mt-8 mb-2">
           Details of the Call Center
         </h2>
-        <p className="text-gray-700 text-lg leading-relaxed mb-2 text-justify">
+        <p className="text-gray-700 md:text-lg leading-relaxed mb-2 text-justify">
           The call center is staffed by a team of scientists from the BRRI
           Agromet Lab.
         </p>
-        <div className="text-gray-700 text-lg leading-relaxed mb-6 space-y-2">
+        <div className="text-gray-700 md:text-lg leading-relaxed mb-6 space-y-2">
           <p>
             <strong>Helpline Number:</strong> 09644300300
           </p>
@@ -151,11 +151,11 @@ const About = () => {
           </p>
         </div>
       </div>
-      <div className="flex flex-col md:flex-row justify-center items-start gap-6 p-6 bg-white shadow-xl rounded-xl w-full mt-6 hover:shadow-2xl transition-shadow duration-300">
+      <div className="flex flex-col md:flex-row justify-center items-center gap-6 p-6 bg-white shadow-xl rounded-xl w-full mt-6 hover:shadow-2xl transition-shadow duration-300">
         {patrons.map((patron, index) => (
           <div
             key={index}
-            className="text-center group hover:transform hover:scale-105 transition-all duration-300 p-4 rounded-lg hover:bg-gray-50"
+            className="text-center group hover:transform hover:scale-105 transition-all duration-300 p-4 rounded-lg hover:bg-gray-50 w-full md:w-auto flex flex-col items-center"
           >
             <h3 className="text-xl font-semibold mb-4 text-green-700 border-b-2 border-green-200 pb-2">
               {patron.title}
@@ -181,11 +181,11 @@ const About = () => {
         <h3 className="text-xl font-semibold mb-6 text-green-700 border-b-2 border-green-200 pb-3 text-center">
           Reviewed by
         </h3>
-        <div className="flex flex-col md:flex-row justify-center items-start gap-8">
+        <div className="flex flex-col md:flex-row justify-center items-center gap-8">
           {reviewers.map((reviewer, index) => (
             <div
               key={index}
-              className="text-center group hover:transform hover:scale-105 transition-all duration-300 p-4 rounded-lg hover:bg-gray-50"
+              className="text-center group hover:transform hover:scale-105 transition-all duration-300 p-4 rounded-lg hover:bg-gray-50 w-full md:w-auto flex flex-col items-center"
             >
               <div className="relative overflow-hidden rounded-lg shadow-lg mb-3 group-hover:shadow-xl transition-shadow duration-300">
                 <img
@@ -212,8 +212,8 @@ const About = () => {
         <h3 className="text-xl font-semibold mb-6 text-green-700 border-b-2 border-green-200 pb-3 text-center">
           Plan, Database & Execution By
         </h3>
-        <div className="flex flex-col md:flex-row justify-center items-start gap-8">
-          <div className="flex flex-col md:flex-row items-start gap-6 group hover:transform hover:scale-[1.02] transition-all duration-300 p-4 rounded-lg hover:bg-gray-50">
+        <div className="flex flex-col md:flex-row justify-center items-center gap-8">
+          <div className="flex flex-col md:flex-row items-center md:items-start gap-6 group hover:transform hover:scale-[1.02] transition-all duration-300 p-4 rounded-lg hover:bg-gray-50 w-full md:w-auto">
             <div className="relative overflow-hidden rounded-lg shadow-lg group-hover:shadow-xl transition-shadow duration-300">
               <img
                 src="/niaz.jpg" // replace with correct image path
@@ -239,13 +239,6 @@ const About = () => {
                 <p className="text-gray-700">
                   <span className="font-semibold">Email:</span>{" "}
                   <a
-                    href="mailto:niaz.stat@brri.gov.bd"
-                    className="text-green-600 hover:text-green-700 underline hover:no-underline transition-all duration-200"
-                  >
-                    niaz.stat@brri.gov.bd
-                  </a>
-                  ,{" "}
-                  <a
                     href="mailto:niaz.sust@gmail.com"
                     className="text-green-600 hover:text-green-700 underline hover:no-underline transition-all duration-200"
                   >
@@ -269,9 +262,9 @@ const About = () => {
         <h3 className="text-xl font-semibold mb-6 text-green-700 border-b-2 border-green-200 pb-3 text-center">
           Development Team
         </h3>
-        <div className="flex flex-col md:flex-row justify-center items-start gap-8">
+        <div className="flex flex-col md:flex-row justify-center items-center gap-8">
           {/* Fullstack Developer */}
-          <div className="text-center group hover:transform hover:scale-105 transition-all duration-300 p-4 rounded-lg hover:bg-gray-50">
+          <div className="text-center group hover:transform hover:scale-105 transition-all duration-300 p-4 rounded-lg hover:bg-gray-50 w-full md:w-auto flex flex-col items-center">
             <div className="relative overflow-hidden rounded-lg shadow-lg mb-3 group-hover:shadow-xl transition-shadow duration-300">
               <img
                 src="/riyad.jpg"
@@ -301,7 +294,7 @@ const About = () => {
           </div>
 
           {/* Frontend Developer */}
-          <div className="text-center group hover:transform hover:scale-105 transition-all duration-300 p-4 rounded-lg hover:bg-gray-50">
+          <div className="text-center group hover:transform hover:scale-105 transition-all duration-300 p-4 rounded-lg hover:bg-gray-50 w-full md:w-auto flex flex-col items-center">
             <div className="relative overflow-hidden rounded-lg shadow-lg mb-3 group-hover:shadow-xl transition-shadow duration-300">
               <img
                 src="/faysal.JPG"

@@ -156,8 +156,8 @@ function Login() {
 
         {/* Main container with two halves */}
         <div className="flex w-full min-h-screen z-10 relative">
-          {/* Left half - Information card */}
-          <div className="w-1/2 min-h-screen flex items-center justify-center p-8">
+          {/* Left half - Information card - Hidden on mobile */}
+          <div className="hidden lg:flex w-1/2 min-h-screen items-center justify-center p-8">
             <div className="p-8 w-full max-w-lg">
               {/* 24 hour logo section */}
               <div className="text-center mb-8">
@@ -225,8 +225,8 @@ function Login() {
             </div>
           </div>
 
-          {/* Right half - Login form */}
-          <div className="w-1/2 min-h-screen flex items-center justify-start">
+          {/* Right half - Login form - Full width on mobile */}
+          <div className="w-full lg:w-1/2 min-h-screen flex items-center justify-center p-4 lg:justify-start lg:p-8">
             <div className="bg-white/98 backdrop-blur-sm px-10 py-6 rounded-2xl shadow-2xl w-full max-w-md border border-[#04cccc]/20">
               {/* Logo/Icon */}
               <div className="text-center mb-4">

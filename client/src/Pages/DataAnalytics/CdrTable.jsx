@@ -609,36 +609,34 @@ const CdrTable = () => {
         )}
 
         {/* Pagination */}
-        <div className="flex flex-col sm:flex-row justify-center items-center mt-6 sm:mt-8 gap-3 sm:gap-4">
-          <div className="flex items-center space-x-1 sm:space-x-2">
-            <button
-              aria-label="First Page"
-              className="p-2 sm:p-3 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 shadow-sm"
-              onClick={() => handlePageChange(1)}
-              disabled={pagination.page <= 1}
-            >
-              <FaAngleDoubleLeft
-                size={14}
-                className="sm:w-4 sm:h-4 text-gray-600"
-              />
-            </button>
-            <button
-              aria-label="Previous Page"
-              className="p-2 sm:p-3 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 shadow-sm"
-              onClick={() => handlePageChange(pagination.page - 1)}
-              disabled={pagination.page <= 1}
-            >
-              <FaAngleLeft size={14} className="sm:w-4 sm:h-4 text-gray-600" />
-            </button>
-          </div>
+        <div className="flex justify-center items-center mt-6 sm:mt-8 gap-1 sm:gap-2">
+          <button
+            aria-label="First Page"
+            className="p-1.5 sm:p-2 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 shadow-sm"
+            onClick={() => handlePageChange(1)}
+            disabled={pagination.page <= 1}
+          >
+            <FaAngleDoubleLeft
+              size={12}
+              className="sm:w-4 sm:h-4 text-gray-600"
+            />
+          </button>
+          <button
+            aria-label="Previous Page"
+            className="p-1.5 sm:p-2 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 shadow-sm"
+            onClick={() => handlePageChange(pagination.page - 1)}
+            disabled={pagination.page <= 1}
+          >
+            <FaAngleLeft size={12} className="sm:w-4 sm:h-4 text-gray-600" />
+          </button>
 
-          <div className="flex items-center space-x-2 sm:space-x-3 bg-white border border-gray-200 rounded-lg px-3 sm:px-4 py-2 shadow-sm">
+          <div className="flex items-center gap-1 sm:gap-2 bg-white border border-gray-200 rounded-lg px-2 sm:px-3 py-1 sm:py-2 shadow-sm">
             <span className="text-gray-600 font-medium text-xs sm:text-sm">
               Page
             </span>
             <input
               type="number"
-              className="w-12 sm:w-16 text-center p-1 sm:p-2 border border-gray-200 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none text-gray-700 font-medium text-xs sm:text-sm"
+              className="w-8 sm:w-12 text-center p-1 border border-gray-200 rounded focus:ring-1 focus:ring-green-500 focus:border-green-500 outline-none text-gray-700 font-medium text-xs sm:text-sm"
               value={pagination.page}
               min={1}
               max={pagination.totalPages}
@@ -649,27 +647,25 @@ const CdrTable = () => {
             </span>
           </div>
 
-          <div className="flex items-center space-x-1 sm:space-x-2">
-            <button
-              aria-label="Next Page"
-              className="p-2 sm:p-3 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 shadow-sm"
-              onClick={() => handlePageChange(pagination.page + 1)}
-              disabled={pagination.page >= pagination.totalPages}
-            >
-              <FaAngleRight size={14} className="sm:w-4 sm:h-4 text-gray-600" />
-            </button>
-            <button
-              aria-label="Last Page"
-              className="p-2 sm:p-3 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 shadow-sm"
-              onClick={() => handlePageChange(pagination.totalPages)}
-              disabled={pagination.page >= pagination.totalPages}
-            >
-              <FaAngleDoubleRight
-                size={14}
-                className="sm:w-4 sm:h-4 text-gray-600"
-              />
-            </button>
-          </div>
+          <button
+            aria-label="Next Page"
+            className="p-1.5 sm:p-2 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 shadow-sm"
+            onClick={() => handlePageChange(pagination.page + 1)}
+            disabled={pagination.page >= pagination.totalPages}
+          >
+            <FaAngleRight size={12} className="sm:w-4 sm:h-4 text-gray-600" />
+          </button>
+          <button
+            aria-label="Last Page"
+            className="p-1.5 sm:p-2 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 shadow-sm"
+            onClick={() => handlePageChange(pagination.totalPages)}
+            disabled={pagination.page >= pagination.totalPages}
+          >
+            <FaAngleDoubleRight
+              size={12}
+              className="sm:w-4 sm:h-4 text-gray-600"
+            />
+          </button>
         </div>
       </div>
     </div>
