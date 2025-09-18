@@ -137,9 +137,13 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
 
     sortedData.forEach(([timestamp, value]) => {
       const date = new Date(timestamp);
-      
+
       // Create a unique key for each hour (YYYY-MM-DD-HH)
-      const hourKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}-${String(date.getHours()).padStart(2, '0')}`;
+      const hourKey = `${date.getFullYear()}-${String(
+        date.getMonth() + 1
+      ).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}-${String(
+        date.getHours()
+      ).padStart(2, "0")}`;
 
       // Only include if we haven't seen this hour yet
       if (!seenHours.has(hourKey)) {
@@ -163,12 +167,14 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
 
       // Create interval key based on the selected interval
       let intervalKey;
-      
+
       if (intervalHours >= 24) {
         // For daily intervals (24H, 48H, 72H), group by days
         const dayStart = new Date(date);
         dayStart.setHours(0, 0, 0, 0);
-        const daysSinceEpoch = Math.floor(dayStart.getTime() / (24 * 60 * 60 * 1000));
+        const daysSinceEpoch = Math.floor(
+          dayStart.getTime() / (24 * 60 * 60 * 1000)
+        );
         const intervalSlot = Math.floor(daysSinceEpoch % (intervalHours / 24));
         intervalKey = `day_${daysSinceEpoch - intervalSlot}`;
       } else {
@@ -202,7 +208,7 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
   // Handle interval change
   const handleIntervalChange = (hours) => {
     setIntervalHours(hours);
-    
+
     const timeRangeFiltered = filterDataByTimeRange(
       data,
       timeRange,
@@ -223,7 +229,10 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
       newRange.enabled = true;
 
       const timeRangeFiltered = filterDataByTimeRange(data, "custom", newRange);
-      const intervalFiltered = filterByInterval(timeRangeFiltered, intervalHours);
+      const intervalFiltered = filterByInterval(
+        timeRangeFiltered,
+        intervalHours
+      );
       setFilteredData(intervalFiltered);
     }
   };
@@ -497,7 +506,10 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
 
       setData(chartData);
       const timeRangeFiltered = filterDataByTimeRange(chartData, timeRange);
-      const intervalFiltered = filterByInterval(timeRangeFiltered, intervalHours);
+      const intervalFiltered = filterByInterval(
+        timeRangeFiltered,
+        intervalHours
+      );
       setFilteredData(intervalFiltered);
 
       if (chartData.length === 0) {
@@ -526,7 +538,10 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
         timeRange,
         customDateRange.enabled ? customDateRange : null
       );
-      const intervalFiltered = filterByInterval(timeRangeFiltered, intervalHours);
+      const intervalFiltered = filterByInterval(
+        timeRangeFiltered,
+        intervalHours
+      );
       setFilteredData(intervalFiltered);
     }
   }, [data, timeRange, customDateRange, intervalHours]);
@@ -537,12 +552,16 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
 
     // First, remove duplicates by hour to ensure accurate daily calculations
     const hourlyDeduped = {};
-    
+
     data.forEach(([timestamp, value]) => {
       const date = new Date(timestamp);
-      
+
       // Create a unique key for each hour (YYYY-MM-DD-HH)
-      const hourKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}-${String(date.getHours()).padStart(2, '0')}`;
+      const hourKey = `${date.getFullYear()}-${String(
+        date.getMonth() + 1
+      ).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}-${String(
+        date.getHours()
+      ).padStart(2, "0")}`;
 
       // Only keep the first value for each hour
       if (!hourlyDeduped[hourKey]) {
@@ -694,7 +713,9 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
         style: { fontSize: "16px", fontWeight: "bold", color: "#374151" },
       },
       subtitle: {
-        text: unit ? `Unit: ${unit} • ${intervalHours}H intervals` : `${intervalHours}H intervals`,
+        text: unit
+          ? `Unit: ${unit} • ${intervalHours}H intervals`
+          : `${intervalHours}H intervals`,
         align: "left",
         style: { color: "#6B7280", fontSize: "12px" },
       },
@@ -750,10 +771,10 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
           states: { hover: { lineWidth: 3 } },
         },
         column: {
-          pointPadding: 0.1,
+          pointPadding: 0.3, // Increased for more gap between bars
           borderWidth: 0,
-          groupPadding: 0.05,
-          pointWidth: 8, // Slim bars
+          groupPadding: 0.1, // Increased for better spacing
+          pointWidth: 4, // Slim bars
           states: {
             hover: {
               brightness: 0.1,
@@ -768,13 +789,15 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
           color: colorConfig.lineColor,
           fillColor: isRainData ? colorConfig.lineColor : "transparent",
           lineWidth: isRainData ? 0 : 2,
-          marker: isRainData ? { enabled: false } : {
-            enabled: true,
-            radius: 6,
-            fillColor: colorConfig.lineColor,
-            lineColor: "#ffffff",
-            lineWidth: 2,
-          },
+          marker: isRainData
+            ? { enabled: false }
+            : {
+                enabled: true,
+                radius: 6,
+                fillColor: colorConfig.lineColor,
+                lineColor: "#ffffff",
+                lineWidth: 2,
+              },
           connectNulls: !isRainData,
         },
       ],
@@ -835,29 +858,65 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
         {data.length > 0 && (
           <div className="mb-2 sm:mb-3 space-y-3">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-              {/* Preset Time Range Buttons */}
-              <div className="flex flex-wrap gap-1 sm:gap-2 justify-center sm:justify-start">
-                {[
-                  { key: "day", label: "1D" },
-                  { key: "week", label: "1W" },
-                  { key: "month", label: "1M" },
-                  { key: "3month", label: "3M" },
-                  { key: "6month", label: "6M" },
-                  { key: "1year", label: "1Y" },
-                  { key: "all", label: "All" },
-                ].map((range) => (
-                  <button
-                    key={range.key}
-                    onClick={() => handleTimeRangeChange(range.key)}
-                    className={`btn btn-xs sm:btn-sm transition-all duration-200 text-xs sm:text-sm ${
-                      timeRange === range.key && !customDateRange.enabled
-                        ? "btn-primary"
-                        : "btn-outline btn-primary"
-                    }`}
-                  >
-                    {range.label}
-                  </button>
-                ))}
+              <div className="flex flex-col gap-2">
+                {/* Preset Time Range Buttons */}
+                <div className="flex flex-col gap-2">
+                  <label className="text-xs sm:text-sm font-medium text-gray-600">
+                    Time Interval:
+                  </label>
+                  <div className="flex flex-wrap gap-1 sm:gap-2 justify-center sm:justify-start">
+                    {[
+                      { key: "day", label: "1D" },
+                      { key: "week", label: "1W" },
+                      { key: "month", label: "1M" },
+                      { key: "3month", label: "3M" },
+                      { key: "6month", label: "6M" },
+                      { key: "1year", label: "1Y" },
+                      { key: "all", label: "All" },
+                    ].map((range) => (
+                      <button
+                        key={range.key}
+                        onClick={() => handleTimeRangeChange(range.key)}
+                        className={`btn btn-xs sm:btn-sm transition-all duration-200 text-xs sm:text-sm ${
+                          timeRange === range.key && !customDateRange.enabled
+                            ? "btn-primary"
+                            : "btn-outline btn-primary"
+                        }`}
+                      >
+                        {range.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                {/* Interval Selection */}
+                <div className="flex flex-col gap-2">
+                  <label className="text-xs sm:text-sm font-medium text-gray-600">
+                    Data Interval:
+                  </label>
+                  <div className="flex flex-wrap gap-1 sm:gap-2 justify-center sm:justify-start">
+                    {[
+                      { hours: 1, label: "1H" },
+                      { hours: 4, label: "4H" },
+                      { hours: 8, label: "8H" },
+                      { hours: 12, label: "12H" },
+                      { hours: 24, label: "24H" },
+                      { hours: 48, label: "48H" },
+                      { hours: 72, label: "72H" },
+                    ].map((interval) => (
+                      <button
+                        key={interval.hours}
+                        onClick={() => handleIntervalChange(interval.hours)}
+                        className={`btn btn-xs sm:btn-sm transition-all duration-200 text-xs sm:text-sm ${
+                          intervalHours === interval.hours
+                            ? "bg-emerald-600 hover:bg-emerald-700 text-white border-emerald-600"
+                            : "btn-outline border-emerald-600 text-emerald-600 hover:bg-emerald-600 hover:text-white"
+                        }`}
+                      >
+                        {interval.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
 
               {/* Custom Date Range Picker */}
@@ -873,7 +932,7 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
                       onChange={(e) =>
                         handleCustomDateRangeChange("startDate", e.target.value)
                       }
-                      className="input input-sm sm:input-md input-bordered text-sm sm:text-base w-44 sm:w-48"
+                      className="input input-sm sm:input-md input-bordered text-sm sm:text-base w-36 sm:w-48"
                       max={new Date().toISOString().split("T")[0]}
                     />
                     <span className="text-gray-400 text-sm">to</span>
@@ -883,7 +942,7 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
                       onChange={(e) =>
                         handleCustomDateRangeChange("endDate", e.target.value)
                       }
-                      className="input input-sm sm:input-md input-bordered text-sm sm:text-base w-44 sm:w-48"
+                      className="input input-sm sm:input-md input-bordered text-sm sm:text-base w-36 sm:w-48"
                       min={customDateRange.startDate}
                       max={new Date().toISOString().split("T")[0]}
                     />
@@ -898,45 +957,6 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
                     Clear
                   </button>
                 )}
-              </div>
-            </div>
-
-            {/* Active Range Display */}
-            {customDateRange.enabled && (
-              <div className="text-xs text-gray-600 bg-blue-50 px-2 py-1 rounded-md inline-block">
-                📅 Custom:{" "}
-                {new Date(customDateRange.startDate).toLocaleDateString()} -{" "}
-                {new Date(customDateRange.endDate).toLocaleDateString()}
-              </div>
-            )}
-
-            {/* Interval Selection */}
-            <div className="flex flex-col gap-2">
-              <label className="text-xs sm:text-sm font-medium text-gray-600">
-                Data Interval:
-              </label>
-              <div className="flex flex-wrap gap-1 sm:gap-2 justify-center sm:justify-start">
-                {[
-                  { hours: 1, label: "1H" },
-                  { hours: 4, label: "4H" },
-                  { hours: 8, label: "8H" },
-                  { hours: 12, label: "12H" },
-                  { hours: 24, label: "24H" },
-                  { hours: 48, label: "48H" },
-                  { hours: 72, label: "72H" },
-                ].map((interval) => (
-                  <button
-                    key={interval.hours}
-                    onClick={() => handleIntervalChange(interval.hours)}
-                    className={`btn btn-xs sm:btn-sm transition-all duration-200 text-xs sm:text-sm ${
-                      intervalHours === interval.hours
-                        ? "bg-emerald-600 hover:bg-emerald-700 text-white border-emerald-600"
-                        : "btn-outline border-emerald-600 text-emerald-600 hover:bg-emerald-600 hover:text-white"
-                    }`}
-                  >
-                    {interval.label}
-                  </button>
-                ))}
               </div>
             </div>
           </div>
@@ -1001,7 +1021,9 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
                           </>
                         ) : (
                           <th className="text-xs sm:text-sm font-semibold text-gray-600 px-2 sm:px-3">
-                            {parameter === "Accumulated Rain 1h" ? "Total" : "Avg"}{" "}
+                            {parameter === "Accumulated Rain 1h"
+                              ? "Total"
+                              : "Avg"}{" "}
                             {unit}
                           </th>
                         )}
