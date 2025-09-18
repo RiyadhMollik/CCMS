@@ -19,7 +19,7 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
-        Component: VcSms,
+        Component: AWS,
       },
       {
         path: "/data-analytics",

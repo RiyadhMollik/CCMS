@@ -14,8 +14,8 @@ const AWS = () => {
       icon: "🌡️",
     },
     {
-      parameter: "Rain Gauge",
-      title: "Rain Gauge", 
+      parameter: "Accumulated Rain 1h",
+      title: "Accumulated Rain 1h",
       unit: "mm",
       icon: "🌧️",
     },
@@ -32,7 +32,7 @@ const AWS = () => {
       icon: "💨",
     },
     {
-      parameter: "Wind Direction Gust", 
+      parameter: "Wind Direction Gust",
       title: "Wind Direction Gust",
       unit: "°",
       icon: "🧭",
@@ -45,7 +45,7 @@ const AWS = () => {
     },
     {
       parameter: "Sunshine Duration",
-      title: "Sunshine Duration", 
+      title: "Sunshine Duration",
       unit: "hours",
       icon: "🌞",
     },
@@ -62,14 +62,15 @@ const AWS = () => {
       }
       const stationsData = await response.json();
       setStations(stationsData);
-      
+
       // Set default station to "DAE-BRRI Gazipur" if available, otherwise first station
       if (stationsData.length > 0 && !location) {
-        const gazipurStation = stationsData.find(station => 
-          station.station_name?.toLowerCase().includes('gazipur') ||
-          station.station_name?.toLowerCase().includes('dae-brri gazipur')
+        const gazipurStation = stationsData.find(
+          (station) =>
+            station.station_name?.toLowerCase().includes("gazipur") ||
+            station.station_name?.toLowerCase().includes("dae-brri gazipur")
         );
-        
+
         if (gazipurStation) {
           setLocation(gazipurStation.station_id);
         } else {
@@ -121,11 +122,15 @@ const AWS = () => {
                   <span className="text-white text-sm sm:text-lg">🏢</span>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-bold text-gray-800 text-sm sm:text-base truncate">Weather Station</h3>
-                  <p className="text-xs sm:text-sm text-gray-600 truncate">{stations.length} monitoring sites available</p>
+                  <h3 className="font-bold text-gray-800 text-sm sm:text-base truncate">
+                    Weather Station
+                  </h3>
+                  <p className="text-xs sm:text-sm text-gray-600 truncate">
+                    {stations.length} monitoring sites available
+                  </p>
                 </div>
               </div>
-              
+
               {/* Selection Controls */}
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
                 <div className="relative flex-1">
@@ -174,13 +179,18 @@ const AWS = () => {
           <div className="card bg-base-100 shadow-xl mx-1 sm:mx-0">
             <div className="card-body p-6 sm:p-8 lg:p-12">
               <div className="flex flex-col items-center justify-center space-y-4 sm:space-y-6">
-                <div className="text-4xl sm:text-6xl lg:text-8xl opacity-30">🌤️</div>
+                <div className="text-4xl sm:text-6xl lg:text-8xl opacity-30">
+                  🌤️
+                </div>
                 <div className="text-center max-w-sm sm:max-w-md px-2">
                   <h3 className="text-lg sm:text-xl lg:text-2xl font-bold text-base-content/70 mb-2 sm:mb-3">
                     Select a Weather Station
                   </h3>
                   <p className="text-sm sm:text-base text-base-content/50 leading-relaxed">
-                    Choose a weather station from the dropdown above to view comprehensive climate data across 7 different parameters including temperature, humidity, rainfall, wind, and solar radiation.
+                    Choose a weather station from the dropdown above to view
+                    comprehensive climate data across 7 different parameters
+                    including temperature, humidity, rainfall, wind, and solar
+                    radiation.
                   </p>
                 </div>
               </div>

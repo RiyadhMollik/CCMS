@@ -24,6 +24,7 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
   const [filteredData, setFilteredData] = useState([]);
   const [timeRange, setTimeRange] = useState("month");
   const [showDownloadModal, setShowDownloadModal] = useState(false);
+  const [intervalHours, setIntervalHours] = useState(8); // Default to 8 hours
   const [customDateRange, setCustomDateRange] = useState({
     startDate: "",
     endDate: "",
@@ -123,29 +124,60 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
     return fullData.filter((point) => point[0] >= startDate.getTime());
   };
 
-  // Filter data to show every 8 hours (skip 7 hours each time)
-  const filterBy8Hours = (data) => {
+  // Remove duplicate hourly data and filter by dynamic interval
+  const filterByInterval = (data, intervalHours) => {
     if (data.length === 0) return data;
 
     // Sort data by timestamp to ensure chronological order
     const sortedData = [...data].sort((a, b) => a[0] - b[0]);
 
-    // Filter to show data at 8-hour intervals: 00:00, 08:00, 16:00
-    const filtered = [];
-    const seenIntervals = new Set();
+    // First, remove duplicates by keeping only one entry per hour
+    const hourlyFiltered = [];
+    const seenHours = new Set();
 
     sortedData.forEach(([timestamp, value]) => {
       const date = new Date(timestamp);
+      
+      // Create a unique key for each hour (YYYY-MM-DD-HH)
+      const hourKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}-${String(date.getHours()).padStart(2, '0')}`;
+
+      // Only include if we haven't seen this hour yet
+      if (!seenHours.has(hourKey)) {
+        hourlyFiltered.push([timestamp, value]);
+        seenHours.add(hourKey);
+      }
+    });
+
+    // For 1 hour interval, return all deduplicated hourly data
+    if (intervalHours === 1) {
+      return hourlyFiltered;
+    }
+
+    // For other intervals, filter to show data at specified intervals
+    const filtered = [];
+    const seenIntervals = new Set();
+
+    hourlyFiltered.forEach(([timestamp, value]) => {
+      const date = new Date(timestamp);
       const hour = date.getHours();
 
-      // Create a unique key for each 8-hour interval
-      // This ensures we only take one reading per 8-hour slot per day
-      const dayStart = new Date(date);
-      dayStart.setHours(0, 0, 0, 0);
-
-      // Determine which 8-hour slot this falls into (0-7 = slot 0, 8-15 = slot 1, 16-23 = slot 2)
-      const slot = Math.floor(hour / 8);
-      const intervalKey = `${dayStart.getTime()}_${slot}`;
+      // Create interval key based on the selected interval
+      let intervalKey;
+      
+      if (intervalHours >= 24) {
+        // For daily intervals (24H, 48H, 72H), group by days
+        const dayStart = new Date(date);
+        dayStart.setHours(0, 0, 0, 0);
+        const daysSinceEpoch = Math.floor(dayStart.getTime() / (24 * 60 * 60 * 1000));
+        const intervalSlot = Math.floor(daysSinceEpoch % (intervalHours / 24));
+        intervalKey = `day_${daysSinceEpoch - intervalSlot}`;
+      } else {
+        // For hourly intervals (4H, 8H, 12H), group within days
+        const dayStart = new Date(date);
+        dayStart.setHours(0, 0, 0, 0);
+        const slot = Math.floor(hour / intervalHours);
+        intervalKey = `${dayStart.getTime()}_${slot}`;
+      }
 
       // Only include if we haven't seen this interval yet
       if (!seenIntervals.has(intervalKey)) {
@@ -163,8 +195,21 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
     setCustomDateRange({ ...customDateRange, enabled: false });
 
     const timeRangeFiltered = filterDataByTimeRange(data, range);
-    const hourlyFiltered = filterBy8Hours(timeRangeFiltered);
-    setFilteredData(hourlyFiltered);
+    const intervalFiltered = filterByInterval(timeRangeFiltered, intervalHours);
+    setFilteredData(intervalFiltered);
+  };
+
+  // Handle interval change
+  const handleIntervalChange = (hours) => {
+    setIntervalHours(hours);
+    
+    const timeRangeFiltered = filterDataByTimeRange(
+      data,
+      timeRange,
+      customDateRange.enabled ? customDateRange : null
+    );
+    const intervalFiltered = filterByInterval(timeRangeFiltered, hours);
+    setFilteredData(intervalFiltered);
   };
 
   // Handle custom date range change
@@ -178,8 +223,8 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
       newRange.enabled = true;
 
       const timeRangeFiltered = filterDataByTimeRange(data, "custom", newRange);
-      const hourlyFiltered = filterBy8Hours(timeRangeFiltered);
-      setFilteredData(hourlyFiltered);
+      const intervalFiltered = filterByInterval(timeRangeFiltered, intervalHours);
+      setFilteredData(intervalFiltered);
     }
   };
 
@@ -188,8 +233,8 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
     setCustomDateRange({ startDate: "", endDate: "", enabled: false });
     setTimeRange("month");
     const timeRangeFiltered = filterDataByTimeRange(data, "month");
-    const hourlyFiltered = filterBy8Hours(timeRangeFiltered);
-    setFilteredData(hourlyFiltered);
+    const intervalFiltered = filterByInterval(timeRangeFiltered, intervalHours);
+    setFilteredData(intervalFiltered);
   };
 
   // Handle chart download using Highcharts native export or fallback methods
@@ -389,7 +434,7 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
         dailyData.forEach((item) => {
           csvContent += `${item.date},${item.min},${item.max},${item.average}\n`;
         });
-      } else if (parameter === "Rain Gauge") {
+      } else if (parameter === "Accumulated Rain 1h") {
         csvContent = `Date,Total ${unit}\n`;
         dailyData.forEach((item) => {
           csvContent += `${item.date},${item.total}\n`;
@@ -452,8 +497,8 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
 
       setData(chartData);
       const timeRangeFiltered = filterDataByTimeRange(chartData, timeRange);
-      const hourlyFiltered = filterBy8Hours(timeRangeFiltered);
-      setFilteredData(hourlyFiltered);
+      const intervalFiltered = filterByInterval(timeRangeFiltered, intervalHours);
+      setFilteredData(intervalFiltered);
 
       if (chartData.length === 0) {
         setError("No valid data available for this parameter");
@@ -473,7 +518,7 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
     }
   }, [stationId, parameter]);
 
-  // Update filtered data when time range changes
+  // Update filtered data when time range or interval changes
   useEffect(() => {
     if (data.length > 0) {
       const timeRangeFiltered = filterDataByTimeRange(
@@ -481,19 +526,34 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
         timeRange,
         customDateRange.enabled ? customDateRange : null
       );
-      const hourlyFiltered = filterBy8Hours(timeRangeFiltered);
-      setFilteredData(hourlyFiltered);
+      const intervalFiltered = filterByInterval(timeRangeFiltered, intervalHours);
+      setFilteredData(intervalFiltered);
     }
-  }, [data, timeRange, customDateRange]);
+  }, [data, timeRange, customDateRange, intervalHours]);
 
   // Calculate daily averages for recent 5 days
   const getDailyAverages = () => {
     if (data.length === 0) return [];
 
-    // Group data by date
+    // First, remove duplicates by hour to ensure accurate daily calculations
+    const hourlyDeduped = {};
+    
+    data.forEach(([timestamp, value]) => {
+      const date = new Date(timestamp);
+      
+      // Create a unique key for each hour (YYYY-MM-DD-HH)
+      const hourKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}-${String(date.getHours()).padStart(2, '0')}`;
+
+      // Only keep the first value for each hour
+      if (!hourlyDeduped[hourKey]) {
+        hourlyDeduped[hourKey] = { timestamp, value };
+      }
+    });
+
+    // Group deduplicated data by date
     const dailyGroups = {};
 
-    data.forEach(([timestamp, value]) => {
+    Object.values(hourlyDeduped).forEach(({ timestamp, value }) => {
       const date = new Date(timestamp);
       const dateKey = date.toISOString().split("T")[0]; // YYYY-MM-DD format
 
@@ -505,7 +565,7 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
 
     // Calculate daily statistics (average, min, max for temperature; total for rain)
     const isTemperature = parameter === "Air Temperature";
-    const isRainfall = parameter === "Rain Gauge";
+    const isRainfall = parameter === "Accumulated Rain 1h";
 
     const dailyAverages = Object.entries(dailyGroups)
       .map(([date, values]) => {
@@ -553,8 +613,8 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
     if (paramLower.includes("temperature") || paramLower.includes("temp")) {
       // Temperature: Bold red
       return {
-        lineColor: "#B91C1C",
-        hoverLineColor: "#B91C1C",
+        lineColor: "#eb1010",
+        hoverLineColor: "#f50505",
       };
     } else if (paramLower.includes("humidity")) {
       // Humidity: Bold teal
@@ -568,7 +628,7 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
     ) {
       // Rain: Bold dark blue
       return {
-        lineColor: "#1E3A8A",
+        lineColor: "#7690db",
         hoverLineColor: "#1E3A8A",
       };
     } else if (paramLower.includes("wind")) {
@@ -608,6 +668,10 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
     const chartData = filteredData.map((point) => [point[0], point[1]]);
     const colorConfig = getColorConfig();
 
+    // Determine if this is rain data to show as bar chart
+    const isRainData = parameter === "Accumulated Rain 1h";
+    const chartType = isRainData ? "column" : "areaspline";
+
     // Calculate dynamic Y-axis range
     const values = chartData.map((point) => point[1]);
     const minValue = Math.min(...values);
@@ -617,7 +681,7 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
 
     return {
       chart: {
-        type: "areaspline",
+        type: chartType,
         zooming: { type: "x" },
         backgroundColor: "transparent",
         height: 380,
@@ -630,7 +694,7 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
         style: { fontSize: "16px", fontWeight: "bold", color: "#374151" },
       },
       subtitle: {
-        text: unit ? `Unit: ${unit} • 8-hour intervals` : "8-hour intervals",
+        text: unit ? `Unit: ${unit} • ${intervalHours}H intervals` : `${intervalHours}H intervals`,
         align: "left",
         style: { color: "#6B7280", fontSize: "12px" },
       },
@@ -685,22 +749,33 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
           connectNulls: true,
           states: { hover: { lineWidth: 3 } },
         },
+        column: {
+          pointPadding: 0.1,
+          borderWidth: 0,
+          groupPadding: 0.05,
+          pointWidth: 8, // Slim bars
+          states: {
+            hover: {
+              brightness: 0.1,
+            },
+          },
+        },
       },
       series: [
         {
           name: title,
           data: chartData,
           color: colorConfig.lineColor,
-          fillColor: "transparent",
-          lineWidth: 2,
-          marker: {
+          fillColor: isRainData ? colorConfig.lineColor : "transparent",
+          lineWidth: isRainData ? 0 : 2,
+          marker: isRainData ? { enabled: false } : {
             enabled: true,
             radius: 6,
             fillColor: colorConfig.lineColor,
             lineColor: "#ffffff",
             lineWidth: 2,
           },
-          connectNulls: true,
+          connectNulls: !isRainData,
         },
       ],
       credits: { enabled: false },
@@ -727,7 +802,7 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
                 {title}
               </h3>
               <p className="text-xs sm:text-sm text-gray-500">
-                {unit} • 8-hour intervals
+                {unit} • {intervalHours}H intervals
               </p>
             </div>
           </div>
@@ -834,6 +909,36 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
                 {new Date(customDateRange.endDate).toLocaleDateString()}
               </div>
             )}
+
+            {/* Interval Selection */}
+            <div className="flex flex-col gap-2">
+              <label className="text-xs sm:text-sm font-medium text-gray-600">
+                Data Interval:
+              </label>
+              <div className="flex flex-wrap gap-1 sm:gap-2 justify-center sm:justify-start">
+                {[
+                  { hours: 1, label: "1H" },
+                  { hours: 4, label: "4H" },
+                  { hours: 8, label: "8H" },
+                  { hours: 12, label: "12H" },
+                  { hours: 24, label: "24H" },
+                  { hours: 48, label: "48H" },
+                  { hours: 72, label: "72H" },
+                ].map((interval) => (
+                  <button
+                    key={interval.hours}
+                    onClick={() => handleIntervalChange(interval.hours)}
+                    className={`btn btn-xs sm:btn-sm transition-all duration-200 text-xs sm:text-sm ${
+                      intervalHours === interval.hours
+                        ? "bg-emerald-600 hover:bg-emerald-700 text-white border-emerald-600"
+                        : "btn-outline border-emerald-600 text-emerald-600 hover:bg-emerald-600 hover:text-white"
+                    }`}
+                  >
+                    {interval.label}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         )}
 
@@ -871,7 +976,7 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
                   <span className="sm:hidden">7 Days</span>
                   {parameter === "Air Temperature"
                     ? "Temperature Range"
-                    : parameter === "Rain Gauge"
+                    : parameter === "Accumulated Rain 1h"
                     ? "Total Rainfall"
                     : "Average"}
                 </h4>
@@ -896,7 +1001,7 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
                           </>
                         ) : (
                           <th className="text-xs sm:text-sm font-semibold text-gray-600 px-2 sm:px-3">
-                            {parameter === "Rain Gauge" ? "Total" : "Avg"}{" "}
+                            {parameter === "Accumulated Rain 1h" ? "Total" : "Avg"}{" "}
                             {unit}
                           </th>
                         )}
@@ -935,7 +1040,7 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
                                 {item.average}
                               </td>
                             </>
-                          ) : parameter === "Rain Gauge" ? (
+                          ) : parameter === "Accumulated Rain 1h" ? (
                             <td className="text-xs sm:text-sm font-medium text-gray-800 px-2 sm:px-3">
                               {item.total}
                             </td>
