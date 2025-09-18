@@ -551,98 +551,51 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
     const paramLower = parameter?.toLowerCase() || "";
 
     if (paramLower.includes("temperature") || paramLower.includes("temp")) {
-      // Temperature: Light red to bold red gradient
+      // Temperature: Bold red
       return {
         lineColor: "#B91C1C",
-        gradientStops: [
-          [0, "#FEE2E2"],
-          [0.3, "#FECACA"],
-          [0.6, "#F87171"],
-          [0.8, "#EF4444"],
-          [1, "#B91C1C"],
-        ],
         hoverLineColor: "#B91C1C",
       };
     } else if (paramLower.includes("humidity")) {
-      // Humidity: Light blue to teal
+      // Humidity: Bold teal
       return {
         lineColor: "#0891B2",
-        gradientStops: [
-          [0, "#E0F7FA"],
-          [0.3, "#80DEEA"],
-          [0.6, "#26C6DA"],
-          [0.8, "#00ACC1"],
-          [1, "#0891B2"],
-        ],
         hoverLineColor: "#0891B2",
       };
     } else if (
       paramLower.includes("rain") ||
       paramLower.includes("precipitation")
     ) {
-      // Rain: Light gray to dark blue
+      // Rain: Bold dark blue
       return {
         lineColor: "#1E3A8A",
-        gradientStops: [
-          [0, "#F1F5F9"],
-          [0.3, "#CBD5E1"],
-          [0.6, "#64748B"],
-          [0.8, "#334155"],
-          [1, "#1E3A8A"],
-        ],
         hoverLineColor: "#1E3A8A",
       };
     } else if (paramLower.includes("wind")) {
-      // Wind: Light green to dark green
+      // Wind: Bold dark green
       return {
         lineColor: "#166534",
-        gradientStops: [
-          [0, "#F0FDF4"],
-          [0.3, "#BBF7D0"],
-          [0.6, "#4ADE80"],
-          [0.8, "#16A34A"],
-          [1, "#166534"],
-        ],
         hoverLineColor: "#166534",
       };
     } else if (
       paramLower.includes("solar") ||
       paramLower.includes("radiation")
     ) {
-      // Solar: Light yellow to orange
+      // Solar: Bold orange
       return {
         lineColor: "#EA580C",
-        gradientStops: [
-          [0, "#FFFBEB"],
-          [0.3, "#FED7AA"],
-          [0.6, "#FB923C"],
-          [0.8, "#F97316"],
-          [1, "#EA580C"],
-        ],
         hoverLineColor: "#EA580C",
       };
     } else if (paramLower.includes("pressure")) {
-      // Pressure: Light purple to dark purple
+      // Pressure: Bold purple
       return {
         lineColor: "#7C3AED",
-        gradientStops: [
-          [0, "#F5F3FF"],
-          [0.3, "#DDD6FE"],
-          [0.6, "#A78BFA"],
-          [0.8, "#8B5CF6"],
-          [1, "#7C3AED"],
-        ],
         hoverLineColor: "#7C3AED",
       };
     } else {
-      // Default: Blue gradient
+      // Default: Bold blue
       return {
         lineColor: "#1E40AF",
-        gradientStops: [
-          [0, "#93C5FD"],
-          [0.5, "#3B82F6"],
-          [1, "#1E40AF"],
-        ],
         hoverLineColor: "#1E40AF",
       };
     }
@@ -711,21 +664,21 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
       legend: { enabled: false },
       plotOptions: {
         areaspline: {
-          lineWidth: 1,
-          fillOpacity: 0.3,
+          lineWidth: 2,
+          fillOpacity: 0.1,
           marker: {
             enabled: true,
-            radius: 4,
+            radius: 6,
             fillColor: colorConfig.lineColor,
             lineColor: "#ffffff",
-            lineWidth: 1,
+            lineWidth: 2,
             states: {
               hover: {
                 enabled: true,
-                radius: 6,
+                radius: 8,
                 fillColor: colorConfig.lineColor,
                 lineColor: "#ffffff",
-                lineWidth: 1,
+                lineWidth: 2,
               },
             },
           },
@@ -737,15 +690,12 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
         {
           name: title,
           data: chartData,
-          color: {
-            linearGradient: { x1: 0, x2: 0, y1: 1, y2: 0 },
-            stops: colorConfig.gradientStops,
-          },
+          color: colorConfig.lineColor,
           fillColor: "transparent",
-          lineWidth: 1,
+          lineWidth: 2,
           marker: {
             enabled: true,
-            radius: 4,
+            radius: 6,
             fillColor: colorConfig.lineColor,
             lineColor: "#ffffff",
             lineWidth: 2,
@@ -1109,7 +1059,7 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
                   </svg>
                 </div>
                 <div className="text-left">
-                  <div className="font-medium text-gray-800">Chart Image</div>
+                  <div className="font-medium text-gray-800">Image</div>
                   <div className="text-sm text-gray-500">
                     High-quality PNG of the chart
                   </div>

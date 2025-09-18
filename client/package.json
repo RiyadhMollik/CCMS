@@ -16,6 +16,7 @@
     "axios": "^1.11.0",
     "chart.js": "^4.5.0",
     "chartjs-adapter-date-fns": "^3.0.0",
+    "dom-to-image-more": "^3.7.1",
     "highcharts": "^12.4.0",
     "highcharts-react-official": "^3.2.2",
     "html2canvas": "^1.4.1",
