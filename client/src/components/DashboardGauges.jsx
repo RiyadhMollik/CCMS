@@ -198,7 +198,7 @@ const DashboardGauges = () => {
 
   if (loading || !modulesLoaded) {
     return (
-      <div className="bg-white rounded-xl p-4 md:p-6 shadow-sm border border-gray-100 mb-6 lg:h-[776px] h-auto">
+      <div className="bg-white rounded-xl p-4 md:p-6 shadow-sm border border-gray-100 mb-6 md:h-[588px] lg:h-[752px] h-auto">
         <div className="flex justify-center items-center h-48 md:h-64">
           <div className="text-gray-500 flex items-center space-x-2">
             <div className="animate-spin w-5 h-5 border-2 border-emerald-500 border-t-transparent rounded-full"></div>
@@ -214,7 +214,7 @@ const DashboardGauges = () => {
   return (
     <div
       ref={containerRef}
-      className="bg-white rounded-xl p-4 md:p-6 shadow-sm border border-gray-100 mb-6 flex flex-col"
+      className="bg-white rounded-xl p-4 md:p-6 shadow-sm border border-gray-100 md:h-[588px] lg:h-[773px] h-auto flex flex-col"
     >
       {/* Header */}
       <div className="mb-3 md:mb-4 flex justify-between items-center">
@@ -268,10 +268,10 @@ const DashboardGauges = () => {
           />
         </div>
 
-        {/* Legend BELOW chart */}
         <div className="grid grid-cols-3 sm:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-3 mt-4 max-w-[600px] mx-auto">
           {gaugeData.map((item, i) => (
             <div key={i}>
+              {/* Mobile/Small screens: Simple dot + name */}
               <div className="flex items-center justify-center space-x-2 md:hidden">
                 <div
                   className="w-3 h-3 rounded-full flex-shrink-0"
@@ -285,6 +285,7 @@ const DashboardGauges = () => {
                 </span>
               </div>
 
+              {/* Medium and Large screens: Full legend with background */}
               <div
                 className="hidden md:block text-center p-3 rounded-lg border"
                 style={{
