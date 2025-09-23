@@ -27,31 +27,46 @@ const CampaignPieChart = () => {
     }
   }, []);
 
-  // Demo data for last 5 campaigns
+  // Demo data for last 5 campaigns with detailed call status
   const demoData = [
     {
       name: "Rice Quality Survey",
-      calls: 420,
+      totalCalls: 420,
+      connected: 320,
+      notConnected: 85,
+      noBalance: 15,
       color: "#3b82f6", // blue
     },
     {
       name: "Farmer Feedback",
-      calls: 365,
+      totalCalls: 365,
+      connected: 280,
+      notConnected: 70,
+      noBalance: 15,
       color: "#10b981", // green
     },
     {
       name: "Crop Advisory",
-      calls: 280,
+      totalCalls: 280,
+      connected: 210,
+      notConnected: 60,
+      noBalance: 10,
       color: "#f59e0b", // orange
     },
     {
       name: "Weather Alert",
-      calls: 195,
+      totalCalls: 195,
+      connected: 150,
+      notConnected: 35,
+      noBalance: 10,
       color: "#ef4444", // red
     },
     {
       name: "Market Price Update",
-      calls: 140,
+      totalCalls: 140,
+      connected: 105,
+      notConnected: 25,
+      noBalance: 10,
       color: "#8b5cf6", // purple
     },
   ];
@@ -60,11 +75,11 @@ const CampaignPieChart = () => {
   useEffect(() => {
     const loadDemoData = () => {
       setLoading(true);
-      
+
       // Simulate loading delay
       setTimeout(() => {
         setData(demoData);
-        const total = demoData.reduce((sum, item) => sum + item.calls, 0);
+        const total = demoData.reduce((sum, item) => sum + item.totalCalls, 0);
         setTotalCalls(total);
         setLoading(false);
       }, 700);
@@ -77,58 +92,51 @@ const CampaignPieChart = () => {
     num >= 1000 ? `${(num / 1000).toFixed(1)}K` : num.toString();
   const isMobile = windowWidth < 640;
 
-  // Custom tooltip
+  // Custom tooltip with detailed call breakdown
   const CustomTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
       const data = payload[0];
       const percentage = ((data.value / totalCalls) * 100).toFixed(1);
       return (
-        <div className="bg-white p-3 rounded-lg shadow-lg border border-gray-200">
-          <h4 className="font-semibold text-gray-800 mb-1 text-sm">
+        <div className="bg-white p-3 rounded-lg shadow-lg border border-gray-200 min-w-[200px]">
+          <h4 className="font-semibold text-gray-800 mb-2 text-sm border-b pb-1">
             {data.name}
           </h4>
           <div className="space-y-1">
-            <p className="text-xs">
-              <span className="font-medium">Calls:</span> {data.value.toLocaleString()}
-            </p>
-            <p className="text-xs">
-              <span className="font-medium">Percentage:</span> {percentage}%
-            </p>
+            <div className="flex justify-between text-xs">
+              <span className="font-medium">Total Calls:</span>
+              <span className="font-bold">
+                {data.payload.totalCalls.toLocaleString()}
+              </span>
+            </div>
+            <div className="flex justify-between text-xs">
+              <span className="font-medium">Percentage:</span>
+              <span className="font-bold">{percentage}%</span>
+            </div>
+            <hr className="my-1" />
+            <div className="flex justify-between text-xs">
+              <span className="text-green-600">Connected:</span>
+              <span className="font-medium">
+                {data.payload.connected.toLocaleString()}
+              </span>
+            </div>
+            <div className="flex justify-between text-xs">
+              <span className="text-red-600">Not Connected:</span>
+              <span className="font-medium">
+                {data.payload.notConnected.toLocaleString()}
+              </span>
+            </div>
+            <div className="flex justify-between text-xs">
+              <span className="text-orange-600">No Balance:</span>
+              <span className="font-medium">
+                {data.payload.noBalance.toLocaleString()}
+              </span>
+            </div>
           </div>
         </div>
       );
     }
     return null;
-  };
-
-  // Custom legend
-  const CustomLegend = ({ payload }) => {
-    return (
-      <div className="grid grid-cols-1 gap-2 mt-4">
-        {payload.map((entry, index) => {
-          const percentage = ((entry.payload.calls / totalCalls) * 100).toFixed(1);
-          return (
-            <div key={index} className="flex items-center justify-between text-xs">
-              <div className="flex items-center space-x-2 flex-1 min-w-0">
-                <div
-                  className="w-3 h-3 rounded-full flex-shrink-0"
-                  style={{ backgroundColor: entry.color }}
-                />
-                <span className="text-gray-600 truncate font-medium">
-                  {entry.value}
-                </span>
-              </div>
-              <div className="text-right flex-shrink-0 ml-2">
-                <div className="font-bold text-gray-800">
-                  {entry.payload.calls.toLocaleString()}
-                </div>
-                <div className="text-gray-500">{percentage}%</div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    );
   };
 
   // Download chart card as PNG
@@ -163,7 +171,7 @@ const CampaignPieChart = () => {
             Campaign Call Distribution
           </h3>
           <p className="text-gray-500 text-xs md:text-sm">
-            Last 5 campaigns and their total calls
+            Last 5 campaigns and their call distribution
           </p>
         </div>
         <div className="text-right flex-shrink-0 flex items-center gap-2">
@@ -199,7 +207,7 @@ const CampaignPieChart = () => {
       </div>
 
       {/* Chart Container */}
-      <div className="flex-grow flex flex-col lg:flex-row gap-4">
+      <div className="flex-grow flex flex-col">
         {loading ? (
           <div className="flex justify-center items-center h-full w-full">
             <div className="text-gray-500 flex items-center space-x-2">
@@ -210,17 +218,17 @@ const CampaignPieChart = () => {
         ) : (
           <>
             {/* Pie Chart */}
-            <div className="flex-1 h-48 md:h-64 lg:h-full">
+            <div className="flex-1 h-48 md:h-64 lg:h-80">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
                     data={data}
                     cx="50%"
                     cy="50%"
-                    innerRadius={isMobile ? 40 : 60}
-                    outerRadius={isMobile ? 80 : 100}
+                    innerRadius={isMobile ? 50 : 70}
+                    outerRadius={isMobile ? 90 : 120}
                     paddingAngle={2}
-                    dataKey="calls"
+                    dataKey="totalCalls"
                   >
                     {data.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.color} />
@@ -231,17 +239,42 @@ const CampaignPieChart = () => {
               </ResponsiveContainer>
             </div>
 
-            {/* Legend */}
-            <div className="flex-1 lg:max-w-xs">
-              <div className="bg-gray-50 rounded-lg p-3">
-                <h4 className="text-sm font-semibold text-gray-700 mb-3">
-                  Campaign Details
-                </h4>
-                <CustomLegend payload={data.map(item => ({ 
-                  value: item.name, 
-                  color: item.color, 
-                  payload: item 
-                }))} />
+            {/* Legend Below Chart */}
+            <div className="mt-4">
+              <h4 className="text-sm font-semibold text-gray-700 mb-3 text-center">
+                Campaign Details
+              </h4>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+                {data.map((item, index) => {
+                  const percentage = (
+                    (item.totalCalls / totalCalls) *
+                    100
+                  ).toFixed(1);
+                  return (
+                    <div key={index} className="text-center">
+                      <div className="flex items-center justify-center space-x-2 mb-1">
+                        <div
+                          className="w-3 h-3 rounded-full flex-shrink-0"
+                          style={{ backgroundColor: item.color }}
+                        />
+                        <span
+                          className="text-xs font-medium text-gray-700 truncate"
+                          title={item.name}
+                        >
+                          {item.name.length > 12
+                            ? `${item.name.substring(0, 12)}...`
+                            : item.name}
+                        </span>
+                      </div>
+                      <div className="text-xs">
+                        <div className="font-bold text-gray-800">
+                          {item.totalCalls.toLocaleString()}
+                        </div>
+                        <div className="text-gray-500">{percentage}%</div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </>

@@ -30,6 +30,14 @@ const router = createBrowserRouter([
         path: "/about",
         Component: About,
       },
+      {
+        path: "/aws",
+        Component: AWS,
+      },
+      {
+        path: "/ccvs",
+        Component: Home,
+      },
     ],
   },
   {

@@ -108,6 +108,32 @@ const Sidebar = () => {
 
       <li className="text-base font-medium">
         <NavLink
+          to="/aws"
+          className={`flex items-center ${isCollapsed ? "justify-center" : ""}`}
+          title={isCollapsed ? "AWS" : ""}
+        >
+          <IoAnalyticsSharp
+            className={`w-5 h-5 ${!isCollapsed ? "mr-2" : ""}`}
+          />
+          {!isCollapsed && "AWS"}
+        </NavLink>
+      </li>
+
+      <li className="text-base font-medium">
+        <NavLink
+          to="/ccvs"
+          className={`flex items-center ${isCollapsed ? "justify-center" : ""}`}
+          title={isCollapsed ? "CCVS" : ""}
+        >
+          <IoAnalyticsSharp
+            className={`w-5 h-5 ${!isCollapsed ? "mr-2" : ""}`}
+          />
+          {!isCollapsed && "CCVS"}
+        </NavLink>
+      </li>
+
+      <li className="text-base font-medium">
+        <NavLink
           to="/about"
           className={`flex items-center ${isCollapsed ? "justify-center" : ""}`}
           title={isCollapsed ? "About" : ""}
@@ -151,7 +177,7 @@ const Sidebar = () => {
           </div>
         </li>
       )}
-      
+
       {!isCollapsed && (
         <li className="mt-auto mb-4">
           <div className="flex flex-col items-center px-4">

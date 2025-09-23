@@ -59,104 +59,193 @@ const StatsCards = () => {
       title: "Total Calls",
       value: formatNumber(statsData.totalCalls),
       rawValue: statsData.totalCalls,
-      icon: "📞",
-      color: "blue",
-      bgColor: "bg-blue-50",
-      progressColor: "bg-blue-500",
-      textColor: "text-blue-600",
+      icon: (
+        <svg
+          className="w-8 h-8"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21L7.5 11.5c-.897.46-1.275 1.375-.837 2.15.196.348.481.685.837.987M17.5 11.5l2.724-2.113a1 1 0 00-.502-1.21L18.224 3.684A1 1 0 0017.276 3H14a2 2 0 00-2 2v1"
+          />
+        </svg>
+      ),
+      gradient: "from-blue-500 to-indigo-600",
+      lightBg: "from-blue-50 to-indigo-50",
+      darkColor: "text-blue-600",
       percentage: 100,
-      description: "All calls made",
+      trend: "+12%",
+      trendPositive: true,
     },
     {
       id: 2,
-      title: "Connected",
+      title: "Connected Calls",
       value: formatNumber(statsData.connected),
       rawValue: statsData.connected,
-      icon: "✅",
-      color: "green",
-      bgColor: "bg-green-50",
-      progressColor: "bg-green-500",
-      textColor: "text-green-600",
+      icon: (
+        <svg
+          className="w-8 h-8"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+          />
+        </svg>
+      ),
+      gradient: "from-green-500 to-emerald-600",
+      lightBg: "from-green-50 to-emerald-50",
+      darkColor: "text-green-600",
       percentage: connectedPercentage,
-      description: "Successfully connected",
+      trend: "+8%",
+      trendPositive: true,
     },
     {
       id: 3,
-      title: "Not Connected",
+      title: "Failed Calls",
       value: formatNumber(statsData.notConnected),
       rawValue: statsData.notConnected,
-      icon: "❌",
-      color: "red",
-      bgColor: "bg-red-50",
-      progressColor: "bg-red-500",
-      textColor: "text-red-600",
+      icon: (
+        <svg
+          className="w-8 h-8"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+          />
+        </svg>
+      ),
+      gradient: "from-red-500 to-rose-600",
+      lightBg: "from-red-50 to-rose-50",
+      darkColor: "text-red-600",
       percentage: notConnectedPercentage,
-      description: "Failed to connect",
+      trend: "-5%",
+      trendPositive: false,
     },
     {
       id: 4,
-      title: "Duration",
+      title: "Call Duration",
       value: formatDuration(statsData.totalDuration),
       rawValue: statsData.totalDuration,
-      icon: "⏱️",
-      color: "purple",
-      bgColor: "bg-purple-50",
-      progressColor: "bg-purple-500",
-      textColor: "text-purple-600",
+      icon: (
+        <svg
+          className="w-8 h-8"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+          />
+        </svg>
+      ),
+      gradient: "from-purple-500 to-violet-600",
+      lightBg: "from-purple-50 to-violet-50",
+      darkColor: "text-purple-600",
       percentage: Math.min(
         Math.round((statsData.totalDuration / 86400) * 100),
         100
-      ), // Max 24h
-      description: "Total call time",
+      ),
+      trend: "+15%",
+      trendPositive: true,
     },
     {
       id: 5,
-      title: "Campaigns",
+      title: "Total Campaigns",
       value: statsData.campaigns,
       rawValue: statsData.campaigns,
-      icon: "📢",
-      color: "indigo",
-      bgColor: "bg-indigo-50",
-      progressColor: "bg-indigo-500",
-      textColor: "text-indigo-600",
-      percentage: Math.min(statsData.campaigns * 5, 100), // Arbitrary scaling
-      description: "Active campaigns",
+      icon: (
+        <svg
+          className="w-8 h-8"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.196-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
+          />
+        </svg>
+      ),
+      gradient: "from-amber-500 to-orange-600",
+      lightBg: "from-amber-50 to-orange-50",
+      darkColor: "text-amber-600",
+      percentage: Math.min(statsData.campaigns * 8, 100),
+      trend: "+3",
+      trendPositive: true,
     },
     {
       id: 6,
-      title: "No Balance Calls",
+      title: "No Balance",
       value: statsData.noBalanceCalls,
       rawValue: statsData.noBalanceCalls,
-      icon: "💸",
-      color: "orange",
-      bgColor: "bg-orange-50",
-      progressColor: "bg-orange-500",
-      textColor: "text-orange-600",
+      icon: (
+        <svg
+          className="w-8 h-8"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"
+          />
+        </svg>
+      ),
+      gradient: "from-cyan-500 to-teal-600",
+      lightBg: "from-cyan-50 to-teal-50",
+      darkColor: "text-cyan-600",
       percentage:
         statsData.totalCalls > 0
           ? Math.round((statsData.noBalanceCalls / statsData.totalCalls) * 100)
           : 0,
-      description: "Insufficient balance",
+      trend: "-2%",
+      trendPositive: false,
     },
   ];
 
   if (loading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 md:gap-6 mb-8">
         {[...Array(6)].map((_, index) => (
           <div
             key={index}
-            className="bg-gray-50 rounded-xl p-6 shadow-sm border border-gray-100 animate-pulse"
+            className="relative bg-white rounded-2xl p-6 shadow-lg border border-gray-100 animate-pulse overflow-hidden"
           >
-            <div className="flex items-center justify-between mb-4">
-              <div className="h-4 bg-gray-200 rounded w-20"></div>
-              <div className="w-6 h-6 bg-gray-200 rounded"></div>
+            {/* Skeleton gradient background */}
+            <div className="absolute inset-0 bg-gradient-to-br from-gray-50 to-gray-100 opacity-50"></div>
+
+            <div className="relative z-10">
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-8 h-8 bg-gray-200 rounded-lg"></div>
+                <div className="w-12 h-4 bg-gray-200 rounded-full"></div>
+              </div>
+              <div className="space-y-2 mb-4">
+                <div className="h-8 bg-gray-200 rounded w-16"></div>
+                <div className="h-3 bg-gray-200 rounded w-20"></div>
+              </div>
+              <div className="w-full h-1.5 bg-gray-200 rounded-full"></div>
             </div>
-            <div className="mb-4">
-              <div className="h-8 bg-gray-200 rounded w-16 mb-2"></div>
-              <div className="h-3 bg-gray-200 rounded w-24"></div>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-2"></div>
           </div>
         ))}
       </div>
@@ -164,84 +253,75 @@ const StatsCards = () => {
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 mb-8">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 md:gap-6 mb-8">
       {cards.map((card, index) => (
         <div
           key={card.id}
-          className={`${
-            card.bgColor
-          } rounded-xl p-6 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 border border-gray-100 cursor-pointer group transform relative overflow-hidden ${
+          className={`relative group bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 cursor-pointer overflow-hidden ${
             isVisible ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
           }`}
           style={{
             transitionDelay: `${index * 100}ms`,
-            animationDelay: `${index * 100}ms`,
           }}
         >
-          {/* Background Icon Decoration */}
-          <div className="absolute -top-2 -right-2 text-5xl opacity-10 group-hover:opacity-20 transition-opacity duration-300">
-            {card.icon}
-          </div>
+          {/* Gradient Background on Hover */}
+          <div
+            className={`absolute inset-0 bg-gradient-to-br ${card.lightBg} opacity-0 group-hover:opacity-100 transition-opacity duration-300`}
+          ></div>
 
-          {/* Header */}
-          <div className="flex items-center justify-between mb-4 relative z-10">
-            <div className="flex items-center space-x-2">
-              <span className="text-2xl group-hover:scale-110 transition-transform duration-200">
+          <div className="relative z-10">
+            {/* Icon and Title */}
+            <div className="flex items-center justify-between mb-4">
+              <div
+                className={`p-2.5 rounded-xl bg-gradient-to-br ${card.gradient} text-white shadow-lg group-hover:scale-105 transition-transform duration-300`}
+              >
                 {card.icon}
-              </span>
-              <div>
-                <h3 className="text-gray-700 font-semibold text-sm group-hover:text-gray-900 transition-colors duration-200">
-                  {card.title}
-                </h3>
+              </div>
+              <div
+                className={`text-xs font-semibold px-2 py-1 rounded-full ${
+                  card.trendPositive
+                    ? "bg-green-100 text-green-600"
+                    : "bg-red-100 text-red-600"
+                }`}
+              >
+                {card.trend}
               </div>
             </div>
-            <div
-              className={`px-3 py-1 rounded-full text-xs font-bold ${card.textColor} bg-white/70 shadow-sm`}
-            >
-              {card.percentage}%
-            </div>
-          </div>
 
-          {/* Value */}
-          <div className="mb-4 relative z-10">
-            <div className="flex items-end justify-between">
+            {/* Title */}
+            <h3 className="text-gray-600 font-medium text-sm mb-3">
+              {card.title}
+            </h3>
+
+            {/* Value */}
+            <div className="mb-4">
               <h2
-                className={`text-3xl font-bold ${card.textColor} group-hover:scale-110 transition-transform duration-200`}
+                className={`text-2xl font-bold ${card.darkColor} group-hover:scale-105 transition-transform duration-200`}
               >
                 {card.value}
               </h2>
             </div>
-            {card.rawValue !== card.value && (
-              <p className="text-xs text-gray-600 mt-2 font-medium">
-                Raw: {card.rawValue.toLocaleString()}
-              </p>
-            )}
-          </div>
 
-          {/* Progress Bar */}
-          <div className="w-full bg-white/60 rounded-full h-2 overflow-hidden relative z-10 shadow-inner">
-            <div
-              className={`${
-                card.progressColor
-              } h-2 rounded-full transition-all duration-1000 ease-out transform origin-left relative ${
-                isVisible ? "scale-x-100" : "scale-x-0"
-              }`}
-              style={{
-                width: `${Math.min(Math.max(card.percentage, 0), 100)}%`,
-                transitionDelay: `${index * 200 + 500}ms`,
-              }}
-            >
-              <div className="absolute inset-0 bg-white/20 rounded-full animate-pulse"></div>
+            {/* Simple Progress Bar */}
+            <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
+              <div
+                className={`h-full bg-gradient-to-r ${
+                  card.gradient
+                } rounded-full transition-all duration-1000 ease-out ${
+                  isVisible ? "scale-x-100" : "scale-x-0"
+                } origin-left`}
+                style={{
+                  width: `${Math.min(Math.max(card.percentage, 0), 100)}%`,
+                  transitionDelay: `${index * 200 + 500}ms`,
+                }}
+              ></div>
             </div>
           </div>
 
-          {/* Hover Glow Effect */}
+          {/* Subtle Hover Glow */}
           <div
-            className={`absolute inset-0 ${card.progressColor} opacity-0 rounded-xl group-hover:opacity-10 transition-opacity duration-300 pointer-events-none`}
+            className={`absolute inset-0 bg-gradient-to-br ${card.gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-300 rounded-2xl`}
           ></div>
-
-          {/* Shimmer Effect */}
-          <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-700 pointer-events-none transform -skew-x-12 translate-x-full group-hover:translate-x-[-200%]"></div>
         </div>
       ))}
     </div>

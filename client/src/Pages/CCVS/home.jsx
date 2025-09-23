@@ -4,6 +4,7 @@ import CallStatusChart from "./components/CallStatusChart";
 import WeeklyChart from "./components/WeeklyChart";
 import WeeklyCampaignsChart from "./components/WeeklyCampaignsChart";
 import CampaignPieChart from "./components/CampaignPieChart";
+import CampaignHistoryTable from "./components/CampaignHistoryTable";
 
 const Home = () => {
   return (
@@ -23,7 +24,7 @@ const Home = () => {
         </h2>
         <div className="flex flex-col lg:flex-row gap-6">
           <div className="flex-1">
-            <CallStatusChart />
+            <CampaignPieChart />
           </div>
           <div className="flex-1">
             <WeeklyChart />
@@ -38,9 +39,14 @@ const Home = () => {
             <WeeklyCampaignsChart />
           </div>
           <div className="flex-1">
-            <CampaignPieChart />
+            <CallStatusChart />
           </div>
         </div>
+      </div>
+
+      {/* Campaign History Table Section */}
+      <div className="mb-8">
+        <CampaignHistoryTable />
       </div>
     </div>
   );
