@@ -142,7 +142,7 @@ const CallHistoryTable = () => {
                     </div>
                   </td>
                   <td className="py-4 px-4 text-gray-700">
-                    {cleanSource(call.source)}
+                    0{cleanSource(call.source)}
                   </td>
                   <td className="py-4 px-4 text-gray-700">
                     {call.destination || "N/A"}

@@ -24,6 +24,8 @@ const CdrTable = () => {
     problem: "",
     startDate: "",
     endDate: "",
+    startTime: "",
+    endTime: "",
   });
   const tableRef = useRef(null);
 
@@ -61,7 +63,12 @@ const CdrTable = () => {
       });
       const res = await fetch(`https://iinms.brri.gov.bd/api/cdr?${params}`);
       const result = await res.json();
-      setCdrData(result.data);
+
+      // Filter out calls with destination "s"
+      const filteredData = result.data.filter(
+        (item) => item.destination !== "s"
+      );
+      setCdrData(filteredData);
       setPagination(result.pagination);
     } catch (err) {
       console.error("Failed to fetch CDR data:", err);
@@ -76,12 +83,12 @@ const CdrTable = () => {
     );
     try {
       await fetch(`https://iinms.brri.gov.bd/api/cdr/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ [field]: value }),
       });
     } catch (err) {
-      console.error('Update failed:', err);
+      console.error("Update failed:", err);
     }
   };
 
@@ -117,6 +124,37 @@ const CdrTable = () => {
     return status.toUpperCase();
   };
 
+  // Format date safely
+  const formatDate = (dateString, options = {}) => {
+    if (!dateString) return "N/A";
+
+    try {
+      let date;
+
+      // Handle different date formats
+      if (dateString.includes("Z") || dateString.includes("+")) {
+        // Already has timezone info
+        date = new Date(dateString);
+      } else {
+        // Assume UTC if no timezone info
+        date = new Date(dateString + "Z");
+      }
+
+      // Check if date is valid
+      if (isNaN(date.getTime())) {
+        return "Invalid Date";
+      }
+
+      return date.toLocaleString("en-US", {
+        timeZone: "UTC",
+        ...options,
+      });
+    } catch (error) {
+      console.error("Date formatting error:", error);
+      return "Invalid Date";
+    }
+  };
+
   const handleExportCSV = () => {
     try {
       const visibleColumns = columns.filter((col) => col.visible);
@@ -132,13 +170,15 @@ const CdrTable = () => {
           const keyAlias = col.name.toLowerCase().replace(/\s+/g, "");
           const actualKey = columnKeyMap[col.name];
           if (col.name === "Date") {
-            rowData[keyAlias] = new Date(row.date).toLocaleString("en-GB", {
+            rowData[keyAlias] = formatDate(row.date, {
+              weekday: "short",
               year: "numeric",
-              month: "2-digit",
+              month: "short",
               day: "2-digit",
               hour: "2-digit",
               minute: "2-digit",
               second: "2-digit",
+              hour12: true,
             });
           } else if (col.name === "Source") {
             rowData[keyAlias] = cleanSource(row[actualKey]);
@@ -200,13 +240,15 @@ const CdrTable = () => {
         visibleColumns.map((col) => {
           const key = columnKeyMap[col.name];
           if (col.name === "Date") {
-            return new Date(row.date).toLocaleString("en-GB", {
+            return formatDate(row.date, {
+              weekday: "short",
               year: "numeric",
-              month: "2-digit",
+              month: "short",
               day: "2-digit",
               hour: "2-digit",
               minute: "2-digit",
               second: "2-digit",
+              hour12: true,
             });
           } else if (col.name === "Source") {
             return cleanSource(row[key]);
@@ -354,8 +396,8 @@ const CdrTable = () => {
 
           <div className="bg-gray-50 rounded-xl p-4">
             <form onSubmit={handleFilterSubmit} className="space-y-3">
-              {/* First Row - Date Range and Primary Filters */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-2 sm:gap-3">
+              {/* First Row - Date Range, Time Range and Primary Filters */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-9 gap-2 sm:gap-3">
                 <div className="relative">
                   <input
                     type="date"
@@ -380,6 +422,30 @@ const CdrTable = () => {
                     To Date
                   </label>
                 </div>
+                <div className="relative">
+                  <input
+                    type="time"
+                    name="startTime"
+                    value={filters.startTime}
+                    onChange={handleFilterChange}
+                    className="w-full p-2.5 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition shadow-sm text-sm"
+                  />
+                  <label className="absolute -top-2 left-2 px-1 bg-white text-xs font-medium text-gray-500">
+                    From Time
+                  </label>
+                </div>
+                <div className="relative">
+                  <input
+                    type="time"
+                    name="endTime"
+                    value={filters.endTime}
+                    onChange={handleFilterChange}
+                    className="w-full p-2.5 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition shadow-sm text-sm"
+                  />
+                  <label className="absolute -top-2 left-2 px-1 bg-white text-xs font-medium text-gray-500">
+                    To Time
+                  </label>
+                </div>
                 <input
                   type="text"
                   name="source"
@@ -402,11 +468,20 @@ const CdrTable = () => {
                     <option value="103">103</option>
                     <option value="104">104</option>
                     <option value="105">105</option>
-                    <option value="s">s</option>
                   </select>
                   <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 9l-7 7-7-7"
+                      />
                     </svg>
                   </div>
                 </div>
@@ -423,8 +498,18 @@ const CdrTable = () => {
                     <option value="busy">Busy</option>
                   </select>
                   <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 9l-7 7-7-7"
+                      />
                     </svg>
                   </div>
                 </div>
@@ -478,6 +563,8 @@ const CdrTable = () => {
                       problem: "",
                       startDate: "",
                       endDate: "",
+                      startTime: "",
+                      endTime: "",
                     });
                     fetchData(1);
                   }}
@@ -560,23 +647,25 @@ const CdrTable = () => {
                     <td className="py-3 sm:py-4 px-3 sm:px-6 text-gray-800 font-medium">
                       <div className="flex flex-col">
                         <span className="text-xs sm:text-sm font-semibold text-gray-900">
-                          {new Date(row.date).toLocaleDateString("en-GB", {
+                          {formatDate(row.date, {
+                            weekday: "short",
                             year: "numeric",
-                            month: "2-digit",
+                            month: "short",
                             day: "2-digit",
                           })}
                         </span>
                         <span className="text-xs text-gray-600 mt-1">
-                          {new Date(row.date).toLocaleTimeString("en-GB", {
+                          {formatDate(row.date, {
                             hour: "2-digit",
                             minute: "2-digit",
                             second: "2-digit",
+                            hour12: true,
                           })}
                         </span>
                       </div>
                     </td>
                     <td className="py-3 sm:py-4 px-2 sm:px-4 text-gray-700 text-xs sm:text-sm">
-                      {cleanSource(row.source)}
+                      0{cleanSource(row.source)}
                     </td>
                     <td className="py-3 sm:py-4 px-2 sm:px-4 text-gray-700 text-xs sm:text-sm text-center">
                       {row.destination}
@@ -606,7 +695,9 @@ const CdrTable = () => {
                         type="text"
                         className="w-full p-1.5 sm:p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition text-xs sm:text-sm"
                         value={row.name || ""}
-                        onChange={(e) => handleInputChange(row.id, "name", e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange(row.id, "name", e.target.value)
+                        }
                         placeholder="Location"
                       />
                     </td>
@@ -615,7 +706,9 @@ const CdrTable = () => {
                         type="text"
                         className="w-full p-1.5 sm:p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition text-xs sm:text-sm"
                         value={row.address || ""}
-                        onChange={(e) => handleInputChange(row.id, "address", e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange(row.id, "address", e.target.value)
+                        }
                         placeholder="Problem"
                       />
                     </td>

@@ -94,9 +94,27 @@ const DashboardGauges = () => {
         if (!mounted) return;
 
         if (res?.data?.destinationStats) {
-          const destinations = res.data.destinationStats.filter(
-            (d) => d.destination !== "104"
-          );
+          const destinations = res.data.destinationStats
+            .filter((d) => d.destination !== "104") // Remove irrigation (104)
+            .map((d) => {
+              // Transform the data based on destination
+              if (d.destination === "s") {
+                // Show "others" as "Help Desk"
+                return {
+                  ...d,
+                  destinationState: "Help Desk"
+                };
+              } else if (d.destination === "100") {
+                // Show "Help Desk" as "Irrigation" 
+                return {
+                  ...d,
+                  destinationState: "Irrigation"
+                };
+              }
+              // Keep other destinations as they are
+              return d;
+            });
+          
           setDestinationData(destinations);
           const total = destinations.reduce(
             (s, it) => s + (it.totalCalls || 0),
