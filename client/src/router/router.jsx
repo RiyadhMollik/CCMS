@@ -7,6 +7,7 @@ import AWS from "../Pages/AWS/AWS";
 import VcSms from "../Pages/VcSms/VcSms";
 import CdrTable from "../Pages/DataAnalytics/CdrTable";
 import About from "../Pages/About/About";
+import Home from "../Pages/CCVS/home";
 
 const router = createBrowserRouter([
   {

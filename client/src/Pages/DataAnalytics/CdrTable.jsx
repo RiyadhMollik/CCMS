@@ -388,22 +388,46 @@ const CdrTable = () => {
                   placeholder="Source"
                   className="p-2.5 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition shadow-sm text-sm"
                 />
-                <input
-                  type="text"
-                  name="destination"
-                  value={filters.destination}
-                  onChange={handleFilterChange}
-                  placeholder="Destination"
-                  className="p-2.5 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition shadow-sm text-sm"
-                />
-                <input
-                  type="text"
-                  name="status"
-                  value={filters.status}
-                  onChange={handleFilterChange}
-                  placeholder="Status"
-                  className="p-2.5 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition shadow-sm text-sm"
-                />
+                <div className="relative">
+                  <select
+                    name="destination"
+                    value={filters.destination}
+                    onChange={handleFilterChange}
+                    className="w-full p-2.5 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition shadow-sm text-sm appearance-none cursor-pointer"
+                  >
+                    <option value="">All Destinations</option>
+                    <option value="100">100</option>
+                    <option value="101">101</option>
+                    <option value="102">102</option>
+                    <option value="103">103</option>
+                    <option value="104">104</option>
+                    <option value="105">105</option>
+                    <option value="s">s</option>
+                  </select>
+                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
+                </div>
+                <div className="relative">
+                  <select
+                    name="status"
+                    value={filters.status}
+                    onChange={handleFilterChange}
+                    className="w-full p-2.5 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition shadow-sm text-sm appearance-none cursor-pointer"
+                  >
+                    <option value="">All Status</option>
+                    <option value="answered">Answered</option>
+                    <option value="no answer">No Answer</option>
+                    <option value="busy">Busy</option>
+                  </select>
+                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
+                </div>
                 <input
                   type="text"
                   name="location"
@@ -557,12 +581,6 @@ const CdrTable = () => {
                     <td className="py-3 sm:py-4 px-2 sm:px-4 text-gray-700 text-xs sm:text-sm text-center">
                       {row.destination}
                     </td>
-                    {/* <td className="py-3 sm:py-4 px-2 sm:px-4 text-gray-700 text-xs sm:text-sm hidden sm:table-cell">
-                      {row.src_channel}
-                    </td> */}
-                    {/* <td className="py-3 sm:py-4 px-2 sm:px-4 text-gray-700 text-xs sm:text-sm hidden sm:table-cell">
-                      {row.dst_channel}
-                    </td> */}
                     <td className="py-3 sm:py-4 px-2 sm:px-4 text-gray-700 text-center">
                       <span
                         className={`inline-flex items-center rounded-full text-xs px-2 py-1 font-medium whitespace-nowrap ${
@@ -571,7 +589,7 @@ const CdrTable = () => {
                             : (row.status || "").toLowerCase() === "no answer"
                             ? "bg-red-800 text-white"
                             : (row.status || "").toLowerCase() === "busy"
-                            ? "bg-yellow-800 text-black"
+                            ? "bg-yellow-800 text-white"
                             : "bg-gray-100 text-gray-800"
                         }`}
                       >
