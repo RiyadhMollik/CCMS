@@ -36,19 +36,33 @@ const CallHistoryTable = () => {
   }, []);
 
   // Format date and time function
-  const formatDateTime = (dateString) => {
+  const formatDate = (dateString, options = {}) => {
     if (!dateString) return "N/A";
+
     try {
-      const date = new Date(dateString);
+      let date;
+
+      // Handle different date formats
+      if (dateString.includes("Z") || dateString.includes("+")) {
+        // Already has timezone info
+        date = new Date(dateString);
+      } else {
+        // Assume UTC if no timezone info
+        date = new Date(dateString + "Z");
+      }
+
+      // Check if date is valid
+      if (isNaN(date.getTime())) {
+        return "Invalid Date";
+      }
+
       return date.toLocaleString("en-US", {
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit",
+        timeZone: "UTC",
+        ...options,
       });
-    } catch {
-      return "N/A";
+    } catch (error) {
+      console.error("Date formatting error:", error);
+      return "Invalid Date";
     }
   };
 
@@ -135,9 +149,22 @@ const CallHistoryTable = () => {
                   className="bg-white hover:bg-green-50 transition-colors duration-200 ease-in-out"
                 >
                   <td className="py-4 px-6 text-gray-800 font-medium">
-                    <div className="flex items-center">
-                      <span className="whitespace-nowrap overflow-hidden text-ellipsis">
-                        {formatDateTime(call.date)}
+                    <div className="flex items-center gap-5">
+                      <span className="text-xs sm:text-sm font-semibold text-gray-900">
+                        {formatDate(call.date, {
+                          weekday: "short",
+                          year: "numeric",
+                          month: "short",
+                          day: "2-digit",
+                        })}
+                      </span>
+                      <span className="text-xs text-gray-600 mt-1">
+                        {formatDate(call.date, {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          second: "2-digit",
+                          hour12: true,
+                        })}
                       </span>
                     </div>
                   </td>
@@ -149,15 +176,14 @@ const CallHistoryTable = () => {
                   </td>
                   <td className="py-4 px-4 text-gray-700 text-center">
                     <span
-                      className={`inline-flex items-center rounded-full text-sm px-2 py-1 font-medium ${
-                        call.status === "ANSWERED"
-                          ? "bg-green-800 text-white"
-                          : call.status === "NO ANSWER" || call.status === "FAILED"
+                      className={`inline-flex items-center rounded-full text-sm px-2 py-1 font-medium ${call.status === "ANSWERED"
+                        ? "bg-green-800 text-white"
+                        : call.status === "NO ANSWER" || call.status === "FAILED"
                           ? "bg-red-800 text-white"
                           : call.status === "BUSY"
-                          ? "bg-yellow-800 text-black"
-                          : "bg-gray-100 text-gray-800"
-                      }`}
+                            ? "bg-yellow-800 text-black"
+                            : "bg-gray-100 text-gray-800"
+                        }`}
                     >
                       {call.status || "N/A"}
                     </span>
