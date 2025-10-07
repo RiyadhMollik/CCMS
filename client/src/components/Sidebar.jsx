@@ -121,6 +121,19 @@ const Sidebar = () => {
 
       <li className="text-base font-medium">
         <NavLink
+          to="/cis-table"
+          className={`flex items-center ${isCollapsed ? "justify-center" : ""}`}
+          title={isCollapsed ? "CIS Table" : ""}
+        >
+          <IoAnalyticsSharp
+            className={`w-5 h-5 ${!isCollapsed ? "mr-2" : ""}`}
+          />
+          {!isCollapsed && "CIS Table"}
+        </NavLink>
+      </li>
+
+      <li className="text-base font-medium">
+        <NavLink
           to="/ccvs"
           className={`flex items-center ${isCollapsed ? "justify-center" : ""}`}
           title={isCollapsed ? "CCVS" : ""}
