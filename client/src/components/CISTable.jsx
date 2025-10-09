@@ -311,12 +311,9 @@ const CISTable = () => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
           </div> */}
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-800 mb-3 leading-tight">
+          <h1 className="text-2xl md:text-4xl font-bold text-gray-800 mb-3 leading-tight">
             Climate Information Service
           </h1>
-          <p className="text-gray-600 text-lg lg:text-xl mb-4">
-            Weather Data Request Management System
-          </p>
         </div>
 
         {/* Summary Stats */}
@@ -482,26 +479,6 @@ const CISTable = () => {
                   <option value="Approved">Approved</option>
                   <option value="Rejected">Rejected</option>
                 </select>
-              </div>
-
-              {/* Stats */}
-              <div className="flex flex-col lg:flex-row items-start lg:items-center gap-3">
-                <div className="flex items-center px-3 py-2 bg-blue-50 border border-blue-200 rounded-lg">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
-                  <span className="text-blue-700 font-medium text-sm">
-                    Total: {filteredRequests.length}
-                  </span>
-                </div>
-                <div className="flex items-center px-3 py-2 bg-amber-50 border border-amber-200 rounded-lg">
-                  <div className="w-2 h-2 bg-amber-500 rounded-full mr-2"></div>
-                  <span className="text-amber-700 font-medium text-sm">
-                    Pending:{" "}
-                    {
-                      filteredRequests.filter((r) => r.status === "Pending")
-                        .length
-                    }
-                  </span>
-                </div>
               </div>
             </div>
           </div>

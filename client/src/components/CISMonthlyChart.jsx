@@ -4,6 +4,7 @@ import axios from "axios";
 const CISMonthlyChart = () => {
   const [chartOptions, setChartOptions] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [timePeriod, setTimePeriod] = useState("monthly"); // 'daily', 'weekly', 'monthly'
   const [stats, setStats] = useState({
     totalRequests: 0,
     totalApproved: 0,
@@ -68,8 +69,16 @@ const CISMonthlyChart = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
+
+        // Use demo data for now (replace with API call later)
+        createDemoChart(timePeriod);
+        setLoading(false);
+        return;
+
+        // TODO: Uncomment when API is ready
+        /*
         const response = await axios.get(
-          "https://iinms.brri.gov.bd/api/cis/monthly-stats"
+          `https://iinms.brri.gov.bd/api/cis/stats?period=${timePeriod}`
         );
 
         // Process the API response
@@ -294,35 +303,76 @@ const CISMonthlyChart = () => {
           });
         } else {
           // Fallback to mock data if API returns unexpected format
-          createMockChart();
+          createDemoChart(timePeriod);
         }
+        */
       } catch (error) {
         console.error("Error fetching CIS monthly stats:", error);
         // Use mock data on error
-        createMockChart();
+        createDemoChart(timePeriod);
       } finally {
         setLoading(false);
       }
     };
 
-    const createMockChart = () => {
-      const categories = [
-        "Jan '25",
-        "Feb '25",
-        "Mar '25",
-        "Apr '25",
-        "May '25",
-        "Jun '25",
-        "Jul '25",
-        "Aug '25",
-        "Sep '25",
-        "Oct '25",
-        "Nov '25",
-        "Dec '25",
-      ];
-      const requestsData = [45, 52, 48, 61, 55, 58, 63, 59, 54, 67, 10, 5];
-      const approvedData = [38, 45, 41, 53, 47, 50, 55, 51, 46, 58, 6, 3];
-      const rejectedData = [7, 7, 7, 8, 8, 8, 8, 8, 8, 9, 4, 2];
+    const createDemoChart = (period) => {
+      let categories = [];
+      let requestsData = [];
+      let approvedData = [];
+      let rejectedData = [];
+      let titleText = "";
+      let subtitleText = "";
+
+      if (period === "daily") {
+        // Last 12 days
+        const today = new Date();
+        for (let i = 11; i >= 0; i--) {
+          const date = new Date(today);
+          date.setDate(date.getDate() - i);
+          const day = date.getDate();
+          const month = date.toLocaleString("en-US", { month: "short" });
+          categories.push(`${day} ${month}`);
+        }
+        requestsData = [23, 18, 25, 21, 28, 24, 30, 26, 22, 29, 27, 31];
+        approvedData = [18, 15, 20, 17, 22, 19, 24, 21, 18, 23, 21, 25];
+        rejectedData = [5, 3, 5, 4, 6, 5, 6, 5, 4, 6, 6, 6];
+      } else if (period === "weekly") {
+        // Last 12 weeks
+        const today = new Date();
+        for (let i = 11; i >= 0; i--) {
+          const weekStart = new Date(today);
+          weekStart.setDate(weekStart.getDate() - i * 7);
+          const weekNum = Math.ceil(weekStart.getDate() / 7);
+          const month = weekStart.toLocaleString("en-US", { month: "short" });
+          categories.push(`W${weekNum} ${month}`);
+        }
+        requestsData = [
+          145, 132, 158, 141, 168, 154, 172, 159, 148, 175, 163, 180,
+        ];
+        approvedData = [
+          118, 108, 128, 115, 138, 126, 142, 131, 122, 145, 135, 148,
+        ];
+        rejectedData = [27, 24, 30, 26, 30, 28, 30, 28, 26, 30, 28, 32];
+      } else {
+        // Monthly (default)
+        categories = [
+          "Jan '25",
+          "Feb '25",
+          "Mar '25",
+          "Apr '25",
+          "May '25",
+          "Jun '25",
+          "Jul '25",
+          "Aug '25",
+          "Sep '25",
+          "Oct '25",
+          "Nov '25",
+          "Dec '25",
+        ];
+        requestsData = [45, 52, 48, 61, 55, 58, 63, 59, 54, 67, 10, 5];
+        approvedData = [38, 45, 41, 53, 47, 50, 55, 51, 46, 58, 6, 3];
+        rejectedData = [7, 7, 7, 8, 8, 8, 8, 8, 8, 9, 4, 2];
+      }
 
       setStats({
         totalRequests: requestsData.reduce((a, b) => a + b, 0),
@@ -337,7 +387,7 @@ const CISMonthlyChart = () => {
           height: null,
         },
         title: {
-          text: "Monthly CIS Request Statistics",
+          text: titleText,
           align: "left",
           style: {
             fontSize: "16px",
@@ -347,7 +397,7 @@ const CISMonthlyChart = () => {
           margin: 20,
         },
         subtitle: {
-          text: "Last 12 months request trends with approval and rejection rates",
+          text: subtitleText,
           align: "left",
           style: {
             fontSize: "12px",
@@ -362,7 +412,12 @@ const CISMonthlyChart = () => {
             dashStyle: "Dash",
           },
           accessibility: {
-            description: "Months",
+            description:
+              period === "daily"
+                ? "Days"
+                : period === "weekly"
+                ? "Weeks"
+                : "Months",
           },
           labels: {
             style: {
@@ -503,7 +558,7 @@ const CISMonthlyChart = () => {
     };
 
     fetchData();
-  }, [hcReady]);
+  }, [hcReady, timePeriod]);
 
   const isBusy = loading || !hcReady;
 
@@ -529,8 +584,105 @@ const CISMonthlyChart = () => {
 
   return (
     <div className="bg-white rounded-xl p-3 sm:p-4 md:p-6 shadow-sm border border-gray-100 mb-6">
+      {/* Header with Time Period Selector */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+        <div className="flex-1">
+          <h3 className="text-lg font-semibold text-gray-800 mb-1">
+            CIS Request Analytics
+          </h3>
+          <p className="text-sm text-gray-500">
+            Track and analyze request trends over time
+          </p>
+        </div>
+
+        {/* Time Period Buttons */}
+        <div className="flex items-center gap-2 bg-gray-100 p-1 rounded-lg">
+          <button
+            onClick={() => setTimePeriod("daily")}
+            className={`px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 ${
+              timePeriod === "daily"
+                ? "bg-white text-blue-600 shadow-sm"
+                : "text-gray-600 hover:text-gray-900"
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-4 w-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+                />
+              </svg>
+              <span className="hidden sm:inline">Daily</span>
+            </div>
+          </button>
+          <button
+            onClick={() => setTimePeriod("weekly")}
+            className={`px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 ${
+              timePeriod === "weekly"
+                ? "bg-white text-blue-600 shadow-sm"
+                : "text-gray-600 hover:text-gray-900"
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-4 w-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                />
+              </svg>
+              <span className="hidden sm:inline">Weekly</span>
+            </div>
+          </button>
+          <button
+            onClick={() => setTimePeriod("monthly")}
+            className={`px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 ${
+              timePeriod === "monthly"
+                ? "bg-white text-blue-600 shadow-sm"
+                : "text-gray-600 hover:text-gray-900"
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-4 w-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                />
+              </svg>
+              <span className="hidden sm:inline">Monthly</span>
+            </div>
+          </button>
+        </div>
+      </div>
+
       {/* Highcharts Chart */}
-      <div className="w-full" style={{ minHeight: "300px" }}>
+      <div
+        className="w-full bg-gray-50 rounded-lg p-4 border border-gray-200"
+        style={{ minHeight: "300px" }}
+      >
         {HC && HCReact && chartOptions ? (
           <HCReact highcharts={HC} options={chartOptions} />
         ) : (
@@ -541,6 +693,106 @@ const CISMonthlyChart = () => {
             </div>
           </div>
         )}
+      </div>
+
+      {/* Stats Summary Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
+        <div className="bg-white rounded-lg p-4 border border-gray-200">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5 text-blue-600"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                />
+              </svg>
+            </div>
+            <div>
+              <p className="text-xs text-gray-500 mb-1">Total Requests</p>
+              <p className="text-xl font-bold text-gray-800">
+                {stats.totalRequests}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-lg p-4 border border-gray-200">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5 text-green-600"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+            </div>
+            <div>
+              <p className="text-xs text-gray-500 mb-1">Approved</p>
+              <p className="text-xl font-bold text-gray-800">
+                {stats.totalApproved}
+              </p>
+              <p className="text-xs text-gray-400">
+                {stats.totalRequests > 0
+                  ? Math.round(
+                      (stats.totalApproved / stats.totalRequests) * 100
+                    )
+                  : 0}
+                % success
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-lg p-4 border border-gray-200">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center flex-shrink-0">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5 text-red-600"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+            </div>
+            <div>
+              <p className="text-xs text-gray-500 mb-1">Rejected</p>
+              <p className="text-xl font-bold text-gray-800">
+                {stats.totalRejected}
+              </p>
+              <p className="text-xs text-gray-400">
+                {stats.totalRequests > 0
+                  ? Math.round(
+                      (stats.totalRejected / stats.totalRequests) * 100
+                    )
+                  : 0}
+                % rejected
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
