@@ -317,9 +317,9 @@ const CISTable = () => {
         </div>
 
         {/* Summary Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="stat bg-base-100 shadow-lg rounded-lg">
-            <div className="stat-figure text-primary">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+          <div className="stat bg-base-100 shadow-lg rounded-lg p-3 md:p-4">
+            <div className="stat-figure text-primary hidden md:block">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="w-8 h-8"
@@ -335,13 +335,13 @@ const CISTable = () => {
                 />
               </svg>
             </div>
-            <div className="stat-title">Total Requests</div>
-            <div className="stat-value text-primary">{requests.length}</div>
-            <div className="stat-desc">All time submissions</div>
+            <div className="stat-title text-xs md:text-sm">Total Requests</div>
+            <div className="stat-value text-primary text-2xl md:text-4xl">{requests.length}</div>
+            <div className="stat-desc text-[10px] md:text-xs">All time submissions</div>
           </div>
 
-          <div className="stat bg-base-100 shadow-lg rounded-lg">
-            <div className="stat-figure text-warning">
+          <div className="stat bg-base-100 shadow-lg rounded-lg p-3 md:p-4">
+            <div className="stat-figure text-warning hidden md:block">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="w-8 h-8"
@@ -357,15 +357,15 @@ const CISTable = () => {
                 />
               </svg>
             </div>
-            <div className="stat-title">Pending</div>
-            <div className="stat-value text-warning">
+            <div className="stat-title text-xs md:text-sm">Pending</div>
+            <div className="stat-value text-warning text-2xl md:text-4xl">
               {requests.filter((r) => r.status === "Pending").length}
             </div>
-            <div className="stat-desc">Awaiting review</div>
+            <div className="stat-desc text-[10px] md:text-xs">Awaiting review</div>
           </div>
 
-          <div className="stat bg-base-100 shadow-lg rounded-lg">
-            <div className="stat-figure text-success">
+          <div className="stat bg-base-100 shadow-lg rounded-lg p-3 md:p-4">
+            <div className="stat-figure text-success hidden md:block">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="w-8 h-8"
@@ -381,15 +381,15 @@ const CISTable = () => {
                 />
               </svg>
             </div>
-            <div className="stat-title">Approved</div>
-            <div className="stat-value text-success">
+            <div className="stat-title text-xs md:text-sm">Approved</div>
+            <div className="stat-value text-success text-2xl md:text-4xl">
               {requests.filter((r) => r.status === "Approved").length}
             </div>
-            <div className="stat-desc">Successfully processed</div>
+            <div className="stat-desc text-[10px] md:text-xs">Successfully processed</div>
           </div>
 
-          <div className="stat bg-base-100 shadow-lg rounded-lg">
-            <div className="stat-figure text-info">
+          <div className="stat bg-base-100 shadow-lg rounded-lg p-3 md:p-4">
+            <div className="stat-figure text-error hidden md:block">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="w-8 h-8"
@@ -401,22 +401,15 @@ const CISTable = () => {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth="2"
-                  d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
+                  d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
                 />
               </svg>
             </div>
-            <div className="stat-title">Success Rate</div>
-            <div className="stat-value text-info">
-              {requests.length > 0
-                ? Math.round(
-                    (requests.filter((r) => r.status === "Approved").length /
-                      requests.length) *
-                      100
-                  )
-                : 0}
-              %
+            <div className="stat-title text-xs md:text-sm">Rejected</div>
+            <div className="stat-value text-error text-2xl md:text-4xl">
+              {requests.filter((r) => r.status === "Rejected").length}
             </div>
-            <div className="stat-desc">Completion rate</div>
+            <div className="stat-desc text-[10px] md:text-xs">Declined requests</div>
           </div>
         </div>
 

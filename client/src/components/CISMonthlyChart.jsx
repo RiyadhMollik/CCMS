@@ -323,39 +323,51 @@ const CISMonthlyChart = () => {
       let titleText = "";
       let subtitleText = "";
 
+      // Check if mobile device
+      const isMobile = window.innerWidth < 768;
+      const dataPoints = isMobile ? 6 : 12;
+
       if (period === "daily") {
-        // Last 12 days
+        // Last days (6 for mobile, 12 for desktop)
         const today = new Date();
-        for (let i = 11; i >= 0; i--) {
+        for (let i = dataPoints - 1; i >= 0; i--) {
           const date = new Date(today);
           date.setDate(date.getDate() - i);
           const day = date.getDate();
           const month = date.toLocaleString("en-US", { month: "short" });
           categories.push(`${day} ${month}`);
         }
-        requestsData = [23, 18, 25, 21, 28, 24, 30, 26, 22, 29, 27, 31];
-        approvedData = [18, 15, 20, 17, 22, 19, 24, 21, 18, 23, 21, 25];
-        rejectedData = [5, 3, 5, 4, 6, 5, 6, 5, 4, 6, 6, 6];
+        const allRequestsData = [23, 18, 25, 21, 28, 24, 30, 26, 22, 29, 27, 31];
+        const allApprovedData = [18, 15, 20, 17, 22, 19, 24, 21, 18, 23, 21, 25];
+        const allRejectedData = [5, 3, 5, 4, 6, 5, 6, 5, 4, 6, 6, 6];
+        
+        requestsData = allRequestsData.slice(-dataPoints);
+        approvedData = allApprovedData.slice(-dataPoints);
+        rejectedData = allRejectedData.slice(-dataPoints);
       } else if (period === "weekly") {
-        // Last 12 weeks
+        // Last weeks (6 for mobile, 12 for desktop)
         const today = new Date();
-        for (let i = 11; i >= 0; i--) {
+        for (let i = dataPoints - 1; i >= 0; i--) {
           const weekStart = new Date(today);
           weekStart.setDate(weekStart.getDate() - i * 7);
           const weekNum = Math.ceil(weekStart.getDate() / 7);
           const month = weekStart.toLocaleString("en-US", { month: "short" });
           categories.push(`W${weekNum} ${month}`);
         }
-        requestsData = [
+        const allRequestsData = [
           145, 132, 158, 141, 168, 154, 172, 159, 148, 175, 163, 180,
         ];
-        approvedData = [
+        const allApprovedData = [
           118, 108, 128, 115, 138, 126, 142, 131, 122, 145, 135, 148,
         ];
-        rejectedData = [27, 24, 30, 26, 30, 28, 30, 28, 26, 30, 28, 32];
+        const allRejectedData = [27, 24, 30, 26, 30, 28, 30, 28, 26, 30, 28, 32];
+        
+        requestsData = allRequestsData.slice(-dataPoints);
+        approvedData = allApprovedData.slice(-dataPoints);
+        rejectedData = allRejectedData.slice(-dataPoints);
       } else {
-        // Monthly (default)
-        categories = [
+        // Monthly (default) - Last months (6 for mobile, 12 for desktop)
+        const allCategories = [
           "Jan '25",
           "Feb '25",
           "Mar '25",
@@ -369,9 +381,14 @@ const CISMonthlyChart = () => {
           "Nov '25",
           "Dec '25",
         ];
-        requestsData = [45, 52, 48, 61, 55, 58, 63, 59, 54, 67, 10, 5];
-        approvedData = [38, 45, 41, 53, 47, 50, 55, 51, 46, 58, 6, 3];
-        rejectedData = [7, 7, 7, 8, 8, 8, 8, 8, 8, 9, 4, 2];
+        const allRequestsData = [45, 52, 48, 61, 55, 58, 63, 59, 54, 67, 10, 5];
+        const allApprovedData = [38, 45, 41, 53, 47, 50, 55, 51, 46, 58, 6, 3];
+        const allRejectedData = [7, 7, 7, 8, 8, 8, 8, 8, 8, 9, 4, 2];
+        
+        categories = allCategories.slice(-dataPoints);
+        requestsData = allRequestsData.slice(-dataPoints);
+        approvedData = allApprovedData.slice(-dataPoints);
+        rejectedData = allRejectedData.slice(-dataPoints);
       }
 
       setStats({
@@ -515,22 +532,49 @@ const CISMonthlyChart = () => {
           rules: [
             {
               condition: {
-                maxWidth: 500,
+                maxWidth: 767,
               },
               chartOptions: {
+                chart: {
+                  height: 280, // Reduced height for mobile
+                },
                 legend: {
-                  layout: "horizontal",
-                  align: "center",
-                  verticalAlign: "bottom",
+                  enabled: false, // Hide default legend on mobile
                 },
                 title: {
                   style: {
-                    fontSize: "14px",
+                    fontSize: "13px",
                   },
+                  margin: 15,
                 },
                 subtitle: {
-                  style: {
-                    fontSize: "10px",
+                  text: null, // Hide subtitle on mobile
+                },
+                xAxis: {
+                  labels: {
+                    style: {
+                      fontSize: "9px",
+                    },
+                    rotation: -45,
+                  },
+                },
+                yAxis: {
+                  title: {
+                    text: "Requests",
+                    style: {
+                      fontSize: "10px",
+                    },
+                  },
+                  labels: {
+                    style: {
+                      fontSize: "9px",
+                    },
+                  },
+                },
+                plotOptions: {
+                  column: {
+                    pointPadding: 0.05,
+                    groupPadding: 0.1,
                   },
                 },
               },
@@ -680,7 +724,7 @@ const CISMonthlyChart = () => {
 
       {/* Highcharts Chart */}
       <div
-        className="w-full bg-gray-50 rounded-lg p-4 border border-gray-200"
+        className="w-full bg-gray-50 rounded-lg p-2 sm:p-4 border border-gray-200"
         style={{ minHeight: "300px" }}
       >
         {HC && HCReact && chartOptions ? (
@@ -695,11 +739,29 @@ const CISMonthlyChart = () => {
         )}
       </div>
 
+      {/* Mobile Legend - Simple version for mobile devices */}
+      <div className="block md:hidden mt-3">
+        <div className="flex items-center justify-center gap-3 text-xs">
+          <div className="flex items-center gap-1">
+            <div className="w-2.5 h-2.5 bg-blue-500 rounded-sm"></div>
+            <span className="text-gray-600">Total</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <div className="w-2.5 h-2.5 bg-green-500 rounded-sm"></div>
+            <span className="text-gray-600">Approved</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <div className="w-2.5 h-2.5 bg-red-500 rounded-sm"></div>
+            <span className="text-gray-600">Rejected</span>
+          </div>
+        </div>
+      </div>
+
       {/* Stats Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
-        <div className="bg-white rounded-lg p-4 border border-gray-200">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+      <div className="grid grid-cols-3 gap-2 sm:gap-4 mt-4 sm:mt-6">
+        <div className="bg-white rounded-lg p-2 sm:p-4 border border-gray-200">
+          <div className="flex flex-col sm:flex-row items-center gap-1 sm:gap-3">
+            <div className="hidden sm:flex w-10 h-10 bg-blue-100 rounded-lg items-center justify-center flex-shrink-0">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-5 w-5 text-blue-600"
@@ -715,18 +777,18 @@ const CISMonthlyChart = () => {
                 />
               </svg>
             </div>
-            <div>
-              <p className="text-xs text-gray-500 mb-1">Total Requests</p>
-              <p className="text-xl font-bold text-gray-800">
+            <div className="text-center sm:text-left">
+              <p className="text-[10px] sm:text-xs text-gray-500 mb-0.5 sm:mb-1">Total</p>
+              <p className="text-base sm:text-xl font-bold text-gray-800">
                 {stats.totalRequests}
               </p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg p-4 border border-gray-200">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+        <div className="bg-white rounded-lg p-2 sm:p-4 border border-gray-200">
+          <div className="flex flex-col sm:flex-row items-center gap-1 sm:gap-3">
+            <div className="hidden sm:flex w-10 h-10 bg-green-100 rounded-lg items-center justify-center flex-shrink-0">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-5 w-5 text-green-600"
@@ -742,12 +804,12 @@ const CISMonthlyChart = () => {
                 />
               </svg>
             </div>
-            <div>
-              <p className="text-xs text-gray-500 mb-1">Approved</p>
-              <p className="text-xl font-bold text-gray-800">
+            <div className="text-center sm:text-left">
+              <p className="text-[10px] sm:text-xs text-gray-500 mb-0.5 sm:mb-1">Approved</p>
+              <p className="text-base sm:text-xl font-bold text-gray-800">
                 {stats.totalApproved}
               </p>
-              <p className="text-xs text-gray-400">
+              <p className="text-[9px] sm:text-xs text-gray-400 hidden sm:block">
                 {stats.totalRequests > 0
                   ? Math.round(
                       (stats.totalApproved / stats.totalRequests) * 100
@@ -759,9 +821,9 @@ const CISMonthlyChart = () => {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg p-4 border border-gray-200">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center flex-shrink-0">
+        <div className="bg-white rounded-lg p-2 sm:p-4 border border-gray-200">
+          <div className="flex flex-col sm:flex-row items-center gap-1 sm:gap-3">
+            <div className="hidden sm:flex w-10 h-10 bg-red-100 rounded-lg items-center justify-center flex-shrink-0">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-5 w-5 text-red-600"
@@ -777,12 +839,12 @@ const CISMonthlyChart = () => {
                 />
               </svg>
             </div>
-            <div>
-              <p className="text-xs text-gray-500 mb-1">Rejected</p>
-              <p className="text-xl font-bold text-gray-800">
+            <div className="text-center sm:text-left">
+              <p className="text-[10px] sm:text-xs text-gray-500 mb-0.5 sm:mb-1">Rejected</p>
+              <p className="text-base sm:text-xl font-bold text-gray-800">
                 {stats.totalRejected}
               </p>
-              <p className="text-xs text-gray-400">
+              <p className="text-[9px] sm:text-xs text-gray-400 hidden sm:block">
                 {stats.totalRequests > 0
                   ? Math.round(
                       (stats.totalRejected / stats.totalRequests) * 100
