@@ -149,7 +149,7 @@ const AWS = () => {
   };
 
   // Handle form submission
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
     // Validation
@@ -182,25 +182,74 @@ const AWS = () => {
       });
       return;
     }
-    
-    console.log("Form submitted with data:", formData);
-    setIsModalOpen(false);
-    // Reset form
-    setFormData({
-      name: "",
-      designation: "",
-      organization: "",
-      address: "",
-      email: "",
-      mobile: "",
-      selectedStations: [],
-      selectedWeatherParameters: [],
-      selectedDataFormats: [],
-      startDate: "",
-      endDate: "",
-      timeInterval: "month",
-      dataInterval: 8
-    });
+
+    try {
+      // Show loading alert
+      Swal.fire({
+        title: 'Submitting Request...',
+        text: 'Please wait while we process your weather data request.',
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
+
+      // Send data to backend API
+      const response = await fetch("https://iinms.brri.gov.bd/api/cis", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      
+      // Show success message
+      Swal.fire({
+        icon: 'success',
+        title: 'Request Submitted Successfully!',
+        text: 'Your weather data request has been submitted and is now under review. You will be contacted via email once processed.',
+        confirmButtonColor: '#10b981',
+        confirmButtonText: 'Great!',
+        draggable: true,
+      });
+
+      // Close modal and reset form
+      setIsModalOpen(false);
+      setFormData({
+        name: "",
+        designation: "",
+        organization: "",
+        address: "",
+        email: "",
+        mobile: "",
+        selectedStations: [],
+        selectedWeatherParameters: [],
+        selectedDataFormats: [],
+        startDate: "",
+        endDate: "",
+        timeInterval: "month",
+        dataInterval: 8
+      });
+
+    } catch (error) {
+      console.error("Error submitting request:", error);
+      
+      // Show error message
+      Swal.fire({
+        icon: 'error',
+        title: 'Submission Failed',
+        text: 'There was an error submitting your request. Please check your internet connection and try again.',
+        confirmButtonColor: '#ef4444',
+        confirmButtonText: 'Try Again',
+        footer: '<small>If the problem persists, please contact support.</small>'
+      });
+    }
   };
 
   return (

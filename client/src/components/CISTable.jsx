@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Swal from "sweetalert2";
+import axios from "axios";
+import CISMonthlyChart from "./CISMonthlyChart";
 
 const CISTable = () => {
   const [requests, setRequests] = useState([]);
@@ -10,80 +12,44 @@ const CISTable = () => {
   const [itemsPerPage] = useState(10);
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [showViewModal, setShowViewModal] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Fetch CIS requests from API
+  const fetchCISRequests = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      console.log("Fetching CIS requests from API...");
+      const response = await axios.get("https://iinms.brri.gov.bd/api/cis");
+
+      console.log("API Response:", response.data);
+
+      // Handle different response structures
+      const requestsData = Array.isArray(response.data)
+        ? response.data
+        : response.data.data
+        ? response.data.data
+        : response.data.requests
+        ? response.data.requests
+        : [];
+
+      setRequests(requestsData);
+      setFilteredRequests(requestsData);
+    } catch (error) {
+      console.error("Error fetching CIS requests:", error);
+      setError(error.message);
+
+      console.log("Using fallback mock data due to API error");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Sample data - replace with actual API call
   useEffect(() => {
-    // Mock data for demonstration
-    const mockData = [
-      {
-        id: 1,
-        name: "Dr. Aminul Islam",
-        designation: "Senior Scientific Officer",
-        organization: "BRRI",
-        address: "Gazipur, Dhaka",
-        email: "aminul@brri.gov.bd",
-        mobile: "+8801712345678",
-        selectedStations: ["DAE-BRRI Gazipur", "BRRI Cumilla"],
-        selectedWeatherParameters: [
-          "Air Temperature",
-          "Air Humidity",
-          "Accumulated Rain 1h",
-        ],
-        selectedDataFormats: ["CSV", "Image"],
-        startDate: "2024-10-01",
-        endDate: "2024-10-07",
-        timeInterval: "week",
-        dataInterval: 8,
-        status: "pending",
-        submitTime: "2024-10-07T10:30:00Z",
-      },
-      {
-        id: 2,
-        name: "Prof. Rahman Khan",
-        designation: "Research Director",
-        organization: "Agricultural University",
-        address: "Mymensingh",
-        email: "rahman@bau.edu.bd",
-        mobile: "+8801987654321",
-        selectedStations: ["BRRI Rangpur"],
-        selectedWeatherParameters: ["Solar Radiation", "Wind Speed Gust"],
-        selectedDataFormats: ["Table", "CSV"],
-        startDate: "2024-09-15",
-        endDate: "2024-10-07",
-        timeInterval: "month",
-        dataInterval: 12,
-        status: "approved",
-        submitTime: "2024-10-06T14:15:00Z",
-      },
-      {
-        id: 3,
-        name: "Dr. Fatima Begum",
-        designation: "Assistant Professor",
-        organization: "Dhaka University",
-        address: "Dhaka",
-        email: "fatima@du.ac.bd",
-        mobile: "+8801555666777",
-        selectedStations: [
-          "DAE-BRRI Gazipur",
-          "BRRI Barishal",
-          "BRRI Satkhira",
-        ],
-        selectedWeatherParameters: [
-          "Air Temperature",
-          "Solar Radiation",
-          "Sunshine Duration",
-        ],
-        selectedDataFormats: ["CSV", "Image", "Table"],
-        startDate: "2024-08-01",
-        endDate: "2024-10-07",
-        timeInterval: "3month",
-        dataInterval: 24,
-        status: "pending",
-        submitTime: "2024-10-05T09:20:00Z",
-      },
-    ];
-    setRequests(mockData);
-    setFilteredRequests(mockData);
+    fetchCISRequests();
   }, []);
 
   // Filter and search functionality
@@ -141,21 +107,21 @@ const CISTable = () => {
 
   const getStatusBadge = (status) => {
     switch (status) {
-      case "pending":
+      case "Pending":
         return (
           <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800 border border-amber-200">
             {/* <div className="w-1.5 h-1.5 bg-amber-500 rounded-full mr-2"></div> */}
             Pending
           </span>
         );
-      case "approved":
+      case "Approved":
         return (
           <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">
             {/* <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mr-2"></div> */}
             Approved
           </span>
         );
-      case "rejected":
+      case "Rejected":
         return (
           <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200">
             {/* <div className="w-1.5 h-1.5 bg-red-500 rounded-full mr-2"></div> */}
@@ -191,8 +157,8 @@ const CISTable = () => {
     setShowViewModal(true);
   };
 
-  const handleAcceptRequest = (requestId, requestName) => {
-    Swal.fire({
+  const handleAcceptRequest = async (requestId, requestName) => {
+    const result = await Swal.fire({
       title: "Accept Request?",
       text: `Are you sure you want to accept the weather data request from ${requestName}?`,
       icon: "question",
@@ -201,14 +167,39 @@ const CISTable = () => {
       cancelButtonColor: "#6b7280",
       confirmButtonText: "Yes, Accept!",
       cancelButtonText: "Cancel",
-    }).then((result) => {
-      if (result.isConfirmed) {
+    });
+
+    if (result.isConfirmed) {
+      try {
+        // Show loading
+        Swal.fire({
+          title: "Processing...",
+          text: "Updating request status",
+          allowOutsideClick: false,
+          didOpen: () => {
+            Swal.showLoading();
+          },
+        });
+
+        // Make API call to update status
+        const response = await axios.put(
+          `https://iinms.brri.gov.bd/api/cis/${requestId}/status`,
+          {
+            status: "Approved",
+            remarks: "Request approved for processing",
+          }
+        );
+
+        console.log("Accept API Response:", response.data);
+
+        // Update local state
         setRequests((prev) =>
           prev.map((req) =>
-            req.id === requestId ? { ...req, status: "approved" } : req
+            req.id === requestId ? { ...req, status: "Approved" } : req
           )
         );
 
+        // Show success message
         Swal.fire({
           title: "Request Accepted!",
           text: "The weather data request has been successfully approved.",
@@ -216,28 +207,76 @@ const CISTable = () => {
           confirmButtonColor: "#10b981",
           draggable: true,
         });
+
+        // Refresh data from server to ensure sync
+        fetchCISRequests();
+      } catch (error) {
+        console.error("Error accepting request:", error);
+        Swal.fire({
+          title: "Error!",
+          text:
+            error.response?.data?.message ||
+            "Failed to accept request. Please try again.",
+          icon: "error",
+          confirmButtonColor: "#ef4444",
+        });
       }
-    });
+    }
   };
 
-  const handleRejectRequest = (requestId, requestName) => {
-    Swal.fire({
+  const handleRejectRequest = async (requestId, requestName) => {
+    const result = await Swal.fire({
       title: "Reject Request?",
-      text: `Are you sure you want to reject the weather data request from ${requestName}? This action cannot be undone!`,
+      text: `Are you sure you want to reject the weather data request from ${requestName}?`,
       icon: "warning",
+      input: "textarea",
+      inputLabel: "Reason for rejection (required)",
+      inputPlaceholder: "Enter the reason for rejecting this request...",
       showCancelButton: true,
       confirmButtonColor: "#ef4444",
       cancelButtonColor: "#6b7280",
       confirmButtonText: "Yes, Reject!",
       cancelButtonText: "Cancel",
-    }).then((result) => {
-      if (result.isConfirmed) {
+      inputValidator: (value) => {
+        if (!value || value.trim() === '') {
+          return 'Please provide a reason for rejection';
+        }
+      },
+    });
+
+    if (result.isConfirmed) {
+      try {
+        // Show loading
+        Swal.fire({
+          title: "Processing...",
+          text: "Updating request status",
+          allowOutsideClick: false,
+          didOpen: () => {
+            Swal.showLoading();
+          },
+        });
+
+        const remarks = result.value || "Request rejected";
+
+        // Make API call to update status
+        const response = await axios.put(
+          `https://iinms.brri.gov.bd/api/cis/${requestId}/status`,
+          {
+            status: "Rejected",
+            remarks: remarks,
+          }
+        );
+
+        console.log("Reject API Response:", response.data);
+
+        // Update local state
         setRequests((prev) =>
           prev.map((req) =>
-            req.id === requestId ? { ...req, status: "rejected" } : req
+            req.id === requestId ? { ...req, status: "Rejected" } : req
           )
         );
 
+        // Show success message
         Swal.fire({
           title: "Request Rejected!",
           text: "The weather data request has been rejected.",
@@ -245,8 +284,21 @@ const CISTable = () => {
           confirmButtonColor: "#ef4444",
           draggable: true,
         });
+
+        // Refresh data from server to ensure sync
+        fetchCISRequests();
+      } catch (error) {
+        console.error("Error rejecting request:", error);
+        Swal.fire({
+          title: "Error!",
+          text:
+            error.response?.data?.message ||
+            "Failed to reject request. Please try again.",
+          icon: "error",
+          confirmButtonColor: "#ef4444",
+        });
       }
-    });
+    }
   };
 
   return (
@@ -265,10 +317,118 @@ const CISTable = () => {
           <p className="text-gray-600 text-lg lg:text-xl mb-4">
             Weather Data Request Management System
           </p>
-          {/* <div className="inline-flex items-center px-4 py-2 bg-blue-50 border border-blue-200 rounded-full">
-            <div className="w-2 h-2 bg-blue-500 rounded-full mr-2 animate-pulse"></div>
-            <span className="text-blue-700 font-medium text-sm">Request Tracking & Management</span>
-          </div> */}
+        </div>
+
+        {/* Summary Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="stat bg-base-100 shadow-lg rounded-lg">
+            <div className="stat-figure text-primary">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="w-8 h-8"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                />
+              </svg>
+            </div>
+            <div className="stat-title">Total Requests</div>
+            <div className="stat-value text-primary">{requests.length}</div>
+            <div className="stat-desc">All time submissions</div>
+          </div>
+
+          <div className="stat bg-base-100 shadow-lg rounded-lg">
+            <div className="stat-figure text-warning">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="w-8 h-8"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+            </div>
+            <div className="stat-title">Pending</div>
+            <div className="stat-value text-warning">
+              {requests.filter((r) => r.status === "Pending").length}
+            </div>
+            <div className="stat-desc">Awaiting review</div>
+          </div>
+
+          <div className="stat bg-base-100 shadow-lg rounded-lg">
+            <div className="stat-figure text-success">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="w-8 h-8"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+            </div>
+            <div className="stat-title">Approved</div>
+            <div className="stat-value text-success">
+              {requests.filter((r) => r.status === "Approved").length}
+            </div>
+            <div className="stat-desc">Successfully processed</div>
+          </div>
+
+          <div className="stat bg-base-100 shadow-lg rounded-lg">
+            <div className="stat-figure text-info">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="w-8 h-8"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
+                />
+              </svg>
+            </div>
+            <div className="stat-title">Success Rate</div>
+            <div className="stat-value text-info">
+              {requests.length > 0
+                ? Math.round(
+                    (requests.filter((r) => r.status === "Approved").length /
+                      requests.length) *
+                      100
+                  )
+                : 0}
+              %
+            </div>
+            <div className="stat-desc">Completion rate</div>
+          </div>
+        </div>
+
+        {/* charts */}
+        <div>
+          <div>
+            <CISMonthlyChart />
+          </div>
+          <div>{/* chart 2 */}</div>
         </div>
 
         {/* Filters and Search */}
@@ -318,9 +478,9 @@ const CISTable = () => {
                   onChange={(e) => setStatusFilter(e.target.value)}
                 >
                   <option value="all">All Status</option>
-                  <option value="pending">Pending</option>
-                  <option value="approved">Approved</option>
-                  <option value="rejected">Rejected</option>
+                  <option value="Pending">Pending</option>
+                  <option value="Approved">Approved</option>
+                  <option value="Rejected">Rejected</option>
                 </select>
               </div>
 
@@ -337,7 +497,7 @@ const CISTable = () => {
                   <span className="text-amber-700 font-medium text-sm">
                     Pending:{" "}
                     {
-                      filteredRequests.filter((r) => r.status === "pending")
+                      filteredRequests.filter((r) => r.status === "Pending")
                         .length
                     }
                   </span>
@@ -349,99 +509,82 @@ const CISTable = () => {
 
         {/* Data Table */}
         <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Name
-                  </th>
-                  <th className="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Organization
-                  </th>
-                  <th className="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Submit Time
-                  </th>
-                  <th className="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {currentItems.length === 0 ? (
+          {loading ? (
+            // Loading State
+            <div className="flex justify-center items-center py-12">
+              <div className="flex flex-col items-center space-y-4">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                <p className="text-gray-600 font-medium">
+                  Loading CIS requests...
+                </p>
+              </div>
+            </div>
+          ) : error ? (
+            // Error State
+            <div className="flex justify-center items-center py-12">
+              <div className="flex flex-col items-center space-y-4 max-w-md text-center">
+                <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-8 w-8 text-red-600"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-red-600 font-medium mb-2">
+                    Failed to load requests
+                  </p>
+                  <p className="text-gray-500 text-sm">{error}</p>
+                </div>
+                <button
+                  onClick={fetchCISRequests}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Try Again
+                </button>
+              </div>
+            </div>
+          ) : (
+            // Data Table Content
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
                   <tr>
-                    <td colSpan="5" className="px-6 py-12 text-center">
-                      <div className="flex flex-col items-center">
-                        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-8 w-8 text-gray-400"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth="2"
-                              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                            />
-                          </svg>
-                        </div>
-                        <p className="text-gray-500 text-lg font-medium">
-                          No requests found
-                        </p>
-                        <p className="text-gray-400 text-sm mt-1">
-                          Try adjusting your search or filter criteria
-                        </p>
-                      </div>
-                    </td>
+                    <th className="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      Name
+                    </th>
+                    <th className="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      Organization
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      Status
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      Submit Time
+                    </th>
+                    <th className="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      Actions
+                    </th>
                   </tr>
-                ) : (
-                  currentItems.map((request, index) => (
-                    <tr
-                      key={request.id}
-                      className="hover:bg-gray-50 transition-colors duration-150"
-                    >
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <div>
-                            <div className="text-sm font-medium text-gray-900">
-                              {request.name}
-                            </div>
-                            <div className="text-sm text-gray-500">
-                              {request.designation}
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">
-                          {request.organization}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {getStatusBadge(request.status)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">
-                          {formatDateTime(request.submitTime)}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <div className="flex items-center space-x-2">
-                          {/* View Button */}
-                          <button
-                            className="inline-flex items-center px-3 py-2 shadow-sm text-sm leading-4 font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
-                            onClick={() => handleViewRequest(request)}
-                            title="View Details"
-                          >
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {currentItems.length === 0 ? (
+                    <tr>
+                      <td colSpan="5" className="px-6 py-12 text-center">
+                        <div className="flex flex-col items-center">
+                          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
                             <svg
                               xmlns="http://www.w3.org/2000/svg"
-                              className="h-4 w-4"
+                              className="h-8 w-8 text-gray-400"
                               fill="none"
                               viewBox="0 0 24 24"
                               stroke="currentColor"
@@ -450,76 +593,140 @@ const CISTable = () => {
                                 strokeLinecap="round"
                                 strokeLinejoin="round"
                                 strokeWidth="2"
-                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                              />
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth="2"
-                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                               />
                             </svg>
-                          </button>
-
-                          {/* Accept Button */}
-                          {request.status === "pending" && (
-                            <button
-                              className="inline-flex items-center px-3 py-2 text-sm leading-4 font-medium rounded-lg text-black bg-green-300 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200 shadow-sm"
-                              onClick={() =>
-                                handleAcceptRequest(request.id, request.name)
-                              }
-                              title="Accept Request"
-                            >
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                className="h-4 w-4"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth="2"
-                                  d="M5 13l4 4L19 7"
-                                />
-                              </svg>
-                            </button>
-                          )}
-
-                          {/* Reject Button */}
-                          {request.status === "pending" && (
-                            <button
-                              className="inline-flex items-center px-3 py-2 text-sm leading-4 font-medium rounded-lg text-black bg-red-400 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200 shadow-sm"
-                              onClick={() =>
-                                handleRejectRequest(request.id, request.name)
-                              }
-                              title="Reject Request"
-                            >
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                className="h-4 w-4"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth="2"
-                                  d="M6 18L18 6M6 6l12 12"
-                                />
-                              </svg>
-                            </button>
-                          )}
+                          </div>
+                          <p className="text-gray-500 text-lg font-medium">
+                            No requests found
+                          </p>
+                          <p className="text-gray-400 text-sm mt-1">
+                            Try adjusting your search or filter criteria
+                          </p>
                         </div>
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+                  ) : (
+                    currentItems.map((request, index) => (
+                      <tr
+                        key={request.id}
+                        className="hover:bg-gray-50 transition-colors duration-150"
+                      >
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <div>
+                              <div className="text-sm font-medium text-gray-900">
+                                {request.name}
+                              </div>
+                              <div className="text-sm text-gray-500">
+                                {request.designation}
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-center">
+                          <div className="text-sm text-gray-900">
+                            {request.organization}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {getStatusBadge(request.status)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900">
+                            {formatDateTime(request.submitTime)}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                          <div className="flex items-center space-x-2">
+                            {/* View Button */}
+                            <button
+                              className="inline-flex items-center px-3 py-2 shadow-sm text-sm leading-4 font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+                              onClick={() => handleViewRequest(request)}
+                              title="View Details"
+                            >
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="h-4 w-4"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth="2"
+                                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                                />
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth="2"
+                                  d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                                />
+                              </svg>
+                            </button>
+
+                            {/* Accept Button */}
+                            {request.status === "Pending" && (
+                              <button
+                                className="inline-flex items-center px-3 py-2 text-sm leading-4 font-medium rounded-lg text-black bg-green-300 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200 shadow-sm"
+                                onClick={() =>
+                                  handleAcceptRequest(request.id, request.name)
+                                }
+                                title="Accept Request"
+                              >
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  className="h-4 w-4"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  stroke="currentColor"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth="2"
+                                    d="M5 13l4 4L19 7"
+                                  />
+                                </svg>
+                              </button>
+                            )}
+
+                            {/* Reject Button */}
+                            {request.status === "Pending" && (
+                              <button
+                                className="inline-flex items-center px-3 py-2 text-sm leading-4 font-medium rounded-lg text-black bg-red-400 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200 shadow-sm"
+                                onClick={() =>
+                                  handleRejectRequest(request.id, request.name)
+                                }
+                                title="Reject Request"
+                              >
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  className="h-4 w-4"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  stroke="currentColor"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth="2"
+                                    d="M6 18L18 6M6 6l12 12"
+                                  />
+                                </svg>
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
 
           {/* Pagination */}
           {totalPages > 1 && (
@@ -585,110 +792,6 @@ const CISTable = () => {
               </button>
             </div>
           )}
-        </div>
-
-        {/* Summary Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="stat bg-base-100 shadow-lg rounded-lg">
-            <div className="stat-figure text-primary">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="w-8 h-8"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                />
-              </svg>
-            </div>
-            <div className="stat-title">Total Requests</div>
-            <div className="stat-value text-primary">{requests.length}</div>
-            <div className="stat-desc">All time submissions</div>
-          </div>
-
-          <div className="stat bg-base-100 shadow-lg rounded-lg">
-            <div className="stat-figure text-warning">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="w-8 h-8"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-            </div>
-            <div className="stat-title">Pending</div>
-            <div className="stat-value text-warning">
-              {requests.filter((r) => r.status === "pending").length}
-            </div>
-            <div className="stat-desc">Awaiting review</div>
-          </div>
-
-          <div className="stat bg-base-100 shadow-lg rounded-lg">
-            <div className="stat-figure text-success">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="w-8 h-8"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-            </div>
-            <div className="stat-title">Approved</div>
-            <div className="stat-value text-success">
-              {requests.filter((r) => r.status === "approved").length}
-            </div>
-            <div className="stat-desc">Successfully processed</div>
-          </div>
-
-          <div className="stat bg-base-100 shadow-lg rounded-lg">
-            <div className="stat-figure text-info">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="w-8 h-8"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
-                />
-              </svg>
-            </div>
-            <div className="stat-title">Success Rate</div>
-            <div className="stat-value text-info">
-              {requests.length > 0
-                ? Math.round(
-                    (requests.filter((r) => r.status === "approved").length /
-                      requests.length) *
-                      100
-                  )
-                : 0}
-              %
-            </div>
-            <div className="stat-desc">Completion rate</div>
-          </div>
         </div>
       </div>
 
@@ -957,7 +1060,8 @@ const CISTable = () => {
                       d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                     />
                   </svg>
-                  Required Data Formats ({selectedRequest.selectedDataFormats?.length || 0})
+                  Required Data Formats (
+                  {selectedRequest.selectedDataFormats?.length || 0})
                 </h4>
                 <div className="flex flex-wrap gap-3">
                   {selectedRequest.selectedDataFormats?.map((format, index) => (
@@ -966,22 +1070,22 @@ const CISTable = () => {
                       className="flex items-center gap-2 p-3 bg-base-100 rounded-lg border border-primary/20"
                     >
                       <div className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center">
-                        {format === 'CSV' && (
+                        {format === "CSV" && (
                           <span className="text-lg">📊</span>
                         )}
-                        {format === 'Image' && (
+                        {format === "Image" && (
                           <span className="text-lg">📈</span>
                         )}
-                        {format === 'Table' && (
+                        {format === "Table" && (
                           <span className="text-lg">📋</span>
                         )}
                       </div>
                       <div className="flex flex-col">
                         <span className="text-sm font-semibold">{format}</span>
                         <span className="text-xs text-gray-500">
-                          {format === 'CSV' && 'Raw Data'}
-                          {format === 'Image' && 'Chart Image'}
-                          {format === 'Table' && 'Formatted Table'}
+                          {format === "CSV" && "Raw Data"}
+                          {format === "Image" && "Chart Image"}
+                          {format === "Table" && "Formatted Table"}
                         </span>
                       </div>
                     </div>
@@ -989,6 +1093,44 @@ const CISTable = () => {
                 </div>
               </div>
             </div>
+
+            {/* Remarks Section - Only show for Approved or Rejected */}
+            {(selectedRequest.status === "Approved" || selectedRequest.status === "Rejected") && selectedRequest.remarks && (
+              <div className="card bg-base-200 mt-6">
+                <div className="card-body p-4">
+                  <h4 className="card-title text-base mb-3 flex items-center gap-2">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5 text-warning"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"
+                      />
+                    </svg>
+                    {selectedRequest.status === "Approved" ? "Approval" : "Rejection"} Remarks
+                  </h4>
+                  <div className={`p-4 rounded-lg ${
+                    selectedRequest.status === "Approved" 
+                      ? "bg-green-50 border border-green-200" 
+                      : "bg-red-50 border border-red-200"
+                  }`}>
+                    <p className={`text-sm ${
+                      selectedRequest.status === "Approved" 
+                        ? "text-green-800" 
+                        : "text-red-800"
+                    }`}>
+                      {selectedRequest.remarks}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Date Range and Intervals */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
@@ -1083,7 +1225,7 @@ const CISTable = () => {
             {/* Modal Actions */}
             <div className="modal-action mt-8">
               <div className="flex gap-2 flex-wrap">
-                {selectedRequest.status === "pending" && (
+                {selectedRequest.status === "Pending" && (
                   <>
                     <button
                       className="btn btn-success"
