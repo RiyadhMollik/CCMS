@@ -13,6 +13,7 @@
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^5.1.0",
-    "html-to-image": "^1.11.13"
+    "html-to-image": "^1.11.13",
+    "sweetalert2": "^11.24.0"
   }
 }
