@@ -19,7 +19,8 @@ const AWS = () => {
     startDate: "",
     endDate: "",
     timeInterval: "month",
-    dataInterval: 8
+    dataInterval: 8,
+    useCustomDateRange: false // Toggle between preset time interval or custom date range
   });
 
   // Weather parameters configuration
@@ -194,13 +195,40 @@ const AWS = () => {
         }
       });
 
+      // Prepare data based on date range selection mode
+      const requestData = {
+        name: formData.name,
+        designation: formData.designation,
+        organization: formData.organization,
+        address: formData.address,
+        email: formData.email,
+        mobile: formData.mobile,
+        selectedStations: formData.selectedStations,
+        selectedWeatherParameters: formData.selectedWeatherParameters,
+        selectedDataFormats: formData.selectedDataFormats,
+        dataInterval: formData.dataInterval
+      };
+
+      // Add either timeInterval OR custom date range
+      if (formData.useCustomDateRange) {
+        // Custom date range mode
+        requestData.startDate = formData.startDate;
+        requestData.endDate = formData.endDate;
+        requestData.timeInterval = null; // Use null instead of empty string
+      } else {
+        // Preset time interval mode
+        requestData.timeInterval = formData.timeInterval;
+        requestData.startDate = null; // Use null instead of empty string
+        requestData.endDate = null; // Use null instead of empty string
+      }
+
       // Send data to backend API
       const response = await fetch("https://iinms.brri.gov.bd/api/cis", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(requestData),
       });
 
       if (!response.ok) {
@@ -234,7 +262,8 @@ const AWS = () => {
         startDate: "",
         endDate: "",
         timeInterval: "month",
-        dataInterval: 8
+        dataInterval: 8,
+        useCustomDateRange: false
       });
 
     } catch (error) {
@@ -497,45 +526,85 @@ const AWS = () => {
                 </div>
               </div>
 
-              {/* Date Range Selection */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text">From Date *</span>
+              {/* Date Range Type Selection */}
+              <div className="form-control mt-4">
+                <label className="label">
+                  <span className="label-text font-semibold">Date Range Selection Method *</span>
+                </label>
+                <div className="flex gap-4">
+                  <label className="flex items-center cursor-pointer gap-2">
+                    <input
+                      type="radio"
+                      name="dateRangeType"
+                      className="radio radio-primary"
+                      checked={!formData.useCustomDateRange}
+                      onChange={() => setFormData(prev => ({ 
+                        ...prev, 
+                        useCustomDateRange: false,
+                        startDate: "",
+                        endDate: ""
+                      }))}
+                    />
+                    <span className="label-text">Use Preset Time Interval</span>
                   </label>
-                  <input
-                    type="date"
-                    name="startDate"
-                    value={formData.startDate}
-                    onChange={handleInputChange}
-                    className="input input-bordered"
-                    max={getTodayDate()}
-                    required
-                  />
-                </div>
-
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text">To Date *</span>
+                  
+                  <label className="flex items-center cursor-pointer gap-2">
+                    <input
+                      type="radio"
+                      name="dateRangeType"
+                      className="radio radio-primary"
+                      checked={formData.useCustomDateRange}
+                      onChange={() => setFormData(prev => ({ 
+                        ...prev, 
+                        useCustomDateRange: true,
+                        timeInterval: ""
+                      }))}
+                    />
+                    <span className="label-text">Use Custom Date Range</span>
                   </label>
-                  <input
-                    type="date"
-                    name="endDate"
-                    value={formData.endDate}
-                    onChange={handleInputChange}
-                    className="input input-bordered"
-                    min={formData.startDate}
-                    max={getTodayDate()}
-                    required
-                  />
                 </div>
               </div>
 
-              {/* Time Interval and Data Interval */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                <div className="form-control">
+              {/* Conditional Rendering: Custom Date Range OR Time Interval */}
+              {formData.useCustomDateRange ? (
+                // Custom Date Range Selection
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                  <div className="form-control">
+                    <label className="label">
+                      <span className="label-text">From Date *</span>
+                    </label>
+                    <input
+                      type="date"
+                      name="startDate"
+                      value={formData.startDate}
+                      onChange={handleInputChange}
+                      className="input input-bordered"
+                      max={getTodayDate()}
+                      required
+                    />
+                  </div>
+
+                  <div className="form-control">
+                    <label className="label">
+                      <span className="label-text">To Date *</span>
+                    </label>
+                    <input
+                      type="date"
+                      name="endDate"
+                      value={formData.endDate}
+                      onChange={handleInputChange}
+                      className="input input-bordered"
+                      min={formData.startDate}
+                      max={getTodayDate()}
+                      required
+                    />
+                  </div>
+                </div>
+              ) : (
+                // Preset Time Interval Selection
+                <div className="form-control mt-4">
                   <label className="label">
-                    <span className="label-text">Time Interval *</span>
+                    <span className="label-text">Time Interval *&nbsp;</span>
                   </label>
                   <select
                     name="timeInterval"
@@ -553,27 +622,28 @@ const AWS = () => {
                     <option value="all">All Data</option>
                   </select>
                 </div>
+              )}
 
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text">Data Interval *</span>
-                  </label>
-                  <select
-                    name="dataInterval"
-                    value={formData.dataInterval}
-                    onChange={handleInputChange}
-                    className="select select-bordered"
-                    required
-                  >
-                    <option value={1}>1 Hour</option>
-                    <option value={4}>4 Hours</option>
-                    <option value={8}>8 Hours</option>
-                    <option value={12}>12 Hours</option>
-                    <option value={24}>24 Hours</option>
-                    <option value={48}>48 Hours</option>
-                    <option value={72}>72 Hours</option>
-                  </select>
-                </div>
+              {/* Data Interval */}
+              <div className="form-control mt-4">
+                <label className="label">
+                  <span className="label-text">Data Interval *&nbsp;</span>
+                </label>
+                <select
+                  name="dataInterval"
+                  value={formData.dataInterval}
+                  onChange={handleInputChange}
+                  className="select select-bordered"
+                  required
+                >
+                  <option value={1}>1 Hour</option>
+                  <option value={4}>4 Hours</option>
+                  <option value={8}>8 Hours</option>
+                  <option value={12}>12 Hours</option>
+                  <option value={24}>24 Hours</option>
+                  <option value={48}>48 Hours</option>
+                  <option value={72}>72 Hours</option>
+                </select>
               </div>
 
               {/* Station and Weather Parameter Selection - Side by side */}
@@ -667,16 +737,6 @@ const AWS = () => {
                       onChange={() => handleDataFormatChange('Image')}
                     />
                     <span className="label-text">Chart Image</span>
-                  </label>
-                  
-                  <label className="flex items-center cursor-pointer gap-2">
-                    <input
-                      type="checkbox"
-                      className="checkbox checkbox-primary"
-                      checked={formData.selectedDataFormats.includes('Table')}
-                      onChange={() => handleDataFormatChange('Table')}
-                    />
-                    <span className="label-text">Data Table</span>
                   </label>
                 </div>
               </div>
