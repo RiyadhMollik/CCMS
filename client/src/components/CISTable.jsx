@@ -88,6 +88,9 @@ const CISTable = () => {
 
   // Helper functions
   const formatDate = (dateString) => {
+    if (!dateString || dateString === null) {
+      return 'N/A';
+    }
     return new Date(dateString).toLocaleDateString("en-BD", {
       year: "numeric",
       month: "short",
@@ -1124,29 +1127,40 @@ const CISTable = () => {
                     Date Range
                   </h4>
                   <div className="space-y-3">
-                    <div className="flex items-center justify-between p-3 bg-base-100 rounded">
-                      <span className="text-sm font-medium">From:</span>
-                      <span className="text-base font-semibold">
-                        {formatDate(selectedRequest.startDate)}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between p-3 bg-base-100 rounded">
-                      <span className="text-sm font-medium">To:</span>
-                      <span className="text-base font-semibold">
-                        {formatDate(selectedRequest.endDate)}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between p-3 bg-info/10 rounded border border-info/20">
-                      <span className="text-sm font-medium">Duration:</span>
-                      <span className="text-base font-semibold text-info">
-                        {Math.ceil(
-                          (new Date(selectedRequest.endDate) -
-                            new Date(selectedRequest.startDate)) /
-                            (1000 * 60 * 60 * 24)
-                        )}{" "}
-                        days
-                      </span>
-                    </div>
+                    {selectedRequest.startDate && selectedRequest.endDate ? (
+                      <>
+                        <div className="flex items-center justify-between p-3 bg-base-100 rounded">
+                          <span className="text-sm font-medium">From:</span>
+                          <span className="text-base font-semibold">
+                            {formatDate(selectedRequest.startDate)}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-base-100 rounded">
+                          <span className="text-sm font-medium">To:</span>
+                          <span className="text-base font-semibold">
+                            {formatDate(selectedRequest.endDate)}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-info/10 rounded border border-info/20">
+                          <span className="text-sm font-medium">Duration:</span>
+                          <span className="text-base font-semibold text-info">
+                            {Math.ceil(
+                              (new Date(selectedRequest.endDate) -
+                                new Date(selectedRequest.startDate)) /
+                                (1000 * 60 * 60 * 24)
+                            )}{" "}
+                            days
+                          </span>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="flex items-center justify-between p-3 bg-base-100 rounded">
+                        <span className="text-sm font-medium">Date Range:</span>
+                        <span className="text-base font-semibold text-gray-500 italic">
+                          Using preset time interval
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
