@@ -61,7 +61,7 @@ const CdrTable = () => {
         limit: 10,
         ...filters,
       });
-      const res = await fetch(`https://iinms.brri.gov.bd/api/cdr?${params}`);
+      const res = await fetch(`https://saads.brri.gov.bd/api/cdr?${params}`);
       const result = await res.json();
 
       // Filter out calls with destination "s"
@@ -82,7 +82,7 @@ const CdrTable = () => {
       prev.map((item) => (item.id === id ? { ...item, [field]: value } : item))
     );
     try {
-      await fetch(`https://iinms.brri.gov.bd/api/cdr/${id}`, {
+      await fetch(`https://saads.brri.gov.bd/api/cdr/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ [field]: value }),

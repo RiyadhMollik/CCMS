@@ -482,7 +482,7 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
 
     try {
       const response = await fetch(
-        `https://iinms.brri.gov.bd/api/research-measures/station/${stationId}/parameter/${encodeURIComponent(
+        `https://saads.brri.gov.bd/api/research-measures/station/${stationId}/parameter/${encodeURIComponent(
           measure
         )}`
       );

@@ -15,12 +15,12 @@ export const AuthContextProvider = ({ children }) => {
         const fetchUserData = async (userId) => {
             setLoadingUser(true);
             try {
-                const response = await fetch(`https://iinms.brri.gov.bd/api/users/${userId}`);
+                const response = await fetch(`https://saads.brri.gov.bd/api/users/${userId}`);
                 if (response.ok) {
                     const userData = await response.json();
                     // console.log(userData);
                     const res = await fetch(
-                        `https://iinms.brri.gov.bd/api/roles/roles/${userData.roleId}/permissions`
+                        `https://saads.brri.gov.bd/api/roles/roles/${userData.roleId}/permissions`
                     );
                     if (res.ok) {
                         const data = await res.json();

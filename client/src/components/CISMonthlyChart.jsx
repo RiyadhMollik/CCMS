@@ -80,7 +80,7 @@ const CISMonthlyChart = () => {
         // TODO: Uncomment when API is ready
         /*
         const response = await axios.get(
-          `https://iinms.brri.gov.bd/api/cis/stats?period=${timePeriod}`
+          `https://saads.brri.gov.bd/api/cis/stats?period=${timePeriod}`
         );
 
         // Process the API response

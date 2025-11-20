@@ -73,7 +73,7 @@ const AWS = () => {
   const fetchStations = async () => {
     try {
       const response = await fetch(
-        "https://iinms.brri.gov.bd/api/research-measures/stations"
+        "https://saads.brri.gov.bd/api/research-measures/stations"
       );
       if (!response.ok) {
         throw new Error("Failed to fetch stations");
@@ -223,7 +223,7 @@ const AWS = () => {
       }
 
       // Send data to backend API
-      const response = await fetch("https://iinms.brri.gov.bd/api/cis", {
+      const response = await fetch("https://saads.brri.gov.bd/api/cis", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
