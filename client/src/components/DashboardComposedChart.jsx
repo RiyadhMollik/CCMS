@@ -69,7 +69,7 @@ const DashboardComposedChart = () => {
       try {
         setLoading(true);
         const response = await axios.get(
-          "https://iinms.brri.gov.bd/api/cdr/report/all"
+          "https://saads.brri.gov.bd/api/cdr/report/all"
         );
 
         if (response.data.last12Months) {

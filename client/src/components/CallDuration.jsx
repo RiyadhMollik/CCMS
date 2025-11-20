@@ -26,7 +26,7 @@ const CallDuration = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const response = await axios.get('https://iinms.brri.gov.bd/api/cdr/report/all');
+        const response = await axios.get('https://saads.brri.gov.bd/api/cdr/report/all');
         const durationRanges = response.data.durationRanges || {};
 
         const chartData = [

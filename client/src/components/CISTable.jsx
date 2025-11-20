@@ -22,7 +22,7 @@ const CISTable = () => {
       setError(null);
 
       console.log("Fetching CIS requests from API...");
-      const response = await axios.get("https://iinms.brri.gov.bd/api/cis");
+      const response = await axios.get("https://saads.brri.gov.bd/api/cis");
 
       console.log("API Response:", response.data);
 
@@ -186,7 +186,7 @@ const CISTable = () => {
 
         // Make API call to update status
         const response = await axios.put(
-          `https://iinms.brri.gov.bd/api/cis/${requestId}/status`,
+          `https://saads.brri.gov.bd/api/cis/${requestId}/status`,
           {
             status: "Approved",
             remarks: "Request approved for processing",
@@ -263,7 +263,7 @@ const CISTable = () => {
 
         // Make API call to update status
         const response = await axios.put(
-          `https://iinms.brri.gov.bd/api/cis/${requestId}/status`,
+          `https://saads.brri.gov.bd/api/cis/${requestId}/status`,
           {
             status: "Rejected",
             remarks: remarks,

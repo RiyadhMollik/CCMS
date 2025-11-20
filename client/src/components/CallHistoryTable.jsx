@@ -11,7 +11,7 @@ const CallHistoryTable = () => {
       try {
         setLoading(true);
         const response = await fetch(
-          "https://iinms.brri.gov.bd/api/cdr/report/all"
+          "https://saads.brri.gov.bd/api/cdr/report/all"
         );
 
         if (!response.ok) {
