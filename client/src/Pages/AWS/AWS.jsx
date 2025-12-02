@@ -23,6 +23,29 @@ const AWS = () => {
     useCustomDateRange: false // Toggle between preset time interval or custom date range
   });
 
+  // Custom station name mapping - Maps station_id to display name
+  // TODO: Replace these demo names with actual custom names for each station
+  const stationNameMapping = {
+    "42": "BRRI R/S Habiganj",
+    "98": "BRRI R/S Faridpur", 
+    "122": "BRRI R/S Gopalganj",
+    "124": "BRRI R/S Kushtia",
+    "126": "BRRI R/S Rajshahi",
+    "137": "BRRI R/S Cumilla",
+    "147": "BRRI R/S Rangpur",
+    "310": "BRRI R/S Sirajganj",
+    "352": "BRRI R/S Barishal",
+    "375": "BRRI R/S Satkhira",
+    "383": "BRRI R/S Sonagazi",
+    "415": "BRRI HQ Gazipur",
+  };
+
+  // Helper function to get display name for a station
+  const getStationDisplayName = (station) => {
+    // If custom name exists in mapping, use it; otherwise use original name
+    return stationNameMapping[station.station_id] || station.station_name;
+  };
+
   // Weather parameters configuration
   const weatherParameters = [
     {
@@ -79,6 +102,15 @@ const AWS = () => {
         throw new Error("Failed to fetch stations");
       }
       const stationsData = await response.json();
+      
+      // Log all stations to console to help create accurate mapping
+      console.log("=== All Weather Stations ===");
+      console.log("Total stations:", stationsData.length);
+      stationsData.forEach((station, index) => {
+        console.log(`${index + 1}. ID: ${station.station_id}, Name: ${station.station_name}`);
+      });
+      console.log("===========================");
+      
       setStations(stationsData);
 
       // Set default station to "DAE-BRRI Gazipur" if available, otherwise first station
@@ -345,7 +377,7 @@ const AWS = () => {
                         key={station.station_id}
                         value={station.station_id}
                       >
-                        {station.station_name}
+                        {getStationDisplayName(station)}
                       </option>
                     ))}
                   </select>
@@ -672,7 +704,7 @@ const AWS = () => {
                               checked={formData.selectedStations.includes(station.station_id)}
                               onChange={() => handleStationChange(station.station_id)}
                             />
-                            <span className="text-sm flex-1">{station.station_name}</span>
+                            <span className="text-sm flex-1">{getStationDisplayName(station)}</span>
                           </label>
                         </li>
                       ))}
