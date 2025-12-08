@@ -23,7 +23,13 @@ const CallHistoryTable = () => {
 
         // Get the last10History array from the API response
         const callsData = data.last10History || [];
-        setCalls(Array.isArray(callsData) ? callsData : []);
+        
+        // Filter out calls with destination "s" or "t"
+        const filteredCalls = Array.isArray(callsData) 
+          ? callsData.filter(call => call.destination !== "s" && call.destination !== "t")
+          : [];
+        
+        setCalls(filteredCalls);
       } catch (err) {
         console.error("Error fetching call history:", err);
         setError(err.message);
