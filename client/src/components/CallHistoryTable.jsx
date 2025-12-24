@@ -187,7 +187,7 @@ const CallHistoryTable = () => {
                         : call.status === "NO ANSWER" || call.status === "FAILED"
                           ? "bg-red-800 text-white"
                           : call.status === "BUSY"
-                            ? "bg-yellow-800 text-black"
+                            ? "bg-yellow-800 text-white"
                             : "bg-gray-100 text-gray-800"
                         }`}
                     >
