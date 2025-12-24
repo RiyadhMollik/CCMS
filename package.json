@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "dev": "nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -12,8 +13,12 @@
   "type": "commonjs",
   "dependencies": {
     "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "html-to-image": "^1.11.13",
+    "mysql2": "^3.16.0",
+    "nodemon": "^3.1.11",
+    "sequelize": "^6.37.7",
     "sweetalert2": "^11.24.0"
   }
 }

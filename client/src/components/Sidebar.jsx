@@ -6,6 +6,8 @@ import {
   ArrowRightOnRectangleIcon,
   ChevronDoubleLeftIcon,
   ChevronDoubleRightIcon,
+  PlusCircleIcon,
+  EyeIcon,
 } from "@heroicons/react/24/outline";
 import { IoAnalyticsSharp } from "react-icons/io5";
 import logo from "/logo.png";
@@ -121,6 +123,19 @@ const Sidebar = () => {
 
       <li className="text-base font-medium">
         <NavLink
+          to="/historical-data"
+          className={`flex items-center ${isCollapsed ? "justify-center" : ""}`}
+          title={isCollapsed ? "Historical Data" : ""}
+        >
+          <IoAnalyticsSharp
+            className={`w-5 h-5 ${!isCollapsed ? "mr-2" : ""}`}
+          />
+          {!isCollapsed && "Historical Data"}
+        </NavLink>
+      </li>
+
+      <li className="text-base font-medium">
+        <NavLink
           to="/cis-table"
           className={`flex items-center ${isCollapsed ? "justify-center" : ""}`}
           title={isCollapsed ? "CIS Table" : ""}
@@ -142,6 +157,32 @@ const Sidebar = () => {
             className={`w-5 h-5 ${!isCollapsed ? "mr-2" : ""}`}
           />
           {!isCollapsed && "CCVS"}
+        </NavLink>
+      </li>
+
+      <li className="text-base font-medium">
+        <NavLink
+          to="/add-data"
+          className={`flex items-center ${isCollapsed ? "justify-center" : ""}`}
+          title={isCollapsed ? "Add Data" : ""}
+        >
+          <PlusCircleIcon
+            className={`w-5 h-5 ${!isCollapsed ? "mr-2" : ""}`}
+          />
+          {!isCollapsed && "Add Data"}
+        </NavLink>
+      </li>
+
+      <li className="text-base font-medium">
+        <NavLink
+          to="/view-data"
+          className={`flex items-center ${isCollapsed ? "justify-center" : ""}`}
+          title={isCollapsed ? "View Data" : ""}
+        >
+          <EyeIcon
+            className={`w-5 h-5 ${!isCollapsed ? "mr-2" : ""}`}
+          />
+          {!isCollapsed && "View Data"}
         </NavLink>
       </li>
 
