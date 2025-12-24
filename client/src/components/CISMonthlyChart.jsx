@@ -7,6 +7,7 @@ const CISMonthlyChart = () => {
   const [timePeriod, setTimePeriod] = useState("monthly"); // 'daily', 'weekly', 'monthly'
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const [refetchTrigger, setRefetchTrigger] = useState(0); // Trigger for refetching data
   const [stats, setStats] = useState({
     totalRequests: 0,
     totalApproved: 0,
@@ -72,51 +73,106 @@ const CISMonthlyChart = () => {
       try {
         setLoading(true);
 
-        // Use demo data for now (replace with API call later)
-        createDemoChart(timePeriod);
-        setLoading(false);
-        return;
+        // Build API URL with query parameters
+        let apiUrl = `https://saads.brri.gov.bd/api/cis/stats?period=${timePeriod}`;
+        
+        if (startDate && endDate) {
+          apiUrl += `&startDate=${startDate}&endDate=${endDate}`;
+        }
 
-        // TODO: Uncomment when API is ready
-        /*
-        const response = await axios.get(
-          `https://saads.brri.gov.bd/api/cis/stats?period=${timePeriod}`
-        );
+        const response = await axios.get(apiUrl);
 
         // Process the API response
-        // Expected format: array of { month: 'YYYY-MM', total: X, approved: Y, rejected: Z, pending: W }
-        if (response.data && Array.isArray(response.data)) {
+        if (response.data?.success && Array.isArray(response.data.data)) {
+          const apiData = response.data.data;
+          
           const monthNames = {
-            "01": "Jan",
-            "02": "Feb",
-            "03": "Mar",
-            "04": "Apr",
-            "05": "May",
-            "06": "Jun",
-            "07": "Jul",
-            "08": "Aug",
-            "09": "Sep",
-            10: "Oct",
-            11: "Nov",
-            12: "Dec",
+            "01": "Jan", "02": "Feb", "03": "Mar", "04": "Apr",
+            "05": "May", "06": "Jun", "07": "Jul", "08": "Aug",
+            "09": "Sep", "10": "Oct", "11": "Nov", "12": "Dec",
           };
 
-          // Get last 12 months data
           const categories = [];
           const requestsData = [];
           const approvedData = [];
           const rejectedData = [];
 
-          let totalReq = 0,
-            totalApp = 0,
-            totalRej = 0;
+          let totalReq = 0, totalApp = 0, totalRej = 0;
 
-          response.data.slice(-12).forEach((item) => {
-            const [year, monthNum] = item.month.split("-");
-            const monthName = monthNames[monthNum] || monthNum;
-            const yearShort = year.slice(-2);
+          apiData.forEach((item) => {
+            let label = '';
+            
+            try {
+              if (timePeriod === 'daily') {
+                // Format: YYYY-MM-DD -> "DD MMM"
+                const parts = item.period.split('-');
+                if (parts.length >= 3) {
+                  const [year, month, day] = parts;
+                  // Pad month to ensure proper lookup
+                  const monthPadded = month.padStart(2, '0');
+                  const monthName = monthNames[monthPadded] || monthNames[month] || month;
+                  label = `${parseInt(day)} ${monthName}`;
+                } else {
+                  label = item.period;
+                }
+              } else if (timePeriod === 'weekly') {
+                // Format: YYYY-WW or YYYY-IW## -> Better date range format
+                const parts = item.period.split('-');
+                if (parts.length >= 2) {
+                  const year = parts[0];
+                  const weekStr = parts[1];
+                  
+                  // Extract week number - handle both "50", "IW50", "W50" formats
+                  const weekNum = parseInt(weekStr.replace(/[^\d]/g, ''));
+                  
+                  if (!isNaN(weekNum) && weekNum > 0 && weekNum <= 53) {
+                    // Calculate the start date of the week using ISO week date
+                    const yearInt = parseInt(year);
+                    const jan4 = new Date(yearInt, 0, 4);
+                    const weekStart = new Date(jan4);
+                    const dayOffset = (jan4.getDay() || 7) - 1; // Monday = 0
+                    weekStart.setDate(jan4.getDate() - dayOffset + (weekNum - 1) * 7);
+                    
+                    const weekEnd = new Date(weekStart);
+                    weekEnd.setDate(weekStart.getDate() + 6);
+                    
+                    // Format: "1-7 Nov" or "25 Nov-1 Dec" if spans months
+                    const startDay = weekStart.getDate();
+                    const endDay = weekEnd.getDate();
+                    const startMonth = weekStart.toLocaleString('en-US', { month: 'short' });
+                    const endMonth = weekEnd.toLocaleString('en-US', { month: 'short' });
+                    
+                    if (startMonth === endMonth) {
+                      label = `${startDay}-${endDay} ${startMonth}`;
+                    } else {
+                      label = `${startDay} ${startMonth}-${endDay} ${endMonth}`;
+                    }
+                  } else {
+                    label = item.period;
+                  }
+                } else {
+                  label = item.period;
+                }
+              } else {
+                // Monthly format: YYYY-MM -> "MMM 'YY"
+                const parts = item.period.split('-');
+                if (parts.length >= 2) {
+                  const [year, monthNum] = parts;
+                  // Pad month to ensure proper lookup
+                  const monthPadded = monthNum.padStart(2, '0');
+                  const monthName = monthNames[monthPadded] || monthNames[monthNum] || monthNum;
+                  const yearShort = year.slice(-2);
+                  label = `${monthName} '${yearShort}`;
+                } else {
+                  label = item.period;
+                }
+              }
+            } catch (error) {
+              console.error('Error formatting period:', item.period, error);
+              label = item.period || 'N/A';
+            }
 
-            categories.push(`${monthName} '${yearShort}`);
+            categories.push(label);
             requestsData.push(item.total || 0);
             approvedData.push(item.approved || 0);
             rejectedData.push(item.rejected || 0);
@@ -132,189 +188,233 @@ const CISMonthlyChart = () => {
             totalRejected: totalRej,
           });
 
-          // Create Highcharts options
-          setChartOptions({
-            chart: {
-              type: "column",
-              backgroundColor: "#ffffff",
-              height: null, // Auto height based on container
-            },
-            title: {
-              text: "Monthly CIS Request Statistics",
-              align: "left",
-              style: {
-                fontSize: "16px",
-                fontWeight: "600",
-                color: "#1f2937",
-              },
-              margin: 20,
-            },
-            subtitle: {
-              text: "Last 12 months request trends with approval and rejection rates",
-              align: "left",
-              style: {
-                fontSize: "12px",
-                color: "#6b7280",
-              },
-            },
-            xAxis: {
-              categories: categories,
-              crosshair: {
-                width: 2,
-                color: "#e5e7eb",
-                dashStyle: "Dash",
-              },
-              accessibility: {
-                description: "Months",
-              },
-              labels: {
-                style: {
-                  fontSize: "10px",
-                  color: "#6b7280",
-                },
-                rotation: -45,
-                align: "right",
-              },
-              lineColor: "#e5e7eb",
-              tickColor: "#e5e7eb",
-            },
-            yAxis: {
-              min: 0,
-              title: {
-                text: "Number of Requests",
-                style: {
-                  fontSize: "11px",
-                  color: "#6b7280",
-                  fontWeight: "500",
-                },
-              },
-              labels: {
-                style: {
-                  fontSize: "10px",
-                  color: "#6b7280",
-                },
-              },
-              gridLineColor: "#f3f4f6",
-              gridLineDashStyle: "Dash",
-            },
-            tooltip: {
-              shared: true,
-              useHTML: true,
-              backgroundColor: "#ffffff",
-              borderColor: "#e5e7eb",
-              borderRadius: 8,
-              borderWidth: 1,
-              padding: 12,
-              shadow: {
-                color: "rgba(0,0,0,0.1)",
-                offsetX: 0,
-                offsetY: 2,
-                opacity: 0.1,
-                width: 4,
-              },
-              style: {
-                fontSize: "11px",
-                fontFamily:
-                  '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-              },
-              headerFormat:
-                '<div style="font-size: 12px; font-weight: 600; margin-bottom: 8px; color: #1f2937;">{point.key}</div>',
-              pointFormat:
-                '<div style="display: flex; align-items: center; margin: 4px 0;"><span style="color:{point.color}; font-size: 16px; margin-right: 6px;">●</span><span style="color: #4b5563; flex: 1;">{series.name}:</span><span style="font-weight: 600; color: #1f2937; margin-left: 8px;">{point.y}</span></div>',
-              footerFormat: "</div>",
-            },
-            plotOptions: {
-              column: {
-                pointPadding: 0.1,
-                borderWidth: 0,
-                borderRadius: 6,
-                dataLabels: {
-                  enabled: false,
-                },
-                groupPadding: 0.15,
-                shadow: false,
-              },
-            },
-            legend: {
-              align: "center",
-              verticalAlign: "bottom",
-              layout: "horizontal",
-              itemStyle: {
-                fontSize: "11px",
-                fontWeight: "500",
-                color: "#4b5563",
-              },
-              itemHoverStyle: {
-                color: "#1f2937",
-              },
-              itemMarginBottom: 5,
-              symbolRadius: 3,
-              symbolHeight: 10,
-              symbolWidth: 10,
-              itemDistance: 20,
-            },
-            credits: {
-              enabled: false,
-            },
-            exporting: {
-              enabled: false,
-            },
-            responsive: {
-              rules: [
-                {
-                  condition: {
-                    maxWidth: 500,
-                  },
-                  chartOptions: {
-                    legend: {
-                      layout: "horizontal",
-                      align: "center",
-                      verticalAlign: "bottom",
-                    },
-                    title: {
-                      style: {
-                        fontSize: "14px",
-                      },
-                    },
-                    subtitle: {
-                      style: {
-                        fontSize: "10px",
-                      },
-                    },
-                  },
-                },
-              ],
-            },
-            series: [
-              {
-                name: "Total Requests",
-                data: requestsData,
-                color: "#3b82f6",
-              },
-              {
-                name: "Approved",
-                data: approvedData,
-                color: "#10b981",
-              },
-              {
-                name: "Rejected",
-                data: rejectedData,
-                color: "#ef4444",
-              },
-            ],
-          });
+          // Reverse arrays to show latest data on the left
+          categories.reverse();
+          requestsData.reverse();
+          approvedData.reverse();
+          rejectedData.reverse();
+
+          // Create chart with real data
+          createChart(categories, requestsData, approvedData, rejectedData);
         } else {
-          // Fallback to mock data if API returns unexpected format
+          // Fallback to demo data if API returns unexpected format
+          console.warn('API returned unexpected format, using demo data');
           createDemoChart(timePeriod);
         }
-        */
       } catch (error) {
         console.error("Error fetching CIS monthly stats:", error);
-        // Use mock data on error
+        // Use demo data on error
         createDemoChart(timePeriod);
       } finally {
         setLoading(false);
       }
+    };
+
+    const createChart = (categories, requestsData, approvedData, rejectedData) => {
+      const isMobile = window.innerWidth < 768;
+      
+      setChartOptions({
+        chart: {
+          type: "column",
+          backgroundColor: "#ffffff",
+          height: null,
+        },
+        title: {
+          text: "",
+          align: "left",
+          style: {
+            fontSize: "16px",
+            fontWeight: "600",
+            color: "#1f2937",
+          },
+          margin: 20,
+        },
+        subtitle: {
+          text: "",
+          align: "left",
+          style: {
+            fontSize: "12px",
+            color: "#6b7280",
+          },
+        },
+        xAxis: {
+          categories: categories,
+          crosshair: {
+            width: 2,
+            color: "#e5e7eb",
+            dashStyle: "Dash",
+          },
+          accessibility: {
+            description:
+              timePeriod === "daily"
+                ? "Days"
+                : timePeriod === "weekly"
+                ? "Weeks"
+                : "Months",
+          },
+          labels: {
+            style: {
+              fontSize: "10px",
+              color: "#6b7280",
+            },
+            rotation: -45,
+            align: "right",
+          },
+          lineColor: "#e5e7eb",
+          tickColor: "#e5e7eb",
+        },
+        yAxis: {
+          min: 0,
+          title: {
+            text: "Number of Requests",
+            style: {
+              fontSize: "11px",
+              color: "#6b7280",
+              fontWeight: "500",
+            },
+          },
+          labels: {
+            style: {
+              fontSize: "10px",
+              color: "#6b7280",
+            },
+          },
+          gridLineColor: "#f3f4f6",
+          gridLineDashStyle: "Dash",
+        },
+        tooltip: {
+          shared: true,
+          useHTML: true,
+          backgroundColor: "#ffffff",
+          borderColor: "#e5e7eb",
+          borderRadius: 8,
+          borderWidth: 1,
+          padding: 12,
+          shadow: {
+            color: "rgba(0,0,0,0.1)",
+            offsetX: 0,
+            offsetY: 2,
+            opacity: 0.1,
+            width: 4,
+          },
+          style: {
+            fontSize: "11px",
+            fontFamily:
+              '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+          },
+          headerFormat:
+            '<div style="font-size: 12px; font-weight: 600; margin-bottom: 8px; color: #1f2937;">{point.key}</div>',
+          pointFormat:
+            '<div style="display: flex; align-items: center; margin: 4px 0;"><span style="color:{point.color}; font-size: 16px; margin-right: 6px;">●</span><span style="color: #4b5563; flex: 1;">{series.name}:</span><span style="font-weight: 600; color: #1f2937; margin-left: 8px;">{point.y}</span></div>',
+          footerFormat: "</div>",
+        },
+        plotOptions: {
+          column: {
+            pointPadding: 0.1,
+            borderWidth: 0,
+            borderRadius: 6,
+            dataLabels: {
+              enabled: false,
+            },
+            groupPadding: 0.15,
+            shadow: false,
+          },
+        },
+        legend: {
+          align: "center",
+          verticalAlign: "bottom",
+          layout: "horizontal",
+          itemStyle: {
+            fontSize: "11px",
+            fontWeight: "500",
+            color: "#4b5563",
+          },
+          itemHoverStyle: {
+            color: "#1f2937",
+          },
+          itemMarginBottom: 5,
+          symbolRadius: 3,
+          symbolHeight: 10,
+          symbolWidth: 10,
+          itemDistance: 20,
+        },
+        credits: {
+          enabled: false,
+        },
+        exporting: {
+          enabled: false,
+        },
+        responsive: {
+          rules: [
+            {
+              condition: {
+                maxWidth: 767,
+              },
+              chartOptions: {
+                chart: {
+                  height: 280,
+                },
+                legend: {
+                  enabled: false,
+                },
+                title: {
+                  style: {
+                    fontSize: "13px",
+                  },
+                  margin: 15,
+                },
+                subtitle: {
+                  text: null,
+                },
+                xAxis: {
+                  labels: {
+                    style: {
+                      fontSize: "9px",
+                    },
+                    rotation: -45,
+                  },
+                },
+                yAxis: {
+                  title: {
+                    text: "Requests",
+                    style: {
+                      fontSize: "10px",
+                    },
+                  },
+                  labels: {
+                    style: {
+                      fontSize: "9px",
+                    },
+                  },
+                },
+                plotOptions: {
+                  column: {
+                    pointPadding: 0.05,
+                    groupPadding: 0.1,
+                  },
+                },
+              },
+            },
+          ],
+        },
+        series: [
+          {
+            name: "Total Requests",
+            data: requestsData,
+            color: "#3b82f6",
+          },
+          {
+            name: "Approved",
+            data: approvedData,
+            color: "#10b981",
+          },
+          {
+            name: "Rejected",
+            data: rejectedData,
+            color: "#ef4444",
+          },
+        ],
+      });
     };
 
     const createDemoChart = (period) => {
@@ -351,10 +451,21 @@ const CISMonthlyChart = () => {
         const today = new Date();
         for (let i = dataPoints - 1; i >= 0; i--) {
           const weekStart = new Date(today);
-          weekStart.setDate(weekStart.getDate() - i * 7);
-          const weekNum = Math.ceil(weekStart.getDate() / 7);
-          const month = weekStart.toLocaleString("en-US", { month: "short" });
-          categories.push(`W${weekNum} ${month}`);
+          weekStart.setDate(weekStart.getDate() - i * 7 - today.getDay() + 1); // Start from Monday
+          
+          const weekEnd = new Date(weekStart);
+          weekEnd.setDate(weekStart.getDate() + 6);
+          
+          const startDay = weekStart.getDate();
+          const endDay = weekEnd.getDate();
+          const startMonth = weekStart.toLocaleString("en-US", { month: "short" });
+          const endMonth = weekEnd.toLocaleString("en-US", { month: "short" });
+          
+          if (startMonth === endMonth) {
+            categories.push(`${startDay}-${endDay} ${startMonth}`);
+          } else {
+            categories.push(`${startDay} ${startMonth}-${endDay} ${endMonth}`);
+          }
         }
         const allRequestsData = [
           145, 132, 158, 141, 168, 154, 172, 159, 148, 175, 163, 180,
@@ -398,6 +509,12 @@ const CISMonthlyChart = () => {
         totalApproved: approvedData.reduce((a, b) => a + b, 0),
         totalRejected: rejectedData.reduce((a, b) => a + b, 0),
       });
+
+      // Reverse arrays to show latest data on the left
+      categories.reverse();
+      requestsData.reverse();
+      approvedData.reverse();
+      rejectedData.reverse();
 
       setChartOptions({
         chart: {
@@ -604,7 +721,7 @@ const CISMonthlyChart = () => {
     };
 
     fetchData();
-  }, [hcReady, timePeriod]);
+  }, [hcReady, timePeriod, refetchTrigger]);
 
   const isBusy = loading || !hcReady;
 
@@ -750,6 +867,7 @@ const CISMonthlyChart = () => {
             type="date"
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
+            max={new Date().toISOString().split('T')[0]}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-sm"
             placeholder="Start Date"
           />
@@ -779,16 +897,37 @@ const CISMonthlyChart = () => {
             type="date"
             value={endDate}
             onChange={(e) => setEndDate(e.target.value)}
+            min={startDate || undefined}
+            max={new Date().toISOString().split('T')[0]}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-sm"
             placeholder="End Date"
           />
         </div>
 
         <button
-          className="w-full sm:w-auto px-6 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200 flex items-center justify-center gap-2"
+          className="w-full sm:w-auto px-6 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          disabled={!startDate || !endDate}
           onClick={() => {
-            // TODO: Add functionality to filter chart data by date range
-            console.log("Filter by date range:", startDate, "to", endDate);
+            // Validate date range before applying
+            if (!startDate || !endDate) {
+              alert('Please select both start and end dates');
+              return;
+            }
+            
+            if (new Date(startDate) > new Date(endDate)) {
+              alert('Start date cannot be after end date');
+              return;
+            }
+            
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            if (new Date(startDate) > today || new Date(endDate) > today) {
+              alert('Dates cannot be in the future');
+              return;
+            }
+            
+            // Trigger refetch by updating the trigger
+            setRefetchTrigger(prev => prev + 1);
           }}
         >
           <svg
