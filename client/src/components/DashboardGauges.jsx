@@ -94,24 +94,23 @@ const DashboardGauges = () => {
         if (!mounted) return;
 
         if (res?.data?.destinationStats) {
-          const destinations = res.data.destinationStats
-            .filter((d) => d.destination !== "104") // Remove irrigation (104)
+          const rawData = res.data.destinationStats;
+          
+          // Find "s" (others) totalCalls to add to Help Desk
+          const othersData = rawData.find((d) => d.destination === "s");
+          const othersCalls = othersData?.totalCalls || 0;
+          
+          // Process destinations: combine "s" calls into Help Desk (100), exclude "s"
+          const destinations = rawData
+            .filter((d) => d.destination !== "s") // Remove "s", we'll add its calls to Help Desk
             .map((d) => {
-              // Transform the data based on destination
-              if (d.destination === "s") {
-                // Show "others" as "Help Desk"
+              if (d.destination === "100") {
+                // Add "others" (s) totalCalls to Help Desk
                 return {
                   ...d,
-                  destinationState: "Help Desk"
-                };
-              } else if (d.destination === "100") {
-                // Show "Help Desk" as "Irrigation" 
-                return {
-                  ...d,
-                  destinationState: "Irrigation"
+                  totalCalls: d.totalCalls + othersCalls
                 };
               }
-              // Keep other destinations as they are
               return d;
             });
           
