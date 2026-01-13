@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import axios from "axios";
 import Swal from "sweetalert2";
+import API_BASE_URL from "../../config/api";
 
 const ViewData = () => {
   const [data, setData] = useState([]);
@@ -76,8 +77,8 @@ const ViewData = () => {
   const fetchFilters = async () => {
     try {
       const [stationsRes, yearsRes] = await Promise.all([
-        axios.get(`http://localhost:5500/api/${selectedDataType}/stations`),
-        axios.get(`http://localhost:5500/api/${selectedDataType}/years`),
+        axios.get(`${API_BASE_URL}/api/${selectedDataType}/stations`),
+        axios.get(`${API_BASE_URL}/api/${selectedDataType}/years`),
       ]);
 
       if (stationsRes.data.success) setStations(stationsRes.data.data);
@@ -98,7 +99,7 @@ const ViewData = () => {
       if (selectedMonth) params.append("month", selectedMonth);
 
       const response = await axios.get(
-        `http://localhost:5500/api/${selectedDataType}?${params.toString()}`
+        `${API_BASE_URL}/api/${selectedDataType}?${params.toString()}`
       );
 
       if (response.data.success) {
@@ -132,7 +133,7 @@ const ViewData = () => {
 
     if (result.isConfirmed) {
       try {
-        await axios.delete(`http://localhost:5500/api/${selectedDataType}/${id}`);
+        await axios.delete(`${API_BASE_URL}/api/${selectedDataType}/${id}`);
         Swal.fire("Deleted!", "Record has been deleted.", "success");
         fetchData();
       } catch (error) {
@@ -171,7 +172,7 @@ const ViewData = () => {
 
     try {
       const response = await axios.put(
-        `http://localhost:5500/api/${selectedDataType}/${editingRecord.id}`,
+        `${API_BASE_URL}/api/${selectedDataType}/${editingRecord.id}`,
         editFormData
       );
 
@@ -229,7 +230,7 @@ const ViewData = () => {
   const checkDuplicateRecord = async (station, year, month) => {
     try {
       const response = await axios.get(
-        `http://localhost:5500/api/${selectedDataType}?station=${station}&year=${year}&month=${month}`
+        `${API_BASE_URL}/api/${selectedDataType}?station=${station}&year=${year}&month=${month}`
       );
       return response.data.data && response.data.data.length > 0;
     } catch (error) {
@@ -267,7 +268,7 @@ const ViewData = () => {
 
     try {
       const response = await axios.post(
-        `http://localhost:5500/api/${selectedDataType}`,
+        `${API_BASE_URL}/api/${selectedDataType}`,
         addFormData
       );
 

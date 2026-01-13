@@ -12,6 +12,7 @@ import Papa from "papaparse";
 import * as XLSX from "xlsx";
 import axios from "axios";
 import Swal from "sweetalert2";
+import API_BASE_URL from "../../config/api";
 
 const AddData = () => {
   const [selectedDataType, setSelectedDataType] = useState("");
@@ -176,7 +177,7 @@ const AddData = () => {
       setUploadProgress(50);
 
       const response = await axios.post(
-        `http://localhost:5500/api/${selectedDataType}/upload`,
+        `${API_BASE_URL}/api/${selectedDataType}/upload`,
         {
           data: parsedData,
           filename: uploadedFile.name,
