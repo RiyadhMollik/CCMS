@@ -27,6 +27,7 @@ const AddData = () => {
     { value: "rainfall", label: "Rainfall Data" },
     { value: "relative-humidity", label: "Relative Humidity Data" },
     { value: "sunshine", label: "Sunshine Data" },
+    { value: "wind-speed", label: "Wind Speed Data" },
   ];
 
   const handleDataTypeChange = (e) => {

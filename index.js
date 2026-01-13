@@ -7,6 +7,7 @@ const minimumTempRoutes = require("./routes/minimumTempRoutes");
 const rainfallRoutes = require("./routes/rainfallRoutes");
 const relativeHumidityRoutes = require("./routes/relativeHumidityRoutes");
 const sunshineRoutes = require("./routes/sunshineRoutes");
+const windSpeedRoutes = require("./routes/windSpeedRoutes");
 
 // Import models
 require("./models/MaximumTemp");
@@ -14,6 +15,7 @@ require("./models/MinimumTemp");
 require("./models/Rainfall");
 require("./models/RelativeHumidity");
 require("./models/Sunshine");
+require("./models/WindSpeed");
 
 const app = express();
 app.use(cors());
@@ -28,6 +30,7 @@ app.use("/api/minimum-temp", minimumTempRoutes);
 app.use("/api/rainfall", rainfallRoutes);
 app.use("/api/relative-humidity", relativeHumidityRoutes);
 app.use("/api/sunshine", sunshineRoutes);
+app.use("/api/wind-speed", windSpeedRoutes);
 
 app.get("/api/health", (req, res) => {
   res.json({ ok: true, message: "Server is running" });
