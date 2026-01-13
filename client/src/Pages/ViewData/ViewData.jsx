@@ -24,6 +24,7 @@ const ViewData = () => {
     { value: "minimum-temp", label: "Minimum Temperature" },
     { value: "rainfall", label: "Rainfall" },
     { value: "relative-humidity", label: "Relative Humidity" },
+    { value: "sunshine", label: "Sunshine" },
   ];
 
   const months = [

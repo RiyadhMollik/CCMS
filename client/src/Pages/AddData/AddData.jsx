@@ -26,6 +26,7 @@ const AddData = () => {
     { value: "minimum-temp", label: "Minimum Temperature Data" },
     { value: "rainfall", label: "Rainfall Data" },
     { value: "relative-humidity", label: "Relative Humidity Data" },
+    { value: "sunshine", label: "Sunshine Data" },
   ];
 
   const handleDataTypeChange = (e) => {
