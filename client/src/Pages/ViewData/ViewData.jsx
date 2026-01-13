@@ -76,8 +76,8 @@ const ViewData = () => {
   const fetchFilters = async () => {
     try {
       const [stationsRes, yearsRes] = await Promise.all([
-        axios.get(`http://localhost:5000/api/${selectedDataType}/stations`),
-        axios.get(`http://localhost:5000/api/${selectedDataType}/years`),
+        axios.get(`http://localhost:5500/api/${selectedDataType}/stations`),
+        axios.get(`http://localhost:5500/api/${selectedDataType}/years`),
       ]);
 
       if (stationsRes.data.success) setStations(stationsRes.data.data);
@@ -98,7 +98,7 @@ const ViewData = () => {
       if (selectedMonth) params.append("month", selectedMonth);
 
       const response = await axios.get(
-        `http://localhost:5000/api/${selectedDataType}?${params.toString()}`
+        `http://localhost:5500/api/${selectedDataType}?${params.toString()}`
       );
 
       if (response.data.success) {
@@ -132,7 +132,7 @@ const ViewData = () => {
 
     if (result.isConfirmed) {
       try {
-        await axios.delete(`http://localhost:5000/api/${selectedDataType}/${id}`);
+        await axios.delete(`http://localhost:5500/api/${selectedDataType}/${id}`);
         Swal.fire("Deleted!", "Record has been deleted.", "success");
         fetchData();
       } catch (error) {
@@ -171,7 +171,7 @@ const ViewData = () => {
 
     try {
       const response = await axios.put(
-        `http://localhost:5000/api/${selectedDataType}/${editingRecord.id}`,
+        `http://localhost:5500/api/${selectedDataType}/${editingRecord.id}`,
         editFormData
       );
 
@@ -229,7 +229,7 @@ const ViewData = () => {
   const checkDuplicateRecord = async (station, year, month) => {
     try {
       const response = await axios.get(
-        `http://localhost:5000/api/${selectedDataType}?station=${station}&year=${year}&month=${month}`
+        `http://localhost:5500/api/${selectedDataType}?station=${station}&year=${year}&month=${month}`
       );
       return response.data.data && response.data.data.length > 0;
     } catch (error) {
@@ -267,7 +267,7 @@ const ViewData = () => {
 
     try {
       const response = await axios.post(
-        `http://localhost:5000/api/${selectedDataType}`,
+        `http://localhost:5500/api/${selectedDataType}`,
         addFormData
       );
 
