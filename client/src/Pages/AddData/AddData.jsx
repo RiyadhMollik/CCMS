@@ -23,6 +23,7 @@ const AddData = () => {
 
   const dataTypeOptions = [
     { value: "maximum-temp", label: "Maximum Temperature Data" },
+    { value: "minimum-temp", label: "Minimum Temperature Data" },
   ];
 
   const handleDataTypeChange = (e) => {
@@ -166,7 +167,7 @@ const AddData = () => {
       setUploadProgress(50);
 
       const response = await axios.post(
-        "http://localhost:5000/api/maximum-temp/upload",
+        `http://localhost:5000/api/${selectedDataType}/upload`,
         {
           data: parsedData,
           filename: uploadedFile.name,

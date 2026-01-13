@@ -12,11 +12,17 @@ const ViewData = () => {
   const [pageSize] = useState(50);
 
   // Filters
+  const [selectedDataType, setSelectedDataType] = useState("maximum-temp");
   const [selectedStation, setSelectedStation] = useState("");
   const [selectedYear, setSelectedYear] = useState("");
   const [selectedMonth, setSelectedMonth] = useState("");
   const [stations, setStations] = useState([]);
   const [years, setYears] = useState([]);
+
+  const dataTypeOptions = [
+    { value: "maximum-temp", label: "Maximum Temperature" },
+    { value: "minimum-temp", label: "Minimum Temperature" },
+  ];
 
   const months = [
     { value: "1", label: "January" },
@@ -35,21 +41,21 @@ const ViewData = () => {
 
   useEffect(() => {
     fetchFilters();
-  }, []);
+  }, [selectedDataType]);
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [selectedStation, selectedYear, selectedMonth]);
+  }, [selectedStation, selectedYear, selectedMonth, selectedDataType]);
 
   useEffect(() => {
     fetchData();
-  }, [currentPage, selectedStation, selectedYear, selectedMonth]);
+  }, [currentPage, selectedStation, selectedYear, selectedMonth, selectedDataType]);
 
   const fetchFilters = async () => {
     try {
       const [stationsRes, yearsRes] = await Promise.all([
-        axios.get("http://localhost:5000/api/maximum-temp/stations"),
-        axios.get("http://localhost:5000/api/maximum-temp/years"),
+        axios.get(`http://localhost:5000/api/${selectedDataType}/stations`),
+        axios.get(`http://localhost:5000/api/${selectedDataType}/years`),
       ]);
 
       if (stationsRes.data.success) setStations(stationsRes.data.data);
@@ -70,7 +76,7 @@ const ViewData = () => {
       if (selectedMonth) params.append("month", selectedMonth);
 
       const response = await axios.get(
-        `http://localhost:5000/api/maximum-temp?${params.toString()}`
+        `http://localhost:5000/api/${selectedDataType}?${params.toString()}`
       );
 
       if (response.data.success) {
@@ -104,7 +110,7 @@ const ViewData = () => {
 
     if (result.isConfirmed) {
       try {
-        await axios.delete(`http://localhost:5000/api/maximum-temp/${id}`);
+        await axios.delete(`http://localhost:5000/api/${selectedDataType}/${id}`);
         Swal.fire("Deleted!", "Record has been deleted.", "success");
         fetchData();
       } catch (error) {
@@ -134,7 +140,7 @@ const ViewData = () => {
         {/* Header */}
         <div className="bg-white rounded-lg sm:rounded-xl shadow-lg p-4 sm:p-6 mb-4 sm:mb-6">
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 mb-2">
-            Maximum Temperature Data
+            {dataTypeOptions.find(dt => dt.value === selectedDataType)?.label || "Climate"} Data
           </h1>
           <p className="text-sm sm:text-base text-gray-600">
             View and manage maximum temperature records from weather stations
@@ -152,7 +158,24 @@ const ViewData = () => {
             Filter Data
           </h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-3 sm:gap-4">
+            <div>
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
+                Data Type
+              </label>
+              <select
+                value={selectedDataType}
+                onChange={(e) => setSelectedDataType(e.target.value)}
+                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                {dataTypeOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
             <div>
               <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
                 Station

@@ -3,9 +3,11 @@ const cors = require("cors");
 require("dotenv").config();
 const sequelize = require("./config/database");
 const maximumTempRoutes = require("./routes/maximumTempRoutes");
+const minimumTempRoutes = require("./routes/minimumTempRoutes");
 
 // Import models
 require("./models/MaximumTemp");
+require("./models/MinimumTemp");
 
 const app = express();
 app.use(cors());
@@ -16,6 +18,7 @@ const PORT = process.env.PORT || 5000;
 
 // Routes
 app.use("/api/maximum-temp", maximumTempRoutes);
+app.use("/api/minimum-temp", minimumTempRoutes);
 
 app.get("/api/health", (req, res) => {
   res.json({ ok: true, message: "Server is running" });
