@@ -24,6 +24,14 @@ const ViewData = () => {
   const [editingRecord, setEditingRecord] = useState(null);
   const [editFormData, setEditFormData] = useState({});
 
+  // Add modal state
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [addFormData, setAddFormData] = useState({
+    station: "",
+    year: "",
+    month: "",
+  });
+
   const dataTypeOptions = [
     { value: "maximum-temp", label: "Maximum Temperature (°C)" },
     { value: "minimum-temp", label: "Minimum Temperature (°C)" },
@@ -186,6 +194,102 @@ const ViewData = () => {
     }
   };
 
+  const openAddModal = () => {
+    setAddFormData({
+      station: "",
+      year: "",
+      month: "",
+    });
+    setIsAddModalOpen(true);
+  };
+
+  const closeAddModal = () => {
+    setIsAddModalOpen(false);
+    setAddFormData({
+      station: "",
+      year: "",
+      month: "",
+    });
+  };
+
+  const handleAddInputChange = (field, value) => {
+    if (field === "station" || field === "year" || field === "month") {
+      setAddFormData((prev) => ({
+        ...prev,
+        [field]: value,
+      }));
+    } else {
+      setAddFormData((prev) => ({
+        ...prev,
+        [field]: value === "" ? null : parseFloat(value) || null,
+      }));
+    }
+  };
+
+  const checkDuplicateRecord = async (station, year, month) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:5000/api/${selectedDataType}?station=${station}&year=${year}&month=${month}`
+      );
+      return response.data.data && response.data.data.length > 0;
+    } catch (error) {
+      console.error("Error checking duplicate:", error);
+      return false;
+    }
+  };
+
+  const handleSaveAdd = async () => {
+    // Validate required fields
+    if (!addFormData.station || !addFormData.year || !addFormData.month) {
+      Swal.fire({
+        icon: "error",
+        title: "Validation Error",
+        text: "Please fill in Station, Year, and Month fields!",
+      });
+      return;
+    }
+
+    // Check for duplicate
+    const isDuplicate = await checkDuplicateRecord(
+      addFormData.station,
+      addFormData.year,
+      addFormData.month
+    );
+
+    if (isDuplicate) {
+      Swal.fire({
+        icon: "error",
+        title: "Duplicate Record",
+        text: `A record for ${addFormData.station} in ${months.find(m => m.value === addFormData.month)?.label} ${addFormData.year} already exists!`,
+      });
+      return;
+    }
+
+    try {
+      const response = await axios.post(
+        `http://localhost:5000/api/${selectedDataType}`,
+        addFormData
+      );
+
+      if (response.data.success) {
+        Swal.fire({
+          icon: "success",
+          title: "Success",
+          text: "Record added successfully!",
+        });
+        closeAddModal();
+        fetchData();
+      }
+    } catch (error) {
+      console.error("Error adding record:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: error.response?.data?.message || "Failed to add record",
+      });
+    }
+  };
+
   const formatTemp = (value) => {
     if (value === null || value === undefined) return "-";
     return parseFloat(value).toFixed(1);
@@ -294,6 +398,25 @@ const ViewData = () => {
           </div>
 
           <div className="mt-4 flex items-center gap-3">
+            <button
+              onClick={openAddModal}
+              className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors flex items-center gap-2"
+            >
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 4v16m8-8H4"
+                />
+              </svg>
+              Add Data
+            </button>
             <button
               onClick={fetchData}
               className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex items-center gap-2"
@@ -672,6 +795,144 @@ const ViewData = () => {
                       />
                     </svg>
                     Save Changes
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+
+        {/* Add Modal */}
+        {isAddModalOpen && (
+          <div className="fixed inset-0 bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              className="bg-white rounded-xl shadow-2xl max-w-6xl w-full max-h-[90vh] overflow-y-auto my-8"
+            >
+              <div className="sticky top-0 bg-gradient-to-r from-green-600 to-green-700 text-white px-6 py-4 flex justify-between items-center rounded-t-xl z-10">
+                <h2 className="text-xl sm:text-2xl font-bold">Add New Record</h2>
+                <button
+                  onClick={closeAddModal}
+                  className="text-white hover:text-gray-200 transition-colors"
+                >
+                  <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              </div>
+
+              <div className="p-6">
+                {/* Station, Year, Month - Required Fields */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6 bg-green-50 p-4 rounded-lg border-2 border-green-200">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Station <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={addFormData.station || ""}
+                      onChange={(e) => handleAddInputChange("station", e.target.value)}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      placeholder="Enter station name"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Year <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="number"
+                      value={addFormData.year || ""}
+                      onChange={(e) => handleAddInputChange("year", e.target.value)}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      placeholder="e.g., 2024"
+                      min="1900"
+                      max="2100"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Month <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      value={addFormData.month || ""}
+                      onChange={(e) => handleAddInputChange("month", e.target.value)}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    >
+                      <option value="">-- Select Month --</option>
+                      {months.map((month) => (
+                        <option key={month.value} value={month.value}>
+                          {month.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {/* Day Values - Optional */}
+                <div className="mb-6">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                    Daily Values (Optional)
+                  </h3>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-3">
+                    {Array.from({ length: 31 }, (_, i) => i + 1).map((day) => (
+                      <div key={day}>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">
+                          Day {day}
+                        </label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          value={addFormData[`day${day}`] ?? ""}
+                          onChange={(e) =>
+                            handleAddInputChange(`day${day}`, e.target.value)
+                          }
+                          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                          placeholder="-"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex justify-end gap-3 pt-4 border-t">
+                  <button
+                    onClick={closeAddModal}
+                    className="px-6 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg transition-colors font-medium"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleSaveAdd}
+                    className="px-6 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors font-medium flex items-center gap-2"
+                  >
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 4v16m8-8H4"
+                      />
+                    </svg>
+                    Add Record
                   </button>
                 </div>
               </div>
