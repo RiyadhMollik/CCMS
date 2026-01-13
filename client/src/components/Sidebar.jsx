@@ -164,12 +164,12 @@ const Sidebar = () => {
         <NavLink
           to="/add-data"
           className={`flex items-center ${isCollapsed ? "justify-center" : ""}`}
-          title={isCollapsed ? "Add Data" : ""}
+          title={isCollapsed ? "Add Historical Data" : ""}
         >
           <PlusCircleIcon
             className={`w-5 h-5 ${!isCollapsed ? "mr-2" : ""}`}
           />
-          {!isCollapsed && "Add Data"}
+          {!isCollapsed && "Add Historical Data"}
         </NavLink>
       </li>
 
@@ -177,12 +177,12 @@ const Sidebar = () => {
         <NavLink
           to="/view-data"
           className={`flex items-center ${isCollapsed ? "justify-center" : ""}`}
-          title={isCollapsed ? "View Data" : ""}
+          title={isCollapsed ? "View Historical Data" : ""}
         >
           <EyeIcon
             className={`w-5 h-5 ${!isCollapsed ? "mr-2" : ""}`}
           />
-          {!isCollapsed && "View Data"}
+          {!isCollapsed && "View Historical Data"}
         </NavLink>
       </li>
 

@@ -22,6 +22,8 @@ const ViewData = () => {
   const dataTypeOptions = [
     { value: "maximum-temp", label: "Maximum Temperature" },
     { value: "minimum-temp", label: "Minimum Temperature" },
+    { value: "rainfall", label: "Rainfall" },
+    { value: "relative-humidity", label: "Relative Humidity" },
   ];
 
   const months = [
@@ -143,7 +145,7 @@ const ViewData = () => {
             {dataTypeOptions.find(dt => dt.value === selectedDataType)?.label || "Climate"} Data
           </h1>
           <p className="text-sm sm:text-base text-gray-600">
-            View and manage maximum temperature records from weather stations
+            View and manage {selectedDataType === 'rainfall' ? 'rainfall' : selectedDataType.replace('-', ' ')} records from weather stations
           </p>
         </div>
 

@@ -24,6 +24,8 @@ const AddData = () => {
   const dataTypeOptions = [
     { value: "maximum-temp", label: "Maximum Temperature Data" },
     { value: "minimum-temp", label: "Minimum Temperature Data" },
+    { value: "rainfall", label: "Rainfall Data" },
+    { value: "relative-humidity", label: "Relative Humidity Data" },
   ];
 
   const handleDataTypeChange = (e) => {

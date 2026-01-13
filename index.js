@@ -4,10 +4,14 @@ require("dotenv").config();
 const sequelize = require("./config/database");
 const maximumTempRoutes = require("./routes/maximumTempRoutes");
 const minimumTempRoutes = require("./routes/minimumTempRoutes");
+const rainfallRoutes = require("./routes/rainfallRoutes");
+const relativeHumidityRoutes = require("./routes/relativeHumidityRoutes");
 
 // Import models
 require("./models/MaximumTemp");
 require("./models/MinimumTemp");
+require("./models/Rainfall");
+require("./models/RelativeHumidity");
 
 const app = express();
 app.use(cors());
@@ -19,6 +23,8 @@ const PORT = process.env.PORT || 5000;
 // Routes
 app.use("/api/maximum-temp", maximumTempRoutes);
 app.use("/api/minimum-temp", minimumTempRoutes);
+app.use("/api/rainfall", rainfallRoutes);
+app.use("/api/relative-humidity", relativeHumidityRoutes);
 
 app.get("/api/health", (req, res) => {
   res.json({ ok: true, message: "Server is running" });
