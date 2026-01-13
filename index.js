@@ -58,6 +58,7 @@ app.get("/api/hello", (req, res) => {
 // Initialize database and start server
 async function initializeDatabase() {
   try {
+    // First, try to authenticate with the database
     await sequelize.authenticate();
     console.log("Database connection established successfully");
 
@@ -69,8 +70,45 @@ async function initializeDatabase() {
       console.log(`Server listening on http://localhost:${PORT}`);
     });
   } catch (error) {
-    console.error("Unable to connect to the database:", error);
-    process.exit(1);
+    // If database doesn't exist, create it
+    if (error.parent && error.parent.code === 'ER_BAD_DB_ERROR') {
+      console.log(`Database '${process.env.DB_NAME || 'ccms'}' does not exist. Creating...`);
+      
+      try {
+        const mysql = require('mysql2/promise');
+        
+        // Connect to MySQL without specifying database
+        const connection = await mysql.createConnection({
+          host: process.env.DB_HOST || 'localhost',
+          user: process.env.DB_USER || 'root',
+          password: process.env.DB_PASSWORD || ''
+        });
+
+        // Create database
+        await connection.query(`CREATE DATABASE IF NOT EXISTS \`${process.env.DB_NAME || 'ccms_db'}\``);
+        console.log(`Database '${process.env.DB_NAME || 'ccms_db'}' created successfully`);
+        
+        await connection.end();
+
+        // Now authenticate again with the newly created database
+        await sequelize.authenticate();
+        console.log("Database connection established successfully");
+
+        // Sync database (creates tables if they don't exist)
+        await sequelize.sync({ alter: true });
+        console.log("Database synchronized successfully");
+
+        app.listen(PORT, () => {
+          console.log(`Server listening on http://localhost:${PORT}`);
+        });
+      } catch (createError) {
+        console.error("Unable to create database:", createError);
+        process.exit(1);
+      }
+    } else {
+      console.error("Unable to connect to the database:", error);
+      process.exit(1);
+    }
   }
 }
 
