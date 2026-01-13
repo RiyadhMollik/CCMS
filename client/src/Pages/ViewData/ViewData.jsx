@@ -20,12 +20,17 @@ const ViewData = () => {
   const [years, setYears] = useState([]);
 
   const dataTypeOptions = [
-    { value: "maximum-temp", label: "Maximum Temperature" },
-    { value: "minimum-temp", label: "Minimum Temperature" },
-    { value: "rainfall", label: "Rainfall" },
-    { value: "relative-humidity", label: "Relative Humidity" },
-    { value: "sunshine", label: "Sunshine" },
-    { value: "wind-speed", label: "Wind Speed" },
+    { value: "maximum-temp", label: "Maximum Temperature (°C)" },
+    { value: "minimum-temp", label: "Minimum Temperature (°C)" },
+    { value: "rainfall", label: "Rainfall (mm)" },
+    { value: "relative-humidity", label: "Relative Humidity (%)" },
+    { value: "sunshine", label: "Sunshine (hrs)" },
+    { value: "wind-speed", label: "Wind Speed (m/s)" },
+    { value: "soil-moisture", label: "Soil Moisture (%)" },
+    { value: "soil-temperature", label: "Soil Temperature (°C)" },
+    { value: "average-temperature", label: "Average Temperature (°C)" },
+    { value: "solar-radiation", label: "Solar Radiation (W/m²)" },
+    { value: "evapo-transpiration", label: "Evapo Transpiration (mm)" },
   ];
 
   const months = [

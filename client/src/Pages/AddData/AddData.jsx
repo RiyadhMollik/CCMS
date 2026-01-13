@@ -22,12 +22,17 @@ const AddData = () => {
   const fileInputRef = useRef(null);
 
   const dataTypeOptions = [
-    { value: "maximum-temp", label: "Maximum Temperature Data" },
-    { value: "minimum-temp", label: "Minimum Temperature Data" },
-    { value: "rainfall", label: "Rainfall Data" },
-    { value: "relative-humidity", label: "Relative Humidity Data" },
-    { value: "sunshine", label: "Sunshine Data" },
-    { value: "wind-speed", label: "Wind Speed Data" },
+    { value: "maximum-temp", label: "Maximum Temperature (°C)" },
+    { value: "minimum-temp", label: "Minimum Temperature (°C)" },
+    { value: "rainfall", label: "Rainfall (mm)" },
+    { value: "relative-humidity", label: "Relative Humidity (%)" },
+    { value: "sunshine", label: "Sunshine (hrs)" },
+    { value: "wind-speed", label: "Wind Speed (km/h)" },
+    { value: "soil-moisture", label: "Soil Moisture (%)" },
+    { value: "soil-temperature", label: "Soil Temperature (°C)" },
+    { value: "average-temperature", label: "Average Temperature (°C)" },
+    { value: "solar-radiation", label: "Solar Radiation (W/m²)" },
+    { value: "evapo-transpiration", label: "Evapo Transpiration (mm)" },
   ];
 
   const handleDataTypeChange = (e) => {

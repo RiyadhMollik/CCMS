@@ -8,6 +8,11 @@ const rainfallRoutes = require("./routes/rainfallRoutes");
 const relativeHumidityRoutes = require("./routes/relativeHumidityRoutes");
 const sunshineRoutes = require("./routes/sunshineRoutes");
 const windSpeedRoutes = require("./routes/windSpeedRoutes");
+const soilMoistureRoutes = require("./routes/soilMoistureRoutes");
+const soilTemperatureRoutes = require("./routes/soilTemperatureRoutes");
+const averageTemperatureRoutes = require("./routes/averageTemperatureRoutes");
+const solarRadiationRoutes = require("./routes/solarRadiationRoutes");
+const evapoTranspirationRoutes = require("./routes/evapoTranspirationRoutes");
 
 // Import models
 require("./models/MaximumTemp");
@@ -16,6 +21,11 @@ require("./models/Rainfall");
 require("./models/RelativeHumidity");
 require("./models/Sunshine");
 require("./models/WindSpeed");
+require("./models/SoilMoisture");
+require("./models/SoilTemperature");
+require("./models/AverageTemperature");
+require("./models/SolarRadiation");
+require("./models/EvapoTranspiration");
 
 const app = express();
 app.use(cors());
@@ -31,6 +41,11 @@ app.use("/api/rainfall", rainfallRoutes);
 app.use("/api/relative-humidity", relativeHumidityRoutes);
 app.use("/api/sunshine", sunshineRoutes);
 app.use("/api/wind-speed", windSpeedRoutes);
+app.use("/api/soil-moisture", soilMoistureRoutes);
+app.use("/api/soil-temperature", soilTemperatureRoutes);
+app.use("/api/average-temperature", averageTemperatureRoutes);
+app.use("/api/solar-radiation", solarRadiationRoutes);
+app.use("/api/evapo-transpiration", evapoTranspirationRoutes);
 
 app.get("/api/health", (req, res) => {
   res.json({ ok: true, message: "Server is running" });
