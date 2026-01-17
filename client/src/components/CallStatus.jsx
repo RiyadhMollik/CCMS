@@ -254,15 +254,15 @@ const CallStatus = () => {
       <div className="flex justify-center gap-6 mt-2 sm:mt-3 md:mt-4 flex-shrink-0">
         <div className="flex items-center justify-center">
           <div className="w-3 h-3 bg-emerald-500 rounded-full mr-2 flex-shrink-0"></div>
-          <span className="text-xs sm:text-sm text-gray-600">Received</span>
+          <span className="text-xs sm:text-sm text-gray-600">Received ({data[0]?.value || 0})</span>
         </div>
         <div className="flex items-center justify-center">
           <div className="w-3 h-3 bg-amber-500 rounded-full mr-2 flex-shrink-0"></div>
-          <span className="text-xs sm:text-sm text-gray-600">Not Received</span>
+          <span className="text-xs sm:text-sm text-gray-600">Not Received ({data[1]?.value || 0})</span>
         </div>
         <div className="flex items-center justify-center">
           <div className="w-3 h-3 bg-red-500 rounded-full mr-2 flex-shrink-0"></div>
-          <span className="text-xs sm:text-sm text-gray-600">Busy/Failed</span>
+          <span className="text-xs sm:text-sm text-gray-600">Busy/Failed ({data[2]?.value || 0})</span>
         </div>
       </div>
     </div>

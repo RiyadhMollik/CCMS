@@ -147,6 +147,8 @@ const getAllRelativeHumidityData = async (req, res) => {
       station,
       year,
       month,
+      startDate,
+      endDate,
       sortBy = "year",
       sortOrder = "DESC",
     } = req.query;
@@ -159,6 +161,45 @@ const getAllRelativeHumidityData = async (req, res) => {
     if (year) whereClause.year = parseInt(year);
     if (month) whereClause.month = parseInt(month);
 
+    // Add date range filtering if provided
+    if (startDate || endDate) {
+      const dateConditions = [];
+      
+      if (startDate) {
+        const start = new Date(startDate);
+        dateConditions.push({
+          [Op.or]: [
+            { year: { [Op.gt]: start.getFullYear() } },
+            {
+              [Op.and]: [
+                { year: start.getFullYear() },
+                { month: { [Op.gte]: start.getMonth() + 1 } }
+              ]
+            }
+          ]
+        });
+      }
+      
+      if (endDate) {
+        const end = new Date(endDate);
+        dateConditions.push({
+          [Op.or]: [
+            { year: { [Op.lt]: end.getFullYear() } },
+            {
+              [Op.and]: [
+                { year: end.getFullYear() },
+                { month: { [Op.lte]: end.getMonth() + 1 } }
+              ]
+            }
+          ]
+        });
+      }
+      
+      if (dateConditions.length > 0) {
+        whereClause[Op.and] = dateConditions;
+      }
+    }
+
     // Get total count
     const total = await RelativeHumidity.count({ where: whereClause });
 
@@ -167,7 +208,10 @@ const getAllRelativeHumidityData = async (req, res) => {
       where: whereClause,
       limit: parseInt(limit),
       offset: offset,
-      order: [[sortBy, sortOrder]],
+      order: [
+        ['year', sortOrder],
+        ['month', sortOrder]
+      ],
     });
 
     return res.status(200).json({

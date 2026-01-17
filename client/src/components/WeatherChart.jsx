@@ -862,7 +862,7 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
                 {/* Preset Time Range Buttons */}
                 <div className="flex flex-col gap-2">
                   <label className="text-xs sm:text-sm font-medium text-gray-600">
-                    Time Interval:
+                    Data Requirement (time):
                   </label>
                   <div className="flex flex-wrap gap-1 sm:gap-2 justify-center sm:justify-start">
                     {[
@@ -1010,21 +1010,31 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
                         {parameter === "Air Temperature" ? (
                           <>
                             <th className="text-xs sm:text-sm font-semibold text-gray-600 px-1 sm:px-2">
-                              Min {unit}
+                              Min ({unit})
                             </th>
                             <th className="text-xs sm:text-sm font-semibold text-gray-600 px-1 sm:px-2">
-                              Max {unit}
+                              Max ({unit})
                             </th>
                             <th className="text-xs sm:text-sm font-semibold text-gray-600 px-1 sm:px-2">
-                              Avg {unit}
+                              Avg ({unit})
                             </th>
                           </>
                         ) : (
                           <th className="text-xs sm:text-sm font-semibold text-gray-600 px-2 sm:px-3">
                             {parameter === "Accumulated Rain 1h"
                               ? "Total"
+                              : parameter === "Air Humidity"
+                              ? "RH"
+                              : parameter === "Wind Speed Gust"
+                              ? "WS"
+                              : parameter === "Wind Direction Gust"
+                              ? "WD"
+                              : parameter === "Solar Radiation"
+                              ? "SR"
+                              : parameter === "Sunshine Duration"
+                              ? "SD"
                               : "Avg"}{" "}
-                            {unit}
+                            ({unit})
                           </th>
                         )}
                       </tr>
@@ -1038,15 +1048,15 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
                           <td className="text-xs sm:text-sm text-gray-700 px-2 sm:px-3">
                             <span className="hidden sm:inline">
                               {new Date(item.date).toLocaleDateString("en-US", {
-                                month: "short",
-                                day: "numeric",
+                                month: "2-digit",
+                                day: "2-digit",
                                 year: "2-digit",
                               })}
                             </span>
                             <span className="sm:hidden">
                               {new Date(item.date).toLocaleDateString("en-US", {
-                                month: "numeric",
-                                day: "numeric",
+                                month: "2-digit",
+                                day: "2-digit",
                               })}
                             </span>
                           </td>
