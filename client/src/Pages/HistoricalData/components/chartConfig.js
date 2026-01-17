@@ -149,7 +149,8 @@ export const getChartOptions = (dataInterval, selectedParameter, dataParameters)
         border: {
           display: false,
         },
-        beginAtZero: false,
+        beginAtZero: true,
+        min: 0,
       },
     },
     interaction: {
