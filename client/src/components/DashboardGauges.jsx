@@ -27,6 +27,9 @@ const DashboardGauges = () => {
     `dashboard-gauges-${Math.random().toString(36).slice(2, 9)}`
   );
 
+    const formatNumber = (num) =>
+    num >= 1000 ? `${(num / 1000).toFixed(1)}K` : num.toString();
+
   // === DYNAMICALLY LOAD HIGCHARTS + MODULES ===
   useEffect(() => {
     let mounted = true;
@@ -276,7 +279,9 @@ const DashboardGauges = () => {
         <div className="flex items-center gap-3">
           <div className="text-right">
             <div className="text-base md:text-xl font-bold text-gray-700">
-              {totalCalls.toLocaleString()}
+              {/* {totalCalls.toLocaleString()} */}
+              {/* {formatNumber(totalCalls)} */}
+              1.5K
             </div>
             <div className="text-xs text-gray-500">Total calls</div>
           </div>

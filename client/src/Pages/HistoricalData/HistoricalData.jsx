@@ -92,6 +92,12 @@ const HistoricalData = () => {
                   Choose a parameter to begin analysis
                 </p>
               </div>
+              <button
+                onClick={() => {/* TODO: Implement request data modal */}}
+                className="btn btn-primary btn-sm sm:btn-md flex-shrink-0"
+              >
+                📋 Request Data
+              </button>
             </div>
 
             <div className="relative">
