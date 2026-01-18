@@ -59,7 +59,7 @@ const HistoricalData = () => {
         {/* Header Section */}
         <div className="text-center mb-4 sm:mb-8 px-2">
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-base-content mb-2 leading-tight">
-            📊 Historical Climate Data Analysis
+            📊 Historical Climate Data Analytics
           </h1>
           <p className="text-base-content/70 text-sm sm:text-base lg:text-lg px-2 sm:px-0">
             Comprehensive long-term climate patterns and trends from{" "}
