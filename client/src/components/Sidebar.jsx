@@ -112,12 +112,12 @@ const Sidebar = () => {
         <NavLink
           to="/aws"
           className={`flex items-center ${isCollapsed ? "justify-center" : ""}`}
-          title={isCollapsed ? "AWS" : ""}
+          title={isCollapsed ? "AgWS" : ""}
         >
           <IoAnalyticsSharp
             className={`w-5 h-5 ${!isCollapsed ? "mr-2" : ""}`}
           />
-          {!isCollapsed && "AWS"}
+          {!isCollapsed && "AgWS"}
         </NavLink>
       </li>
 

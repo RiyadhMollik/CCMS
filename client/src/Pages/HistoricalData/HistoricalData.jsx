@@ -1,57 +1,16 @@
 import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
-import Swal from "sweetalert2";
 import API_BASE_URL from "../../config/api";
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-  TimeScale,
-  Filler,
-} from "chart.js";
-import "chartjs-adapter-date-fns";
-
-// Import components
-import {
-  DistrictModal,
-  ControlPanel,
-  ChartDisplay,
-  dataParameters,
-  intervals,
-  chartColors,
-  getChartOptions,
-} from "./components";
-
-// Register Chart.js components
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-  TimeScale,
-  Filler
-);
+import HistoricalDataChart from "./components/HistoricalDataChart";
+import DistrictModal from "./components/DistrictModal";
+import { dataParameters } from "./components/chartConfig";
 
 const HistoricalData = () => {
   // State management
   const [selectedParameter, setSelectedParameter] = useState("");
-  const [isDistrictModalOpen, setIsDistrictModalOpen] = useState(false);
-  const [selectedDistricts, setSelectedDistricts] = useState([]);
+  const [selectedStations, setSelectedStations] = useState([]);
   const [availableStations, setAvailableStations] = useState([]);
-  const [dataInterval, setDataInterval] = useState("1M");
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
-  const [chartData, setChartData] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [showModal, setShowModal] = useState(false);
 
   // Fetch available stations when parameter changes
   useEffect(() => {
@@ -63,6 +22,8 @@ const HistoricalData = () => {
           );
           if (response.data.success) {
             setAvailableStations(response.data.data);
+            // Show modal when stations are fetched
+            setShowModal(true);
           }
         } catch (error) {
           console.error("Error fetching stations:", error);
@@ -73,239 +34,198 @@ const HistoricalData = () => {
     fetchStations();
   }, [selectedParameter]);
 
-  // Handlers
-  const handleParameterChange = (e) => {
-    const value = e.target.value;
+  // Get parameter info
+  const getParameterInfo = () => {
+    return dataParameters.find(p => p.value === selectedParameter);
+  };
+
+  const paramInfo = getParameterInfo();
+
+  // Handle modal confirm
+  const handleModalConfirm = (stations) => {
+    setSelectedStations(stations);
+    setShowModal(false);
+  };
+
+  // Handle parameter change
+  const handleParameterChange = (value) => {
     setSelectedParameter(value);
-    setSelectedDistricts([]);
-    setChartData(null);
-    if (value) {
-      setIsDistrictModalOpen(true);
-    }
+    setSelectedStations([]);
   };
-
-  const handleDistrictToggle = (district) => {
-    setSelectedDistricts((prev) =>
-      prev.includes(district)
-        ? prev.filter((d) => d !== district)
-        : [...prev, district]
-    );
-  };
-
-  const handleDistrictModalSubmit = () => {
-    if (selectedDistricts.length === 0) {
-      Swal.fire({
-        icon: "warning",
-        title: "No Stations Selected",
-        text: "Please select at least one station",
-        confirmButtonColor: "#3b82f6",
-      });
-      return;
-    }
-    setIsDistrictModalOpen(false);
-    fetchChartData();
-  };
-
-  // Fetch and process chart data
-  const fetchChartData = async () => {
-    setLoading(true);
-    try {
-      const useCustomDateRange = startDate && endDate;
-
-      // Fetch data for all selected districts
-      const promises = selectedDistricts.map((station) => {
-        let url = `${API_BASE_URL}/api/${selectedParameter}?station=${encodeURIComponent(station)}&limit=10000`;
-        
-        if (useCustomDateRange) {
-          url += `&startDate=${startDate}&endDate=${endDate}`;
-        }
-        
-        return axios.get(url);
-      });
-
-      const responses = await Promise.all(promises);
-
-      // Process and aggregate data
-      const allData = [];
-      responses.forEach((response, index) => {
-        const station = selectedDistricts[index];
-        
-        if (response.data.success && response.data.data && response.data.data.length > 0) {
-          response.data.data.forEach((record) => {
-            for (let day = 1; day <= 31; day++) {
-              const value = record[`day${day}`];
-              
-              if (value !== null && value !== undefined && value !== "") {
-                const year = parseInt(record.year);
-                const month = parseInt(record.month);
-                const date = new Date(year, month - 1, day);
-                
-                // Skip invalid dates
-                if (date.getDate() === day && date.getMonth() === month - 1) {
-                  allData.push({
-                    date: date.toISOString().split("T")[0],
-                    value: parseFloat(value),
-                    station: station,
-                  });
-                }
-              }
-            }
-          });
-        }
-      });
-
-      if (allData.length === 0) {
-        Swal.fire({
-          icon: "info",
-          title: "No Data Found",
-          text: "No data available for the selected stations.",
-          confirmButtonColor: "#3b82f6",
-        });
-        setChartData(null);
-        setLoading(false);
-        return;
-      }
-
-      // Sort by date
-      allData.sort((a, b) => new Date(a.date) - new Date(b.date));
-
-      // Filter by interval if not using custom date range
-      let filteredData = allData;
-      if (!useCustomDateRange && dataInterval !== "All") {
-        const mostRecentDate = new Date(allData[allData.length - 1].date);
-        
-        const intervalDays = {
-          "1D": 1, "1W": 7, "1M": 30, "3M": 90, "6M": 180,
-          "1Y": 365, "5Y": 1825, "10Y": 3650, "20Y": 7300,
-          "30Y": 10950, "50Y": 18250,
-        };
-
-        const daysBack = intervalDays[dataInterval] || 30;
-        const cutoffDate = new Date(mostRecentDate);
-        cutoffDate.setDate(cutoffDate.getDate() - daysBack);
-        const cutoffDateStr = cutoffDate.toISOString().split("T")[0];
-
-        filteredData = allData.filter(d => d.date >= cutoffDateStr);
-      }
-
-      if (filteredData.length === 0) {
-        Swal.fire({
-          icon: "info",
-          title: "No Data Found",
-          text: "No data available for the selected time range.",
-          confirmButtonColor: "#3b82f6",
-        });
-        setChartData(null);
-        setLoading(false);
-        return;
-      }
-
-      // Create datasets for each district
-      const datasets = selectedDistricts.map((station, index) => {
-        const stationData = filteredData.filter((d) => d.station === station);
-        const color = chartColors[index % chartColors.length];
-        
-        return {
-          label: station,
-          data: stationData.map((d) => ({ x: d.date, y: d.value })),
-          borderColor: color,
-          backgroundColor: `${color}20`,
-          borderWidth: 2.5,
-          pointRadius: stationData.length > 500 ? 0 : stationData.length > 100 ? 2 : 4,
-          pointHoverRadius: 6,
-          pointBackgroundColor: color,
-          pointBorderColor: "#fff",
-          pointBorderWidth: 2,
-          fill: false,
-          tension: 0.3,
-        };
-      });
-
-      setChartData({ datasets });
-    } catch (error) {
-      console.error("Error fetching chart data:", error);
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: error.message || "Failed to load chart data",
-        confirmButtonColor: "#ef4444",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Get chart options
-  const chartOptions = getChartOptions(dataInterval, selectedParameter, dataParameters);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-100 via-blue-50 to-indigo-100 p-4 sm:p-6 lg:p-8">
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="max-w-7xl mx-auto"
-      >
-        {/* Header */}
-        <div className="mb-6">
-          <div className="flex items-center gap-4 mb-2">
-            <div className="p-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl shadow-lg shadow-blue-500/30">
-              <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-              </svg>
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold text-slate-800">
-                Historical Climate Data
-              </h1>
-              <p className="text-slate-500 mt-1">
-                Analyze and compare historical climate patterns across different regions
-              </p>
+    <div className="min-h-screen bg-base-200 p-2 sm:p-4 lg:p-6">
+      <div className="space-y-4 sm:space-y-6">
+        {/* Header Section */}
+        <div className="text-center mb-4 sm:mb-8 px-2">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-base-content mb-2 leading-tight">
+            📊 Historical Climate Data Analysis
+          </h1>
+          <p className="text-base-content/70 text-sm sm:text-base lg:text-lg px-2 sm:px-0">
+            Comprehensive long-term climate patterns and trends from{" "}
+            <span className="font-semibold text-primary">
+              BRRI Research Stations
+            </span>{" "}
+            across Bangladesh
+          </p>
+          <div className="flex justify-center mt-2 sm:mt-3">
+            <div className="badge badge-outline badge-sm sm:badge-md lg:badge-lg">
+              Multi-Station Climate Analysis
             </div>
           </div>
         </div>
 
-        {/* Control Panel */}
-        <ControlPanel
-          selectedParameter={selectedParameter}
-          onParameterChange={handleParameterChange}
-          dataParameters={dataParameters}
-          dataInterval={dataInterval}
-          onIntervalChange={setDataInterval}
-          intervals={intervals}
-          startDate={startDate}
-          endDate={endDate}
-          onStartDateChange={setStartDate}
-          onEndDateChange={setEndDate}
-          selectedDistricts={selectedDistricts}
-          onRemoveDistrict={handleDistrictToggle}
-          onAddMoreClick={() => setIsDistrictModalOpen(true)}
-          onGenerateChart={fetchChartData}
+        {/* Parameter Selection */}
+        <div className="card bg-gradient-to-r from-white to-gray-50 shadow-lg hover:shadow-xl transition-all duration-300 mx-1 sm:mx-0">
+          <div className="card-body p-3 sm:p-4 lg:p-5">
+            <div className="flex items-center gap-3 sm:gap-4 mb-3">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-primary to-primary-focus rounded-lg sm:rounded-xl flex items-center justify-center shadow-md flex-shrink-0">
+                <span className="text-white text-sm sm:text-lg">
+                  {paramInfo ? paramInfo.icon : "📊"}
+                </span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="font-bold text-gray-800 text-sm sm:text-base truncate">
+                  Climate Parameter Selection
+                </h3>
+                <p className="text-xs sm:text-sm text-gray-600 truncate">
+                  Choose a parameter to begin analysis
+                </p>
+              </div>
+            </div>
+
+            <div className="relative">
+              <select
+                value={selectedParameter}
+                onChange={(e) => handleParameterChange(e.target.value)}
+                className="select select-bordered select-sm sm:select-md w-full bg-white border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 text-gray-700 shadow-sm hover:shadow-md transition-all duration-200 text-xs sm:text-sm"
+              >
+                <option value="">🔍 Choose climate parameter...</option>
+                {dataParameters.map((param) => (
+                  <option key={param.value} value={param.value}>
+                    {param.icon} {param.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {selectedStations.length > 0 && (
+              <div className="mt-3">
+                <p className="text-xs text-gray-600 mb-2">
+                  Selected Stations ({selectedStations.length}):
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {selectedStations.map((station) => (
+                    <div key={station} className="badge badge-primary gap-2">
+                      {station}
+                    </div>
+                  ))}
+                  <button
+                    onClick={() => setShowModal(true)}
+                    className="badge badge-outline hover:badge-primary gap-1 cursor-pointer"
+                  >
+                    ✎ Edit Selection
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* District Selection Modal */}
+        <DistrictModal
+          isOpen={showModal}
+          onClose={() => setShowModal(false)}
+          stations={availableStations}
+          onConfirm={handleModalConfirm}
         />
 
-        {/* Chart Display */}
-        <ChartDisplay
-          chartData={chartData}
-          chartOptions={chartOptions}
-          loading={loading}
-          selectedParameter={selectedParameter}
-          dataParameters={dataParameters}
-        />
-      </motion.div>
-
-      {/* District Selection Modal */}
-      <AnimatePresence>
-        {isDistrictModalOpen && (
-          <DistrictModal
-            isOpen={isDistrictModalOpen}
-            onClose={() => setIsDistrictModalOpen(false)}
-            availableStations={availableStations}
-            selectedDistricts={selectedDistricts}
-            onToggleDistrict={handleDistrictToggle}
-            onSubmit={handleDistrictModalSubmit}
+        {/* Combined Chart for All Selected Stations */}
+        {selectedParameter && selectedStations.length > 0 && (
+          <HistoricalDataChart
+            stations={selectedStations}
+            parameter={selectedParameter}
+            title={paramInfo?.label || selectedParameter}
+            unit={paramInfo?.label?.match(/\(([^)]+)\)/)?.[1] || ""}
+            icon={paramInfo?.icon || "📊"}
+            color={paramInfo?.color || "#3b82f6"}
           />
         )}
-      </AnimatePresence>
+
+        {/* Empty State */}
+        {!selectedParameter && (
+          <div className="card bg-base-100 shadow-xl mx-1 sm:mx-0">
+            <div className="card-body p-6 sm:p-8 lg:p-12">
+              <div className="flex flex-col items-center justify-center space-y-4 sm:space-y-6">
+                <div className="text-4xl sm:text-6xl lg:text-8xl opacity-30">
+                  📊
+                </div>
+                <div className="text-center max-w-sm sm:max-w-md px-2">
+                  <h3 className="text-lg sm:text-xl lg:text-2xl font-bold text-base-content/70 mb-2 sm:mb-3">
+                    Select a Climate Parameter
+                  </h3>
+                  <p className="text-sm sm:text-base text-base-content/50 leading-relaxed">
+                    Choose a climate parameter from the dropdown above to view
+                    historical data across different research stations. Analyze
+                    trends in temperature, rainfall, humidity, and more.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {selectedParameter && selectedStations.length === 0 && (
+          <div className="card bg-base-100 shadow-xl mx-1 sm:mx-0">
+            <div className="card-body p-6 sm:p-8 lg:p-12">
+              <div className="flex flex-col items-center justify-center space-y-4 sm:space-y-6">
+                <div className="text-4xl sm:text-6xl lg:text-8xl opacity-30">
+                  📍
+                </div>
+                <div className="text-center max-w-sm sm:max-w-md px-2">
+                  <h3 className="text-lg sm:text-xl lg:text-2xl font-bold text-base-content/70 mb-2 sm:mb-3">
+                    Select Research Stations
+                  </h3>
+                  <p className="text-sm sm:text-base text-base-content/50 leading-relaxed">
+                    Choose one or more research stations (up to 5) to view their
+                    historical {paramInfo?.label.toLowerCase() || "climate"} data.
+                    Each station will display as a separate chart with
+                    comprehensive analysis tools.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Timestamp */}
+        <div className="mt-4 sm:mt-6 py-3 sm:py-4 text-center px-2">
+          <p className="text-xs sm:text-sm text-base-content/60 leading-relaxed">
+            🕒 Last updated:{" "}
+            <span className="hidden sm:inline">
+              {new Date().toLocaleString("en-BD", {
+                timeZone: "Asia/Dhaka",
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+              })}{" "}
+              BD Time
+            </span>
+            <span className="sm:hidden">
+              {new Date().toLocaleString("en-BD", {
+                timeZone: "Asia/Dhaka",
+                month: "short",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+              })}{" "}
+              BD
+            </span>
+          </p>
+        </div>
+      </div>
     </div>
   );
 };
