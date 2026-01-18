@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import WeatherChart from "../../components/WeatherChart";
 import Swal from 'sweetalert2';
+import { useAuthContext } from "../../components/context/AuthProvider";
 
 const AWS = () => {
+  const { authUser } = useAuthContext();
   const [location, setLocation] = useState("");
   const [stations, setStations] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -181,6 +183,26 @@ const AWS = () => {
     return new Date().toISOString().split('T')[0];
   };
 
+  // Open modal with pre-filled user data from AuthProvider
+  const openRequestModal = () => {
+    if (authUser) {
+      const registeredUser = authUser.RegistedUser || {};
+      setFormData(prev => ({
+        ...prev,
+        name: authUser.name || registeredUser.name || "",
+        designation: registeredUser.designation || "",
+        organization: "", // Not available in auth data
+        address: registeredUser.address || 
+                 [registeredUser.village, registeredUser.union, registeredUser.upazila, registeredUser.district, registeredUser.division]
+                   .filter(Boolean)
+                   .join(", ") || "",
+        email: registeredUser.email || registeredUser.emailOfficial || "",
+        mobile: authUser.mobileNumber || registeredUser.mobileNumber || "",
+      }));
+    }
+    setIsModalOpen(true);
+  };
+
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -356,7 +378,7 @@ const AWS = () => {
                   </p>
                 </div>
                 <button
-                  onClick={() => setIsModalOpen(true)}
+                  onClick={openRequestModal}
                   className="btn btn-primary btn-sm sm:btn-md flex-shrink-0"
                 >
                   📋 Request Data

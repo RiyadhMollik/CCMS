@@ -8,6 +8,7 @@ const CISTable = () => {
   const [filteredRequests, setFilteredRequests] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [dataType, setDataType] = useState("agws"); // "agws" or "historical"
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
   const [selectedRequest, setSelectedRequest] = useState(null);
@@ -309,14 +310,45 @@ const CISTable = () => {
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header Section */}
         <div className="text-center mb-8 px-4">
-          {/* <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-2xl mb-4">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-          </div> */}
           <h1 className="text-2xl md:text-4xl font-bold text-gray-800 mb-3 leading-tight">
             Climate Information Service
           </h1>
+          
+          {/* Data Type Selector - Tabs Style */}
+          <div className="flex justify-center mt-6">
+            <div className="inline-flex bg-gray-100 rounded-2xl p-1.5 shadow-inner">
+              <button
+                onClick={() => {
+                  setDataType("agws");
+                  setCurrentPage(1);
+                }}
+                className={`flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-300 ${
+                  dataType === "agws"
+                    ? "bg-white text-primary shadow-lg shadow-primary/20 scale-[1.02]"
+                    : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+                }`}
+              >
+                <span className="text-lg">🌤️</span>
+                <span className="hidden sm:inline">Agromet Weather Station</span>
+                <span className="sm:hidden">AgWS</span>
+              </button>
+              <button
+                onClick={() => {
+                  setDataType("historical");
+                  setCurrentPage(1);
+                }}
+                className={`flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-300 ${
+                  dataType === "historical"
+                    ? "bg-white text-secondary shadow-lg shadow-secondary/20 scale-[1.02]"
+                    : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+                }`}
+              >
+                <span className="text-lg">📊</span>
+                <span className="hidden sm:inline">Historical Climate Data</span>
+                <span className="sm:hidden">Historical</span>
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* Summary Stats */}

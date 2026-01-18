@@ -18,7 +18,7 @@ export const AuthContextProvider = ({ children }) => {
                 const response = await fetch(`https://saads.brri.gov.bd/api/users/${userId}`);
                 if (response.ok) {
                     const userData = await response.json();
-                    // console.log(userData);
+                    console.log(userData);
                     const res = await fetch(
                         `https://saads.brri.gov.bd/api/roles/roles/${userData.roleId}/permissions`
                     );

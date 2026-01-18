@@ -195,55 +195,43 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
     return filtered;
   };
 
-  // Handle time range change
+  // Handle time range change - refetch from server with new range
   const handleTimeRangeChange = (range) => {
     setTimeRange(range);
     setCustomDateRange({ ...customDateRange, enabled: false });
-
-    const timeRangeFiltered = filterDataByTimeRange(data, range);
-    const intervalFiltered = filterByInterval(timeRangeFiltered, intervalHours);
-    setFilteredData(intervalFiltered);
+    // Refetch data from server with new time range
+    fetchData(stationId, parameter, range, null);
   };
 
-  // Handle interval change
+  // Handle interval change - only client-side filtering needed
   const handleIntervalChange = (hours) => {
     setIntervalHours(hours);
-
-    const timeRangeFiltered = filterDataByTimeRange(
-      data,
-      timeRange,
-      customDateRange.enabled ? customDateRange : null
-    );
-    const intervalFiltered = filterByInterval(timeRangeFiltered, hours);
+    // Apply interval filter to existing data
+    const intervalFiltered = filterByInterval(data, hours);
     setFilteredData(intervalFiltered);
   };
 
-  // Handle custom date range change
+  // Handle custom date range change - refetch from server
   const handleCustomDateRangeChange = (field, value) => {
     const newRange = { ...customDateRange, [field]: value };
     setCustomDateRange(newRange);
 
-    // If both dates are set, apply the filter
+    // If both dates are set, refetch from server with custom range
     if (newRange.startDate && newRange.endDate) {
       setTimeRange("custom");
       newRange.enabled = true;
-
-      const timeRangeFiltered = filterDataByTimeRange(data, "custom", newRange);
-      const intervalFiltered = filterByInterval(
-        timeRangeFiltered,
-        intervalHours
-      );
-      setFilteredData(intervalFiltered);
+      setCustomDateRange(newRange);
+      // Refetch data from server with custom date range
+      fetchData(stationId, parameter, "custom", newRange);
     }
   };
 
-  // Clear custom date range
+  // Clear custom date range - refetch with default month range
   const clearCustomDateRange = () => {
     setCustomDateRange({ startDate: "", endDate: "", enabled: false });
     setTimeRange("month");
-    const timeRangeFiltered = filterDataByTimeRange(data, "month");
-    const intervalFiltered = filterByInterval(timeRangeFiltered, intervalHours);
-    setFilteredData(intervalFiltered);
+    // Refetch data from server with month range
+    fetchData(stationId, parameter, "month", null);
   };
 
   // Handle chart download using Highcharts native export or fallback methods
@@ -474,18 +462,33 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
   };
 
   // Fetch data for specific station and parameter
-  const fetchData = async (stationId, measure) => {
+  const fetchData = async (stationId, measure, range = timeRange, customRange = null) => {
     if (!stationId || !measure) return;
 
     setLoading(true);
     setError(null);
 
     try {
-      const response = await fetch(
-        `https://saads.brri.gov.bd/api/research-measures/station/${stationId}/parameter/${encodeURIComponent(
-          measure
-        )}`
-      );
+      // Build URL with query parameters for server-side filtering
+      let url = `https://saads.brri.gov.bd/api/research-measures/station/${stationId}/parameter/${encodeURIComponent(
+        measure
+      )}`;
+
+      // Add query parameters based on time range
+      const params = new URLSearchParams();
+      
+      if (customRange && customRange.enabled && customRange.startDate && customRange.endDate) {
+        params.append('startDate', customRange.startDate);
+        params.append('endDate', customRange.endDate);
+      } else if (range && range !== 'custom') {
+        params.append('timeRange', range);
+      }
+
+      if (params.toString()) {
+        url += `?${params.toString()}`;
+      }
+
+      const response = await fetch(url);
       if (!response.ok) {
         throw new Error("Failed to fetch data");
       }
@@ -505,11 +508,8 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
         .sort((a, b) => a[0] - b[0]);
 
       setData(chartData);
-      const timeRangeFiltered = filterDataByTimeRange(chartData, timeRange);
-      const intervalFiltered = filterByInterval(
-        timeRangeFiltered,
-        intervalHours
-      );
+      // Apply interval filter only (time range is already filtered by server)
+      const intervalFiltered = filterByInterval(chartData, intervalHours);
       setFilteredData(intervalFiltered);
 
       if (chartData.length === 0) {
@@ -530,21 +530,13 @@ const WeatherChart = ({ stationId, parameter, title, unit, icon }) => {
     }
   }, [stationId, parameter]);
 
-  // Update filtered data when time range or interval changes
+  // Update filtered data when interval changes (data is already filtered by server for time range)
   useEffect(() => {
     if (data.length > 0) {
-      const timeRangeFiltered = filterDataByTimeRange(
-        data,
-        timeRange,
-        customDateRange.enabled ? customDateRange : null
-      );
-      const intervalFiltered = filterByInterval(
-        timeRangeFiltered,
-        intervalHours
-      );
+      const intervalFiltered = filterByInterval(data, intervalHours);
       setFilteredData(intervalFiltered);
     }
-  }, [data, timeRange, customDateRange, intervalHours]);
+  }, [data, intervalHours]);
 
   // Calculate daily averages for recent 5 days
   const getDailyAverages = () => {
