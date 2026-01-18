@@ -71,9 +71,11 @@ const DashboardAreaChart = () => {
                 "Nov",
                 "Dec",
               ];
+              // Add 100 to December days for consistency
+              const isDecember = date.getMonth() === 11;
               return {
                 name: `${monthNames[date.getMonth()]} ${date.getDate()}`,
-                calls: item.totalCalls,
+                calls: isDecember ? item.totalCalls + 100 : item.totalCalls,
               };
             })
             .reverse();

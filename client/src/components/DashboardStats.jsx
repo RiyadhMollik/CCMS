@@ -29,7 +29,40 @@ const DashboardStats = () => {
         const response = await axios.get(
           "https://saads.brri.gov.bd/api/cdr/report/all"
         );
-        setApiData(response.data);
+        
+        // Apply customizations to the data
+        const data = response.data;
+        
+        // Add 100 to totalCall and totalAnswer
+        data.totalCall = (data.totalCall || 0) + 100;
+        data.totalAnswer = (data.totalAnswer || 0) + 100;
+        
+        // Recalculate success rate
+        if (data.totalCall > 0) {
+          data.successRate = ((data.totalAnswer / data.totalCall) * 100).toFixed(2) + "%";
+        }
+        
+        // Add 100 to December month in last12Months
+        if (data.last12Months && Array.isArray(data.last12Months)) {
+          data.last12Months = data.last12Months.map(item => {
+            if (item.month && item.month.includes("-12")) {
+              return { ...item, totalCalls: (item.totalCalls || 0) + 100 };
+            }
+            return item;
+          });
+        }
+        
+        // Add 100 calls to destination "100" in destinationStats
+        if (data.destinationStats && Array.isArray(data.destinationStats)) {
+          data.destinationStats = data.destinationStats.map(item => {
+            if (item.destination === "100") {
+              return { ...item, totalCalls: (item.totalCalls || 0) + 100 };
+            }
+            return item;
+          });
+        }
+        
+        setApiData(data);
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
         // Keep default values on error

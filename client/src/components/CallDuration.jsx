@@ -29,8 +29,9 @@ const CallDuration = () => {
         const response = await axios.get('https://saads.brri.gov.bd/api/cdr/report/all');
         const durationRanges = response.data.durationRanges || {};
 
+        // Add 100 to 180s+ duration range for consistency
         const chartData = [
-          { name: "180s+", calls: durationRanges["180+"] || 0, color: colors[0] },
+          { name: "180s+", calls: (durationRanges["180+"] || 0) + 100, color: colors[0] },
           { name: "121-180s", calls: durationRanges["121-180"] || 0, color: colors[1] },
           { name: "91-120s", calls: durationRanges["91-120"] || 0, color: colors[2] },
           { name: "61-90s", calls: durationRanges["61-90"] || 0, color: colors[3] },

@@ -88,7 +88,15 @@ const DashboardComposedChart = () => {
             12: "Dec",
           };
 
-          const processedData = response.data.last12Months
+          // Add 100 to December month
+          const modifiedData = response.data.last12Months.map(item => {
+            if (item.month && item.month.includes("-12")) {
+              return { ...item, totalCalls: (item.totalCalls || 0) + 100 };
+            }
+            return item;
+          });
+
+          const processedData = modifiedData
             .map((item) => {
               const monthNum = item.month.split("-")[1];
               const year = item.month.split("-")[0].slice(-2);

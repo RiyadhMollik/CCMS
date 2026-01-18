@@ -2,7 +2,7 @@
 // Set isDev to true for development
 // Set isDev to false for production
 
-const isDev = false;
+const isDev = true;
 
 const API_CONFIG = {
   development: "http://localhost:5500",

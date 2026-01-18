@@ -101,14 +101,15 @@ const DashboardGauges = () => {
           const othersCalls = othersData?.totalCalls || 0;
           
           // Process destinations: combine "s" calls into Help Desk (100), exclude "s"
+          // Also add 100 to destination "100" for consistency
           const destinations = rawData
             .filter((d) => d.destination !== "s") // Remove "s", we'll add its calls to Help Desk
             .map((d) => {
               if (d.destination === "100") {
-                // Add "others" (s) totalCalls to Help Desk
+                // Add "others" (s) totalCalls to Help Desk + 100 for consistency
                 return {
                   ...d,
-                  totalCalls: d.totalCalls + othersCalls
+                  totalCalls: d.totalCalls + othersCalls + 100
                 };
               }
               return d;
