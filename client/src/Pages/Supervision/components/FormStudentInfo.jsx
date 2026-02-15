@@ -1,14 +1,16 @@
 import React from "react";
 
 const FormStudentInfo = ({ formData, onChange }) => {
+  const inputClass = "w-full border-2 border-gray-200 focus:border-emerald-500 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-200 transition-all";
+  
   return (
-    <fieldset className="border border-green-200 rounded-lg p-4">
-      <legend className="text-sm font-bold text-green-700 px-2">
-        Student Information
+    <fieldset className="border-2 border-emerald-200 rounded-xl p-5 bg-gradient-to-br from-emerald-50/30 to-transparent">
+      <legend className="text-base font-bold text-emerald-700 px-3 bg-white rounded-lg">
+        🎓 Student Information
       </legend>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">
+          <label className="block text-sm font-bold text-gray-700 mb-2">
             Student Name <span className="text-red-500">*</span>
           </label>
           <input
@@ -18,12 +20,12 @@ const FormStudentInfo = ({ formData, onChange }) => {
             onChange={onChange}
             required
             placeholder="Full name"
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+            className={inputClass}
           />
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">
+          <label className="block text-sm font-bold text-gray-700 mb-2">
             Registration Number <span className="text-red-500">*</span>
           </label>
           <input
@@ -33,12 +35,12 @@ const FormStudentInfo = ({ formData, onChange }) => {
             onChange={onChange}
             required
             placeholder="e.g. 2020-1234"
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+            className={inputClass}
           />
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">
+          <label className="block text-sm font-bold text-gray-700 mb-2">
             Semester <span className="text-red-500">*</span>
           </label>
           <input
@@ -48,12 +50,12 @@ const FormStudentInfo = ({ formData, onChange }) => {
             onChange={onChange}
             required
             placeholder="e.g. Spring 2025"
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+            className={inputClass}
           />
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">
+          <label className="block text-sm font-bold text-gray-700 mb-2">
             Date of Immatriculation <span className="text-red-500">*</span>
           </label>
           <input
@@ -62,12 +64,12 @@ const FormStudentInfo = ({ formData, onChange }) => {
             value={formData.dateOfImmatriculation}
             onChange={onChange}
             required
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+            className={inputClass}
           />
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">
+          <label className="block text-sm font-bold text-gray-700 mb-2">
             Expected Date of Completion <span className="text-red-500">*</span>
           </label>
           <input
@@ -76,12 +78,12 @@ const FormStudentInfo = ({ formData, onChange }) => {
             value={formData.expectedDateOfCompletion}
             onChange={onChange}
             required
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+            className={inputClass}
           />
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">
+          <label className="block text-sm font-bold text-gray-700 mb-2">
             Department <span className="text-red-500">*</span>
           </label>
           <input
@@ -91,12 +93,12 @@ const FormStudentInfo = ({ formData, onChange }) => {
             onChange={onChange}
             required
             placeholder="Department name"
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+            className={inputClass}
           />
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">
+          <label className="block text-sm font-bold text-gray-700 mb-2">
             University Name <span className="text-red-500">*</span>
           </label>
           <input
@@ -106,12 +108,12 @@ const FormStudentInfo = ({ formData, onChange }) => {
             onChange={onChange}
             required
             placeholder="University name"
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+            className={inputClass}
           />
         </div>
 
         <div className="md:col-span-2">
-          <label className="block text-sm font-semibold text-gray-700 mb-1">
+          <label className="block text-sm font-bold text-gray-700 mb-2">
             University Address <span className="text-red-500">*</span>
           </label>
           <input
@@ -121,7 +123,7 @@ const FormStudentInfo = ({ formData, onChange }) => {
             onChange={onChange}
             required
             placeholder="Full university address"
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+            className={inputClass}
           />
         </div>
       </div>

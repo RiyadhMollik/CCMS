@@ -2,12 +2,12 @@ import React from "react";
 
 const FormResearchInfo = ({ formData, onChange }) => {
   return (
-    <fieldset className="border border-green-200 rounded-lg p-4">
-      <legend className="text-sm font-bold text-green-700 px-2">
-        Research Information
+    <fieldset className="border-2 border-emerald-200 rounded-xl p-5 bg-gradient-to-br from-emerald-50/30 to-transparent">
+      <legend className="text-base font-bold text-emerald-700 px-3 bg-white rounded-lg">
+        📝 Research Information
       </legend>
       <div>
-        <label className="block text-sm font-semibold text-gray-700 mb-1">
+        <label className="block text-sm font-bold text-gray-700 mb-2">
           Research Title <span className="text-red-500">*</span>
         </label>
         <textarea
@@ -15,9 +15,9 @@ const FormResearchInfo = ({ formData, onChange }) => {
           value={formData.researchTitle}
           onChange={onChange}
           required
-          rows={3}
+          rows={4}
           placeholder="Enter the full research title"
-          className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+          className="w-full border-2 border-gray-200 focus:border-emerald-500 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-200 transition-all"
         />
       </div>
     </fieldset>

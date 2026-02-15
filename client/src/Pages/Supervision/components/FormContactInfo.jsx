@@ -1,14 +1,16 @@
 import React from "react";
 
 const FormContactInfo = ({ formData, onChange }) => {
+  const inputClass = "w-full border-2 border-gray-200 focus:border-emerald-500 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-200 transition-all";
+  
   return (
-    <fieldset className="border border-green-200 rounded-lg p-4">
-      <legend className="text-sm font-bold text-green-700 px-2">
-        Contact Information
+    <fieldset className="border-2 border-emerald-200 rounded-xl p-5 bg-gradient-to-br from-emerald-50/30 to-transparent">
+      <legend className="text-base font-bold text-emerald-700 px-3 bg-white rounded-lg">
+        📞 Contact Information
       </legend>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">
+          <label className="block text-sm font-bold text-gray-700 mb-2">
             Father's Name <span className="text-red-500">*</span>
           </label>
           <input
@@ -18,12 +20,12 @@ const FormContactInfo = ({ formData, onChange }) => {
             onChange={onChange}
             required
             placeholder="Father's full name"
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+            className={inputClass}
           />
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">
+          <label className="block text-sm font-bold text-gray-700 mb-2">
             Mother's Name <span className="text-red-500">*</span>
           </label>
           <input
@@ -33,12 +35,12 @@ const FormContactInfo = ({ formData, onChange }) => {
             onChange={onChange}
             required
             placeholder="Mother's full name"
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+            className={inputClass}
           />
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">
+          <label className="block text-sm font-bold text-gray-700 mb-2">
             WhatsApp Number <span className="text-red-500">*</span>
           </label>
           <input
@@ -48,12 +50,12 @@ const FormContactInfo = ({ formData, onChange }) => {
             onChange={onChange}
             required
             placeholder="+880..."
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+            className={inputClass}
           />
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">
+          <label className="block text-sm font-bold text-gray-700 mb-2">
             Email <span className="text-red-500">*</span>
           </label>
           <input
@@ -63,12 +65,12 @@ const FormContactInfo = ({ formData, onChange }) => {
             onChange={onChange}
             required
             placeholder="student@example.com"
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+            className={inputClass}
           />
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">
+          <label className="block text-sm font-bold text-gray-700 mb-2">
             Emergency Contact <span className="text-red-500">*</span>
           </label>
           <input
@@ -78,12 +80,12 @@ const FormContactInfo = ({ formData, onChange }) => {
             onChange={onChange}
             required
             placeholder="+880..."
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+            className={inputClass}
           />
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">
+          <label className="block text-sm font-bold text-gray-700 mb-2">
             Date of Birth <span className="text-red-500">*</span>
           </label>
           <input
@@ -92,12 +94,12 @@ const FormContactInfo = ({ formData, onChange }) => {
             value={formData.dateOfBirth}
             onChange={onChange}
             required
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+            className={inputClass}
           />
         </div>
 
         <div className="md:col-span-2 lg:col-span-3">
-          <label className="block text-sm font-semibold text-gray-700 mb-1">
+          <label className="block text-sm font-bold text-gray-700 mb-2">
             Present Address <span className="text-red-500">*</span>
           </label>
           <textarea
@@ -107,12 +109,12 @@ const FormContactInfo = ({ formData, onChange }) => {
             required
             rows={2}
             placeholder="Current address"
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+            className={inputClass}
           />
         </div>
 
         <div className="md:col-span-2 lg:col-span-3">
-          <label className="block text-sm font-semibold text-gray-700 mb-1">
+          <label className="block text-sm font-bold text-gray-700 mb-2">
             Permanent Address <span className="text-red-500">*</span>
           </label>
           <textarea
@@ -122,7 +124,7 @@ const FormContactInfo = ({ formData, onChange }) => {
             required
             rows={2}
             placeholder="Permanent address"
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+            className={inputClass}
           />
         </div>
       </div>

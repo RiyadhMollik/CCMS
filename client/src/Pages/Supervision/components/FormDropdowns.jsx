@@ -5,9 +5,9 @@ const supervisionRoles = ["Supervisor", "Co-supervisor"];
 
 const FormDropdowns = ({ formData, onChange }) => {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
       <div>
-        <label className="block text-sm font-semibold text-gray-700 mb-1">
+        <label className="block text-sm font-bold text-gray-700 mb-2">
           Program Type <span className="text-red-500">*</span>
         </label>
         <select
@@ -15,7 +15,7 @@ const FormDropdowns = ({ formData, onChange }) => {
           value={formData.programType}
           onChange={onChange}
           required
-          className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 bg-white"
+          className="w-full border-2 border-gray-200 focus:border-emerald-500 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-200 bg-white transition-all cursor-pointer"
         >
           <option value="">Select Program Type</option>
           {programTypes.map((type) => (
@@ -27,7 +27,7 @@ const FormDropdowns = ({ formData, onChange }) => {
       </div>
 
       <div>
-        <label className="block text-sm font-semibold text-gray-700 mb-1">
+        <label className="block text-sm font-bold text-gray-700 mb-2">
           Supervision Role <span className="text-red-500">*</span>
         </label>
         <select
@@ -35,7 +35,7 @@ const FormDropdowns = ({ formData, onChange }) => {
           value={formData.supervisionRole}
           onChange={onChange}
           required
-          className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 bg-white"
+          className="w-full border-2 border-gray-200 focus:border-emerald-500 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-200 bg-white transition-all cursor-pointer"
         >
           <option value="">Select Role</option>
           {supervisionRoles.map((role) => (

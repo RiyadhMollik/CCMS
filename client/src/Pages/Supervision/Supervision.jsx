@@ -63,18 +63,36 @@ const Supervision = () => {
   };
 
   return (
-    <div className="p-4 md:p-6 min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl md:text-3xl font-bold text-green-800">
-            Supervision Management
-          </h1>
-          <button
-            onClick={() => setShowForm(!showForm)}
-            className="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded-lg font-medium transition-colors cursor-pointer"
-          >
-            {showForm ? "Hide Form" : "+ Add Student"}
-          </button>
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-teal-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8">
+        {/* Header Section */}
+        <div className="mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-emerald-700 to-teal-600 bg-clip-text text-transparent">
+                Student Supervision
+              </h1>
+              <p className="text-gray-600 mt-2 text-sm md:text-base">
+                Manage and track research students
+              </p>
+            </div>
+            <button
+              onClick={() => setShowForm(!showForm)}
+              className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white px-6 py-3 rounded-xl font-semibold shadow-lg shadow-emerald-200 hover:shadow-xl transition-all duration-200 cursor-pointer"
+            >
+              {showForm ? (
+                <>
+                  <span>✕</span>
+                  <span className="hidden sm:inline">Close Form</span>
+                </>
+              ) : (
+                <>
+                  <span className="text-xl">+</span>
+                  <span>Add Student</span>
+                </>
+              )}
+            </button>
+          </div>
         </div>
 
         {showForm && (
