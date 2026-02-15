@@ -10,6 +10,7 @@ import {
   EyeIcon,
 } from "@heroicons/react/24/outline";
 import { IoAnalyticsSharp } from "react-icons/io5";
+import { HiAcademicCap } from "react-icons/hi2";
 import logo from "/logo.png";
 import useLogout from "./Hook/useLogout";
 import { AuthContext } from "./context/AuthProvider";
@@ -183,6 +184,19 @@ const Sidebar = () => {
             className={`w-5 h-5 ${!isCollapsed ? "mr-2" : ""}`}
           />
           {!isCollapsed && "View Historical Data"}
+        </NavLink>
+      </li>
+
+      <li className="text-base font-medium">
+        <NavLink
+          to="/supervision"
+          className={`flex items-center ${isCollapsed ? "justify-center" : ""}`}
+          title={isCollapsed ? "Supervision" : ""}
+        >
+          <HiAcademicCap
+            className={`w-5 h-5 ${!isCollapsed ? "mr-2" : ""}`}
+          />
+          {!isCollapsed && "Supervision"}
         </NavLink>
       </li>
 

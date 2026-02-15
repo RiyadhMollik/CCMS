@@ -13,6 +13,7 @@ const soilTemperatureRoutes = require("./routes/soilTemperatureRoutes");
 const averageTemperatureRoutes = require("./routes/averageTemperatureRoutes");
 const solarRadiationRoutes = require("./routes/solarRadiationRoutes");
 const evapoTranspirationRoutes = require("./routes/evapoTranspirationRoutes");
+const studentRoutes = require("./routes/studentRoutes");
 
 // Import models
 require("./models/MaximumTemp");
@@ -26,11 +27,16 @@ require("./models/SoilTemperature");
 require("./models/AverageTemperature");
 require("./models/SolarRadiation");
 require("./models/EvapoTranspiration");
+require("./models/Student");
 
 const app = express();
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
+
+// Serve uploaded files statically
+const path = require("path");
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 const PORT = process.env.PORT || 5500;
 
@@ -46,6 +52,7 @@ app.use("/api/soil-temperature", soilTemperatureRoutes);
 app.use("/api/average-temperature", averageTemperatureRoutes);
 app.use("/api/solar-radiation", solarRadiationRoutes);
 app.use("/api/evapo-transpiration", evapoTranspirationRoutes);
+app.use("/api/students", studentRoutes);
 
 app.get("/api/health", (req, res) => {
   res.json({ ok: true, message: "Server is running" });

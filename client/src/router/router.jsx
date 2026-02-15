@@ -12,6 +12,7 @@ import Home from "../Pages/CCVS/home";
 import CISTable from "../components/CISTable";
 import AddData from "../Pages/AddData/AddData";
 import ViewData from "../Pages/ViewData/ViewData";
+import Supervision from "../Pages/Supervision/Supervision";
 
 const router = createBrowserRouter([
   {
@@ -57,6 +58,10 @@ const router = createBrowserRouter([
       {
         path: "/view-data",
         Component: ViewData,
+      },
+      {
+        path: "/supervision",
+        Component: Supervision,
       },
     ],
   },
