@@ -16,6 +16,7 @@ const StudentEditModal = ({ student, onClose, onSuccess }) => {
     dateOfImmatriculation: student.dateOfImmatriculation || "",
     expectedDateOfCompletion: student.expectedDateOfCompletion || "",
     department: student.department || "",
+    faculty: student.faculty || "",
     universityName: student.universityName || "",
     universityAddress: student.universityAddress || "",
     fatherName: student.fatherName || "",
@@ -192,24 +193,25 @@ const StudentEditModal = ({ student, onClose, onSuccess }) => {
                 { name: "studentName", label: "Student Name", type: "text" },
                 {
                   name: "registrationNumber",
-                  label: "Registration Number",
+                  label: "Registration No.",
                   type: "text",
                 },
                 { name: "semester", label: "Semester", type: "text" },
                 {
                   name: "dateOfImmatriculation",
-                  label: "Date of Immatriculation",
+                  label: "Date of Initiation (DoI)",
                   type: "date",
                 },
                 {
                   name: "expectedDateOfCompletion",
-                  label: "Expected Completion",
+                  label: "Expected Date of Completion (EDoC)",
                   type: "date",
                 },
                 { name: "department", label: "Department", type: "text" },
+                { name: "faculty", label: "Faculty", type: "text" },
                 {
                   name: "universityName",
-                  label: "University Name",
+                  label: "University",
                   type: "text",
                 },
               ].map((f) => (

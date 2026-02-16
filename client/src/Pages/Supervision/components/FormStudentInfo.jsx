@@ -26,7 +26,7 @@ const FormStudentInfo = ({ formData, onChange }) => {
 
         <div>
           <label className="block text-sm font-bold text-gray-700 mb-2">
-            Registration Number <span className="text-red-500">*</span>
+            Registration No. <span className="text-red-500">*</span>
           </label>
           <input
             type="text"
@@ -56,7 +56,7 @@ const FormStudentInfo = ({ formData, onChange }) => {
 
         <div>
           <label className="block text-sm font-bold text-gray-700 mb-2">
-            Date of Immatriculation <span className="text-red-500">*</span>
+            Date of Initiation (DoI) <span className="text-red-500">*</span>
           </label>
           <input
             type="date"
@@ -70,7 +70,7 @@ const FormStudentInfo = ({ formData, onChange }) => {
 
         <div>
           <label className="block text-sm font-bold text-gray-700 mb-2">
-            Expected Date of Completion <span className="text-red-500">*</span>
+            Expected Date of Completion (EDoC) <span className="text-red-500">*</span>
           </label>
           <input
             type="date"
@@ -99,7 +99,22 @@ const FormStudentInfo = ({ formData, onChange }) => {
 
         <div>
           <label className="block text-sm font-bold text-gray-700 mb-2">
-            University Name <span className="text-red-500">*</span>
+            Faculty <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            name="faculty"
+            value={formData.faculty}
+            onChange={onChange}
+            required
+            placeholder="Faculty name"
+            className={inputClass}
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-bold text-gray-700 mb-2">
+            University <span className="text-red-500">*</span>
           </label>
           <input
             type="text"
@@ -112,7 +127,7 @@ const FormStudentInfo = ({ formData, onChange }) => {
           />
         </div>
 
-        <div className="md:col-span-2">
+        <div className="">
           <label className="block text-sm font-bold text-gray-700 mb-2">
             University Address <span className="text-red-500">*</span>
           </label>

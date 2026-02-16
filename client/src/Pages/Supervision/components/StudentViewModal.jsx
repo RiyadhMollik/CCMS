@@ -112,14 +112,15 @@ const StudentViewModal = ({ student, onClose }) => {
               <InfoRow label="Name" value={student.studentName} />
               <InfoRow label="Registration No." value={student.registrationNumber} />
               <InfoRow label="Semester" value={student.semester} />
-              <InfoRow label="Immatriculation Date" value={student.dateOfImmatriculation} />
-              <InfoRow label="Expected Completion" value={student.expectedDateOfCompletion} />
+              <InfoRow label="Date of Initiation (DoI)" value={student.dateOfImmatriculation} />
+              <InfoRow label="Expected Date of Completion (EDoC)" value={student.expectedDateOfCompletion} />
               <InfoRow label="Date of Birth" value={student.dateOfBirth} />
             </InfoCard>
 
             {/* University Info */}
             <InfoCard icon={AcademicCapIcon} title="University Details">
               <InfoRow label="Department" value={student.department} />
+              <InfoRow label="Faculty" value={student.faculty} />
               <InfoRow label="University" value={student.universityName} />
               <InfoRow label="Address" value={student.universityAddress} />
             </InfoCard>

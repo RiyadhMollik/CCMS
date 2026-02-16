@@ -47,6 +47,11 @@ const Student = sequelize.define(
       type: DataTypes.STRING(255),
       allowNull: false,
     },
+    faculty: {
+      type: DataTypes.STRING(255),
+      allowNull: false,
+      comment: "Faculty name",
+    },
     universityName: {
       type: DataTypes.STRING(255),
       allowNull: false,

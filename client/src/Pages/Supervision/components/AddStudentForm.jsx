@@ -16,6 +16,7 @@ const initialFormData = {
   dateOfImmatriculation: "",
   expectedDateOfCompletion: "",
   department: "",
+  faculty: "",
   universityName: "",
   universityAddress: "",
   fatherName: "",
