@@ -90,9 +90,16 @@ const AddStudentForm = ({ onSuccess }) => {
     try {
       const fd = new FormData();
 
-      // Append text fields
+      // Append text fields - only add optional fields if they have values
       Object.entries(formData).forEach(([key, value]) => {
-        fd.append(key, value);
+        // Only append if value is not empty or if it's a required field
+        if (value && value.toString().trim() !== "") {
+          fd.append(key, value);
+        } else if (requiredFields.includes(key)) {
+          // This shouldn't happen due to validation, but just in case
+          fd.append(key, value);
+        }
+        // Skip optional fields with empty values - they will be null in DB
       });
 
       // Append file fields

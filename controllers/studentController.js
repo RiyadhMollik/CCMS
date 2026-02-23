@@ -13,10 +13,33 @@ const getRelativePath = (file) => {
   return file.path;
 };
 
+// Helper: convert empty strings to null for optional fields
+const sanitizeOptionalFields = (data) => {
+  const optionalFields = [
+    'fatherName',
+    'motherName',
+    'emergencyContactNumber',
+    'dateOfBirth',
+    'presentAddress',
+    'permanentAddress'
+  ];
+  
+  optionalFields.forEach(field => {
+    if (data[field] === '' || data[field] === 'undefined' || data[field] === 'null') {
+      data[field] = null;
+    }
+  });
+  
+  return data;
+};
+
 // CREATE student
 const createStudent = async (req, res) => {
   try {
     const data = { ...req.body };
+
+    // Sanitize optional fields (convert empty strings to null)
+    sanitizeOptionalFields(data);
 
     // Handle file uploads
     if (req.files) {
@@ -79,6 +102,9 @@ const updateStudent = async (req, res) => {
     }
 
     const data = { ...req.body };
+
+    // Sanitize optional fields (convert empty strings to null)
+    sanitizeOptionalFields(data);
 
     // Handle file uploads on update
     if (req.files) {
