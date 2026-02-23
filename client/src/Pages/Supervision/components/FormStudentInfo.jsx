@@ -84,6 +84,23 @@ const FormStudentInfo = ({ formData, onChange }) => {
 
         <div>
           <label className="block text-sm font-bold text-gray-700 mb-2">
+            Status <span className="text-red-500">*</span>
+          </label>
+          <select
+            name="status"
+            value={formData.status}
+            onChange={onChange}
+            required
+            className={inputClass + " bg-white"}
+          >
+            <option value="">Select Status</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Completed">Completed</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-bold text-gray-700 mb-2">
             Department <span className="text-red-500">*</span>
           </label>
           <input

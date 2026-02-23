@@ -43,6 +43,12 @@ const Student = sequelize.define(
       allowNull: false,
       comment: "Expected date of completion",
     },
+    status: {
+      type: DataTypes.ENUM("In Progress", "Completed"),
+      allowNull: false,
+      defaultValue: "In Progress",
+      comment: "Current status of the program",
+    },
     department: {
       type: DataTypes.STRING(255),
       allowNull: false,
@@ -63,11 +69,11 @@ const Student = sequelize.define(
     // --- Contact Info ---
     fatherName: {
       type: DataTypes.STRING(255),
-      allowNull: false,
+      allowNull: true,
     },
     motherName: {
       type: DataTypes.STRING(255),
-      allowNull: false,
+      allowNull: true,
     },
     whatsappNumber: {
       type: DataTypes.STRING(20),
@@ -79,19 +85,19 @@ const Student = sequelize.define(
     },
     emergencyContactNumber: {
       type: DataTypes.STRING(20),
-      allowNull: false,
+      allowNull: true,
     },
     presentAddress: {
       type: DataTypes.TEXT,
-      allowNull: false,
+      allowNull: true,
     },
     permanentAddress: {
       type: DataTypes.TEXT,
-      allowNull: false,
+      allowNull: true,
     },
     dateOfBirth: {
       type: DataTypes.DATEONLY,
-      allowNull: false,
+      allowNull: true,
     },
     // --- Research ---
     researchTitle: {

@@ -15,6 +15,7 @@ const StudentEditModal = ({ student, onClose, onSuccess }) => {
     semester: student.semester || "",
     dateOfImmatriculation: student.dateOfImmatriculation || "",
     expectedDateOfCompletion: student.expectedDateOfCompletion || "",
+    status: student.status || "",
     department: student.department || "",
     faculty: student.faculty || "",
     universityName: student.universityName || "",
@@ -73,9 +74,29 @@ const StudentEditModal = ({ student, onClose, onSuccess }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    for (const [key, value] of Object.entries(formData)) {
-      if (!value || value.toString().trim() === "") {
-        toast.error(`Please fill in: ${key.replace(/([A-Z])/g, " $1").trim()}`);
+    // Define required fields
+    const requiredFields = [
+      "programType",
+      "supervisionRole",
+      "studentName",
+      "registrationNumber",
+      "semester",
+      "dateOfImmatriculation",
+      "expectedDateOfCompletion",
+      "status",
+      "department",
+      "faculty",
+      "universityName",
+      "universityAddress",
+      "whatsappNumber",
+      "email",
+      "researchTitle"
+    ];
+
+    // Validate only required fields
+    for (const field of requiredFields) {
+      if (!formData[field] || formData[field].toString().trim() === "") {
+        toast.error(`Please fill in: ${field.replace(/([A-Z])/g, " $1").trim()}`);
         return;
       }
     }
@@ -207,6 +228,37 @@ const StudentEditModal = ({ student, onClose, onSuccess }) => {
                   label: "Expected Date of Completion (EDoC)",
                   type: "date",
                 },
+              ].map((f) => (
+                <div key={f.name}>
+                  <label className={labelClass}>{f.label} *</label>
+                  <input
+                    type={f.type}
+                    name={f.name}
+                    value={formData[f.name]}
+                    onChange={handleChange}
+                    required
+                    className={inputClass}
+                  />
+                </div>
+              ))}
+              
+              {/* Status Dropdown */}
+              <div>
+                <label className={labelClass}>Status *</label>
+                <select
+                  name="status"
+                  value={formData.status}
+                  onChange={handleChange}
+                  required
+                  className={inputClass + " bg-white"}
+                >
+                  <option value="">Select Status</option>
+                  <option value="In Progress">In Progress</option>
+                  <option value="Completed">Completed</option>
+                </select>
+              </div>
+
+              {[
                 { name: "department", label: "Department", type: "text" },
                 { name: "faculty", label: "Faculty", type: "text" },
                 {
@@ -248,47 +300,48 @@ const StudentEditModal = ({ student, onClose, onSuccess }) => {
             </legend>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               {[
-                { name: "fatherName", label: "Father's Name", type: "text" },
-                { name: "motherName", label: "Mother's Name", type: "text" },
-                { name: "whatsappNumber", label: "WhatsApp", type: "text" },
-                { name: "email", label: "Email", type: "email" },
+                { name: "fatherName", label: "Father's Name", type: "text", required: false },
+                { name: "motherName", label: "Mother's Name", type: "text", required: false },
+                { name: "whatsappNumber", label: "WhatsApp", type: "text", required: true },
+                { name: "email", label: "Email", type: "email", required: true },
                 {
                   name: "emergencyContactNumber",
                   label: "Emergency Contact",
                   type: "text",
+                  required: false,
                 },
-                { name: "dateOfBirth", label: "Date of Birth", type: "date" },
+                { name: "dateOfBirth", label: "Date of Birth", type: "date", required: false },
               ].map((f) => (
                 <div key={f.name}>
-                  <label className={labelClass}>{f.label} *</label>
+                  <label className={labelClass}>
+                    {f.label} {f.required && <span className="text-red-500">*</span>}
+                  </label>
                   <input
                     type={f.type}
                     name={f.name}
                     value={formData[f.name]}
                     onChange={handleChange}
-                    required
+                    required={f.required}
                     className={inputClass}
                   />
                 </div>
               ))}
               <div className="md:col-span-2 lg:col-span-3">
-                <label className={labelClass}>Present Address *</label>
+                <label className={labelClass}>Present Address</label>
                 <textarea
                   name="presentAddress"
                   value={formData.presentAddress}
                   onChange={handleChange}
-                  required
                   rows={2}
                   className={inputClass}
                 />
               </div>
               <div className="md:col-span-2 lg:col-span-3">
-                <label className={labelClass}>Permanent Address *</label>
+                <label className={labelClass}>Permanent Address</label>
                 <textarea
                   name="permanentAddress"
                   value={formData.permanentAddress}
                   onChange={handleChange}
-                  required
                   rows={2}
                   className={inputClass}
                 />

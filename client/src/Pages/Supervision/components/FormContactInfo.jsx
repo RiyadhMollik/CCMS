@@ -11,14 +11,13 @@ const FormContactInfo = ({ formData, onChange }) => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         <div>
           <label className="block text-sm font-bold text-gray-700 mb-2">
-            Father's Name <span className="text-red-500">*</span>
+            Father's Name
           </label>
           <input
             type="text"
             name="fatherName"
             value={formData.fatherName}
             onChange={onChange}
-            required
             placeholder="Father's full name"
             className={inputClass}
           />
@@ -26,14 +25,13 @@ const FormContactInfo = ({ formData, onChange }) => {
 
         <div>
           <label className="block text-sm font-bold text-gray-700 mb-2">
-            Mother's Name <span className="text-red-500">*</span>
+            Mother's Name
           </label>
           <input
             type="text"
             name="motherName"
             value={formData.motherName}
             onChange={onChange}
-            required
             placeholder="Mother's full name"
             className={inputClass}
           />
@@ -71,14 +69,13 @@ const FormContactInfo = ({ formData, onChange }) => {
 
         <div>
           <label className="block text-sm font-bold text-gray-700 mb-2">
-            Emergency Contact <span className="text-red-500">*</span>
+            Emergency Contact
           </label>
           <input
             type="text"
             name="emergencyContactNumber"
             value={formData.emergencyContactNumber}
             onChange={onChange}
-            required
             placeholder="+880..."
             className={inputClass}
           />
@@ -86,27 +83,25 @@ const FormContactInfo = ({ formData, onChange }) => {
 
         <div>
           <label className="block text-sm font-bold text-gray-700 mb-2">
-            Date of Birth <span className="text-red-500">*</span>
+            Date of Birth
           </label>
           <input
             type="date"
             name="dateOfBirth"
             value={formData.dateOfBirth}
             onChange={onChange}
-            required
             className={inputClass}
           />
         </div>
 
         <div className="md:col-span-2 lg:col-span-3">
           <label className="block text-sm font-bold text-gray-700 mb-2">
-            Present Address <span className="text-red-500">*</span>
+            Present Address
           </label>
           <textarea
             name="presentAddress"
             value={formData.presentAddress}
             onChange={onChange}
-            required
             rows={2}
             placeholder="Current address"
             className={inputClass}
@@ -115,13 +110,12 @@ const FormContactInfo = ({ formData, onChange }) => {
 
         <div className="md:col-span-2 lg:col-span-3">
           <label className="block text-sm font-bold text-gray-700 mb-2">
-            Permanent Address <span className="text-red-500">*</span>
+            Permanent Address
           </label>
           <textarea
             name="permanentAddress"
             value={formData.permanentAddress}
             onChange={onChange}
-            required
             rows={2}
             placeholder="Permanent address"
             className={inputClass}

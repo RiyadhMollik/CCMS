@@ -15,6 +15,7 @@ const initialFormData = {
   semester: "",
   dateOfImmatriculation: "",
   expectedDateOfCompletion: "",
+  status: "",
   department: "",
   faculty: "",
   universityName: "",
@@ -58,10 +59,29 @@ const AddStudentForm = ({ onSuccess }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validate required fields
-    for (const [key, value] of Object.entries(formData)) {
-      if (!value || value.toString().trim() === "") {
-        toast.error(`Please fill in: ${key.replace(/([A-Z])/g, " $1").trim()}`);
+    // Define required fields
+    const requiredFields = [
+      "programType",
+      "supervisionRole",
+      "studentName",
+      "registrationNumber",
+      "semester",
+      "dateOfImmatriculation",
+      "expectedDateOfCompletion",
+      "status",
+      "department",
+      "faculty",
+      "universityName",
+      "universityAddress",
+      "whatsappNumber",
+      "email",
+      "researchTitle"
+    ];
+
+    // Validate only required fields
+    for (const field of requiredFields) {
+      if (!formData[field] || formData[field].toString().trim() === "") {
+        toast.error(`Please fill in: ${field.replace(/([A-Z])/g, " $1").trim()}`);
         return;
       }
     }

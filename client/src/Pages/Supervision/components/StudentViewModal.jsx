@@ -114,6 +114,15 @@ const StudentViewModal = ({ student, onClose }) => {
               <InfoRow label="Semester" value={student.semester} />
               <InfoRow label="Date of Initiation (DoI)" value={student.dateOfImmatriculation} />
               <InfoRow label="Expected Date of Completion (EDoC)" value={student.expectedDateOfCompletion} />
+              <InfoRow label="Status" value={
+                <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
+                  student.status === 'Completed' 
+                    ? 'bg-green-100 text-green-800' 
+                    : 'bg-blue-100 text-blue-800'
+                }`}>
+                  {student.status}
+                </span>
+              } />
               <InfoRow label="Date of Birth" value={student.dateOfBirth} />
             </InfoCard>
 
